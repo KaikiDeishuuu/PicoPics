@@ -73,9 +73,11 @@ export default class UploadQuota {
           { status: 200 }
         );
       } catch (e) {
+        // Log error internally for diagnostics
+        console.error('Error in /check-increase endpoint:', e);
         return new Response(
           JSON.stringify({
-            error: e instanceof Error ? e.message : String(e),
+            error: "Internal server error",
           }),
           { status: 500 }
         );
