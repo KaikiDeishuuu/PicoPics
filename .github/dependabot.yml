@@ -1,0 +1,47 @@
+# .github/dependabot.yml
+
+# Dependabot configuration file
+# See the documentation for all configuration options:
+# https://docs.github.com/code-security/dependabot/dependabot-version-updates/configuration-options-for-the-dependabot.yml-file
+
+version: 2
+updates:
+  # --- Configuration for the Frontend App ---
+  # Keep the npm dependencies for the Next.js frontend up to date.
+  - package-ecosystem: "npm"
+    directory: "/frontend" # Location of the frontend's package.json
+    schedule:
+      interval: "weekly"
+    # Group minor and patch updates for dependencies together to reduce noise.
+    # Major updates will still get their own PR.
+    groups:
+      next-dependencies:
+        patterns:
+          - "next"
+          - "@next/*"
+      react-dependencies:
+        patterns:
+          - "react"
+          - "react-dom"
+          - "@types/react"
+          - "@types/react-dom"
+
+  # --- Configuration for the Cloudflare Worker ---
+  # Keep the npm dependencies for the backend Worker up to date.
+  - package-ecosystem: "npm"
+    directory: "/worker" # Location of the worker's package.json
+    schedule:
+      interval: "weekly"
+    groups:
+      cloudflare-dependencies:
+        patterns:
+          - "@cloudflare/*"
+          - "wrangler"
+
+  # --- Configuration for GitHub Actions ---
+  # Keep the GitHub Actions used in your workflows up to date.
+  # This is a security best practice.
+  - package-ecosystem: "github-actions"
+    directory: "/" # Location of workflow files (.github/workflows)
+    schedule:
+      interval: "weekly"

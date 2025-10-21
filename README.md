@@ -1,3 +1,4 @@
+<<<<<<< HEAD
 # Kaiki Image - Cloudflare R2 图床
 
 > 基于 Cloudflare Workers + R2 + AI 的现代化图床服务  
@@ -220,3 +221,7 @@ MIT License
 
 **Made by [Kaiki](https://github.com/KaikiDeishuuu)**
 ````
+=======
+# PicoPics
+A powerful, full-stack image hosting service designed for developers and communities.
+>>>>>>> 773df95c041d0ddd9415ed47f469c9af6563725b
