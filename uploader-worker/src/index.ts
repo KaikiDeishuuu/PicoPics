@@ -504,10 +504,12 @@ async function handleTestTelegram(
       }
     );
   } catch (error) {
+    // Optionally log the real error details for server-side debugging
+    console.error("handleTestTelegramNotification error:", error);
     return new Response(
       JSON.stringify({
         success: false,
-        error: error instanceof Error ? error.message : String(error),
+        error: "Internal server error",
       }),
       {
         status: 500,
