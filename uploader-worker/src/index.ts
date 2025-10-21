@@ -896,8 +896,10 @@ function getCorsHeaders(env: Env, request?: Request): Record<string, string> {
     if (allowed === requestOrigin) return true;
     // 通配符匹配
     if (allowed.includes("*")) {
-      // 先转义点号，再替换星号为 .*
-      const pattern = allowed.replace(/\./g, "\\.").replace(/\*/g, ".*");
+      // 先转义正则特殊字符(包括反斜杠)\ ，再替换*为.*
+      const escapeRegexSpecialChars = (str: string): string =>
+        str.replace(/[-/\\^$+?.()|[\]{}]/g, '\\$&'); // escape all regex metacharacters including backslash, but not * (handled next)
+      const pattern = escapeRegexSpecialChars(allowed).replace(/\*/g, ".*");
       return new RegExp(`^${pattern}$`).test(requestOrigin);
     }
     return false;
