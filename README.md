@@ -1,227 +1,129 @@
-<<<<<<< HEAD
-# Kaiki Image - Cloudflare R2 图床
+<div align="center">
+  <h1 style="font-size: 3em; font-weight: bold;">PicoPics</h1>
+  <p>
+    <strong>A full-stack, AI-powered image hosting service built on the Cloudflare ecosystem.</strong>
+  </p>
+  <p>
+    High-performance, secure, and cost-effective solution for image uploads and delivery, designed for developers and communities.
+  </p>
+</div>
 
-> 基于 Cloudflare Workers + R2 + AI 的现代化图床服务  
-> 完整的图片上传和存储解决方案，采用 TypeScript + 微服务架构  
-> Created by **Kaiki**
-
-## 架构设计
-
-```
-┌─────────────┐      ┌──────────────────┐      ┌──────────────┐
-│   Frontend  │─────>│ Uploader Worker  │─────>│  R2 Bucket   │
-│  (Next.js)  │ POST │  (上传服务)      │ Write│   (存储)     │
-└─────────────┘      └──────────────────┘      └──────────────┘
-                              │                         │
-                              │ Read                    │
-                              ↓                         ↓
-                     ┌──────────────────┐      ┌──────────────┐
-                     │   CDN Worker     │<─────│              │
-                     │   (分发服务)     │      │              │
-                     └──────────────────┘      └──────────────┘
-                              ↓
-                     ┌──────────────────┐
-                     │    End Users     │
-                     │   (图片访问)     │
-                     └──────────────────┘
-```
-
-## 核心特性
-
-- **全球 CDN** - Cloudflare 边缘网络加速
-- **GitHub OAuth** - 安全的用户认证
-- **AI 审核** - Cloudflare AI 自动内容检测
-- **配额管理** - 每日上传限额保护
-- **防滥用** - IP 黑名单与速率限制
-
-## 技术栈
-
-### 后端
-
-- **Cloudflare Workers** - 无服务器计算
-- **R2 Storage** - 对象存储
-- **Cloudflare AI** - ResNet-50 图像分类
-- **Durable Objects** - 配额与黑名单管理
-
-### 前端
-
-- **Next.js 14** - React 框架
-- **TypeScript** - 类型安全
-- **Tailwind CSS** - 原子化 CSS
-- **Cloudflare Pages** - 静态托管
-
-## 项目结构
-
-## ✨ 特性```
-
-┌─────────────┐ ┌──────────────────┐ ┌──────────────┐
-
-- 🚀 **全球 CDN** - Cloudflare 边缘网络加速 │ Frontend │────────>│ Uploader Worker │────────>│ R2 Bucket │
-
-- 🔐 **GitHub OAuth** - 安全的用户认证 │ (Next.js) │ POST │ (上传服务) │ Write │ (存储) │
-
-- 🤖 **AI 审核** - Cloudflare AI 自动内容检测 └─────────────┘ └──────────────────┘ └──────────────┘
-
-- 📊 **配额管理** - 每日上传限额保护 │
-
-- 🛡️ **防滥用** - IP 黑名单与速率限制 │ Read
-
-- 📱 **响应式** - 完美支持移动设备 ↓
-
-- 🎨 **现代 UI** - 渐变主题，流畅动画 ┌──────────────────┐ ┌──────────────┐
-
-                        │   CDN Worker     │<────────│              │
-
-## 🏗️ 技术栈 │ (分发服务) │ │ │
-
-                        └──────────────────┘         └──────────────┘
-
-### 后端 ↓
-
-- **Cloudflare Workers** - 无服务器计算 ┌──────────────────┐
-
-- **R2 Storage** - 对象存储 │ End Users │
-
-- **Cloudflare AI** - ResNet-50 图像分类 │ (图片访问) │
-
-- **Durable Objects** - 配额与黑名单管理 └──────────────────┘
-
-````
-
-### 前端
-
-- **Next.js 14** - React 框架## 📁 项目结构
-
-- **TypeScript** - 类型安全
-
-- **Tailwind CSS** - 原子化 CSS```
-
-- **Cloudflare Pages** - 静态托管
-```
-CFworkerImage/
-├── uploader-worker/          # 上传 Worker（处理图片上传 + 配额管理）
-│   ├── src/index.ts          # 主入口
-│   ├── src/upload_quota.ts   # Durable Object（配额追踪）
-│   ├── wrangler.toml         # Worker 配置
-│   └── package.json
-│
-├── cdn-worker/               # CDN Worker（高性能图片分发）
-│   ├── src/index.ts          # 主入口
-│   ├── wrangler.toml         # Worker 配置
-│   └── package.json
-│
-├── CFworkerImageFRONTED/     # 前端界面（Next.js + TypeScript）
-│   ├── src/app/              # Next.js App Router
-│   ├── src/components/       # React 组件
-│   ├── src/services/         # API 服务
-│   ├── tsconfig.json
-│   └── package.json
-│
-├── DEPLOY_GUIDE.md           # 部署指南（重要！）
-├── SECURITY.md               # 安全配置说明
-└── README.md                 # 本文件
-```
-
-
-## 快速开始
-
-### 1. 克隆项目
-
-```bash
-git clone https://github.com/yourusername/CFworkerImage.git
-cd CFworkerImage
-```
-
-### 2. 部署后端 Workers
-
-```bash
-# 部署上传服务
-cd uploader-worker
-npm install
-npx wrangler deploy --env production
-
-# 部署 CDN 服务
-cd ../cdn-worker
-npm install
-npx wrangler deploy --env production
-```
-
-### 3. 部署前端
-
-```bash
-cd ../CFworkerImageFRONTED
-npm install
-npm run build
-npx wrangler pages deploy out --project-name=your-project-name
-```
-
-### 4. 配置环境变量
-
-```bash
-# Telegram 通知（可选）
-npx wrangler secret put TELEGRAM_BOT_TOKEN --env production
-npx wrangler secret put TELEGRAM_CHAT_ID --env production
-
-# GitHub OAuth（可选）
-npx wrangler secret put GITHUB_CLIENT_ID --env production
-```
-
-详细配置说明请参考 [DEPLOY_GUIDE.md](./DEPLOY_GUIDE.md)
-
-
-
-
-## 配置说明
-
-### Uploader Worker 环境变量
-
-| 变量                | 说明                                  | 默认值              |
-| ------------------- | ------------------------------------- | ------------------- |
-| `R2_PUBLIC_BASE`    | CDN 域名（返回给前端的图片 URL 前缀） | -                   |
-| `MAX_UPLOAD_SIZE`   | 单张图片最大大小（字节）              | 10485760 (10MB)     |
-| `DAILY_QUOTA_BYTES` | 每日总配额（字节）                    | 2097152000 (2000MB) |
-| `ALLOWED_ORIGINS`   | 允许的 CORS 来源                      | `*`                 |
-
-### CDN Worker 环境变量
-
-| 变量              | 说明             | 默认值          |
-| ----------------- | ---------------- | --------------- |
-| `CACHE_MAX_AGE`   | 缓存时间（秒）   | 31536000 (1 年) |
-| `ALLOWED_ORIGINS` | 允许的 CORS 来源 | `*`             |
-
-### 前端环境变量
-
-| 变量                     | 说明                | 示例                                   |
-| ------------------------ | ------------------- | -------------------------------------- |
-| `NEXT_PUBLIC_UPLOAD_API` | Uploader Worker URL | `https://upload.yourdomain.com/upload` |
-
-## 限制说明
-
-| 项目         | 限制         |
-| ------------ | ------------ |
-| 单张图片最大 | 10MB         |
-| 每日总配额   | 2000MB       |
-| 上传速率限制 | 30 请求/分钟 |
-| 并发上传数   | 50           |
-| CDN 缓存时间 | 1 年         |
-
-## 相关文档
-
-- [DEPLOY_GUIDE.md](./DEPLOY_GUIDE.md) - 完整部署指南
-- [SECURITY.md](./SECURITY.md) - 安全配置说明
-- [uploader-worker/README.md](./uploader-worker/README.md) - 上传服务文档
-- [cdn-worker/README.md](./cdn-worker/README.md) - CDN 服务文档
-- [CFworkerImageFRONTED/README.md](./CFworkerImageFRONTED/README.md) - 前端文档
-
-## 开源协议
-
-MIT License
+<p align="center">
+  <img src="https://img.shields.io/badge/license-MIT-blue.svg" alt="License">
+  <img src="https://img.shields.io/badge/Cloudflare-Workers%20%26%20R2-F38020?logo=cloudflare" alt="Cloudflare Stack">
+  <img src="https://img.shields.io/badge/Next.js-14-black?logo=next.js" alt="Next.js">
+  <img src="https://img.shields.io/badge/TypeScript-blue?logo=typescript" alt="TypeScript">
+  <img src="https://img.shields.io/badge/Tailwind%20CSS-blueviolet?logo=tailwind-css" alt="Tailwind CSS">
+</p>
 
 ---
 
-**Made by [Kaiki](https://github.com/KaikiDeishuuu)**
-````
-=======
-# PicoPics
-A powerful, full-stack image hosting service designed for developers and communities.
->>>>>>> 773df95c041d0ddd9415ed47f469c9af6563725b
+## Core Features
+
+-   **Global CDN Delivery**: All images are served through the Cloudflare edge network for maximum speed and low latency worldwide.
+-   **Secure Authentication**: User access is managed through a secure GitHub OAuth 2.0 flow.
+-   **AI-Powered Content Moderation**: Automatically scans uploads using Cloudflare AI to detect and block inappropriate content.
+-   **Robust Abuse Protection**: Built-in mechanisms like IP blacklisting and rate limiting to prevent misuse.
+-   **Quota Management**: Enforces daily upload limits to ensure fair usage and control costs.
+-   **Optimized Performance**: The client-side uploader supports image compression and chunked uploads for a fast and reliable user experience.
+
+---
+
+## Architecture Overview
+
+The service is designed with a decoupled microservices architecture, leveraging the strengths of the Cloudflare serverless platform. The entire process is split into two main flows:
+
+```mermaid
+graph LR
+    subgraph "Upload Flow"
+        direction LR
+        A[Frontend] -- POST Request --> B(Uploader Worker);
+        B -- AI Scan & Write --> C{{R2 Bucket}};
+    end
+
+    subgraph "Delivery Flow"
+        direction LR
+        D[End User] -- GET Request --> E(CDN Worker);
+        C -- Read Image --> E;
+    end
+
+    style A fill:#007acc,stroke:#333,stroke-width:2px,color:#fff
+    style D fill:#4caf50,stroke:#333,stroke-width:2px,color:#fff
+    style C fill:#f9a825,stroke:#333,stroke-width:2px,color:#fff
+```
+
+---
+
+## Technology Stack
+
+| Category           | Technology                                        |
+| ------------------ | ------------------------------------------------- |
+| **Backend Compute**  | Cloudflare Workers                                |
+| **Storage**        | Cloudflare R2 Storage                             |
+| **AI Moderation**  | Cloudflare AI (ResNet-50 for Image Classification)|
+| **State Management**| Cloudflare Durable Objects                        |
+| **Frontend**       | Next.js 14 (App Router) & React                   |
+| **Language**       | TypeScript                                        |
+| **Styling**        | Tailwind CSS                                      |
+| **Hosting**        | Cloudflare Pages                                  |
+
+---
+
+## Getting Started
+
+### Prerequisites
+
+-   Node.js and npm
+-   A Cloudflare account
+-   [Wrangler CLI](https://developers.cloudflare.com/workers/wrangler/install-and-update/) installed and authenticated.
+
+### 1. Clone the Repository
+
+```bash
+git clone https://github.com/KaikiDeishuuu/PicoPics.git
+cd PicoPics
+```
+
+### 2. Deploy Backend & Frontend
+
+This project is a monorepo. Detailed deployment steps for each service are located in their respective directories. For a complete walkthrough, please refer to the main deployment guide.
+
+-   **[DEPLOY_GUIDE.md](./DEPLOY_GUIDE.md)**: **Start here!** This is the comprehensive guide for deploying the entire service from start to finish.
+
+### 3. Configure Environment Variables
+
+Securely set up your environment variables and secrets (e.g., GitHub OAuth credentials) using the Wrangler CLI as described in the deployment guide.
+
+```bash
+# Example for setting a secret for the uploader worker
+npx wrangler secret put GITHUB_CLIENT_ID --name worker-uploader
+```
+
+---
+
+## Project Structure
+
+The repository is organized with a clear separation of concerns between the frontend and backend services.
+
+```PicoPics/
+├── worker-uploader/          # Worker for handling uploads and business logic
+├── worker-cdn/               # High-performance Worker for image delivery
+├── frontend/                 # Next.js frontend application
+├── DEPLOY_GUIDE.md           # Comprehensive deployment instructions
+├── SECURITY.md               # Security policy and vulnerability reporting
+└── README.md                 # This file
+```
+
+---
+
+## Documentation & License
+
+-   **Deployment**: For detailed setup instructions, see the **[DEPLOY_GUIDE.md](./DEPLOY_GUIDE.md)**.
+-   **Security**: To learn about the security policy or report a vulnerability, please read **[SECURITY.md](./SECURITY.md)**.
+-   **License**: This project is licensed under the **MIT License**. See the [LICENSE](LICENSE) file for details.
+
+<br>
+
+<div align="center">
+  Created by <a href="https://github.com/KaikiDeishuuu"><strong>Kaiki</strong></a>
+</div>
