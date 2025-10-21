@@ -1,0 +1,19 @@
+# 环境变量配置示例
+# 复制此文件为 .dev.vars 用于本地开发
+
+# Telegram Bot 配置
+TELEGRAM_BOT_TOKEN=1234567890:ABCdefGHIjklMNOpqrsTUVwxyz
+TELEGRAM_CHAT_ID=123456789
+
+# 防滥用开关
+ABUSE_DETECTION_ENABLED=true
+
+# R2 公共访问基础 URL
+R2_PUBLIC_BASE=https://pic.lambdax.me
+
+# 上传限制
+MAX_UPLOAD_SIZE=10485760
+DAILY_QUOTA_BYTES=2097152000
+
+# CORS 配置
+ALLOWED_ORIGINS=*

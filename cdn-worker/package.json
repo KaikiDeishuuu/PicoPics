@@ -1,0 +1,27 @@
+{
+  "name": "cdn-worker",
+  "version": "2.0.0",
+  "description": "Cloudflare Worker for serving images from R2 with caching",
+  "main": "src/index.ts",
+  "scripts": {
+    "dev": "wrangler dev",
+    "deploy": "wrangler deploy",
+    "deploy:prod": "wrangler deploy --env production",
+    "tail": "wrangler tail",
+    "type-check": "tsc --noEmit"
+  },
+  "keywords": [
+    "cloudflare",
+    "workers",
+    "r2",
+    "cdn",
+    "image-serving"
+  ],
+  "author": "",
+  "license": "MIT",
+  "devDependencies": {
+    "@cloudflare/workers-types": "^4.20241022.0",
+    "typescript": "^5.6.3",
+    "wrangler": "^4.43.0"
+  }
+}

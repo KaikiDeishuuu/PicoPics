@@ -1,0 +1,21 @@
+# Cloudflare Pages 配置文件
+# 用于在 Dashboard 中直接上传时的构建配置
+
+# 构建配置
+build:
+  command: npm run build
+  output_directory: out
+  environment_variables:
+    NODE_VERSION: "18"
+    NEXT_PUBLIC_UPLOAD_API: "https://upload.lambdax.me/upload"
+    NEXT_PUBLIC_CDN_BASE: "https://pic.lambdax.me"
+
+# 预览部署配置
+preview:
+  environment_variables:
+    NODE_ENV: "production"
+
+# 生产部署配置
+production:
+  environment_variables:
+    NODE_ENV: "production"

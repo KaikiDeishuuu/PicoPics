@@ -1,0 +1,497 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+/* CSS 变量定义 */
+:root {
+  /* 亮色主题 */
+  --background: #ffffff;
+  --foreground: #0f172a;
+  --card: #f8fafc;
+  --card-foreground: #1e293b;
+  --border: #e2e8f0;
+  --input: #e2e8f0;
+  --primary: #3b82f6;
+  --primary-foreground: #ffffff;
+  --secondary: #64748b;
+  --success: #10b981;
+  --warning: #f59e0b;
+  --error: #ef4444;
+  --muted: #f1f5f9;
+  --accent: #8b5cf6;
+}
+
+/* 暗色主题 */
+.dark {
+  --background: #0f172a;
+  --foreground: #f1f5f9;
+  --card: #1e293b;
+  --card-foreground: #cbd5e1;
+  --border: #334155;
+  --input: #1e293b;
+  --primary: #3b82f6;
+  --primary-foreground: #ffffff;
+  --secondary: #64748b;
+  --success: #10b981;
+  --warning: #f59e0b;
+  --error: #ef4444;
+  --muted: #1e293b;
+  --accent: #8b5cf6;
+}
+
+/* 基础样式 */
+* {
+  border-color: rgb(229 231 235);
+}
+
+html {
+  scroll-behavior: smooth;
+}
+
+body {
+  @apply text-white;
+  background: radial-gradient(
+    circle at 20% 20%,
+    #24123f 0%,
+    #0b0518 45%,
+    #03030a 100%
+  );
+  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", "Roboto", "Oxygen",
+    "Ubuntu", "Cantarell", "Fira Sans", "Droid Sans", "Helvetica Neue",
+    sans-serif;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+  min-height: 100vh;
+  position: relative;
+  overflow-x: hidden;
+}
+
+/* 自定义滚动条 */
+::-webkit-scrollbar {
+  width: 10px;
+  height: 10px;
+}
+
+::-webkit-scrollbar-track {
+  @apply bg-gray-100;
+}
+
+::-webkit-scrollbar-thumb {
+  @apply bg-gray-400 rounded-full;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  @apply bg-blue-500;
+}
+
+/* 选中文本样式 */
+::selection {
+  @apply bg-blue-500 text-white;
+}
+
+/* ========== 工具类 ========== */
+@layer utilities {
+  .text-balance {
+    text-wrap: balance;
+  }
+
+  /* 毛玻璃效果 */
+  .glass {
+    @apply bg-white/80 backdrop-blur-xl border border-white/20;
+    box-shadow: 0 8px 32px rgba(0, 0, 0, 0.1);
+  }
+
+  .glass-dark {
+    @apply bg-gray-900/80 backdrop-blur-xl border border-gray-700/20;
+    box-shadow: 0 8px 32px rgba(0, 0, 0, 0.3);
+  }
+
+  /* 渐变背景 */
+  .bg-gradient-primary {
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  }
+
+  .bg-gradient-aurora {
+    background: radial-gradient(
+        circle at 10% 20%,
+        rgba(255, 140, 0, 0.25),
+        transparent 60%
+      ),
+      radial-gradient(
+        circle at 80% 30%,
+        rgba(236, 72, 153, 0.25),
+        transparent 55%
+      ),
+      radial-gradient(
+        circle at 40% 80%,
+        rgba(56, 189, 248, 0.25),
+        transparent 60%
+      ),
+      #090712;
+  }
+
+  .bg-gradient-secondary {
+    background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);
+  }
+
+  .bg-gradient-success {
+    background: linear-gradient(135deg, #84fab0 0%, #8fd3f4 100%);
+  }
+
+  .bg-gradient-warm {
+    background: linear-gradient(135deg, #fa709a 0%, #fee140 100%);
+  }
+
+  .bg-gradient-cool {
+    background: linear-gradient(135deg, #a8edea 0%, #fed6e3 100%);
+  }
+
+  .bg-gradient-purple {
+    background: linear-gradient(135deg, #c471f5 0%, #fa71cd 100%);
+  }
+
+  .bg-gradient-ocean {
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%, #f093fb 100%);
+  }
+
+  /* 光晕效果 */
+  .glow-blue {
+    box-shadow: 0 0 30px rgba(59, 130, 246, 0.5);
+  }
+
+  .glow-purple {
+    box-shadow: 0 0 30px rgba(139, 92, 246, 0.5);
+  }
+
+  .glow-green {
+    box-shadow: 0 0 30px rgba(16, 185, 129, 0.5);
+  }
+
+  .glow-pink {
+    box-shadow: 0 0 30px rgba(236, 72, 153, 0.5);
+  }
+
+  /* 3D 卡片效果 */
+  .card-3d {
+    transform-style: preserve-3d;
+    transition: transform 0.6s;
+  }
+
+  .card-3d:hover {
+    transform: rotateY(5deg) rotateX(5deg) scale(1.05);
+  }
+
+  /* 文字渐变 */
+  .text-gradient {
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+  }
+
+  .text-gradient-rainbow {
+    background: linear-gradient(
+      to right,
+      #f093fb,
+      #f5576c,
+      #feca57,
+      #48dbfb,
+      #0abde3
+    );
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+  }
+
+  .glass-modern {
+    background: linear-gradient(
+      135deg,
+      rgba(255, 255, 255, 0.12),
+      rgba(15, 23, 42, 0.35)
+    );
+    border: 1px solid rgba(255, 255, 255, 0.18);
+    box-shadow: 0 30px 60px rgba(15, 23, 42, 0.35);
+  }
+
+  .glass-modern-soft {
+    background: linear-gradient(
+      160deg,
+      rgba(255, 255, 255, 0.06),
+      rgba(24, 17, 50, 0.5)
+    );
+    border: 1px solid rgba(255, 255, 255, 0.12);
+    box-shadow: 0 20px 45px rgba(8, 8, 18, 0.45);
+  }
+
+  .border-gradient::before {
+    content: "";
+    position: absolute;
+    inset: -1px;
+    z-index: -1;
+    border-radius: inherit;
+    background: linear-gradient(
+      135deg,
+      rgba(249, 115, 22, 0.65),
+      rgba(236, 72, 153, 0.35),
+      rgba(56, 189, 248, 0.4)
+    );
+    opacity: 0.65;
+    filter: blur(6px);
+    transition: opacity 0.4s ease;
+  }
+
+  .border-gradient:hover::before {
+    opacity: 0.9;
+  }
+}
+
+/* 组件样式 */
+@layer components {
+  .btn {
+    @apply px-4 py-2 rounded-lg font-medium transition-all duration-200;
+    @apply focus:outline-none focus:ring-2 focus:ring-offset-2;
+  }
+
+  .btn-primary {
+    @apply btn bg-primary text-primary-foreground;
+    @apply hover:bg-primary/90 focus:ring-primary;
+  }
+
+  .btn-secondary {
+    @apply btn bg-secondary text-white;
+    @apply hover:bg-secondary/90 focus:ring-secondary;
+  }
+
+  .card {
+    @apply rounded-xl shadow-lg p-6 border border-gray-200;
+    @apply bg-white text-gray-900;
+  }
+
+  .input {
+    @apply w-full px-4 py-2 rounded-lg border border-gray-300;
+    @apply bg-white text-gray-900;
+    @apply focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent;
+    @apply transition-all duration-200;
+  }
+}
+
+/* ========== 动画效果（GPU 加速优化）========== */
+
+/* 渐变背景动画 - 使用 transform 优化 */
+@keyframes gradient-shift {
+  0%,
+  100% {
+    background-position: 0% 50%;
+  }
+  50% {
+    background-position: 100% 50%;
+  }
+}
+
+.animate-gradient {
+  background-size: 200% 200%;
+  animation: gradient-shift 15s ease infinite;
+  will-change: background-position;
+}
+
+/* 闪烁效果 - GPU 加速 */
+@keyframes shimmer {
+  0% {
+    transform: translateX(-100%);
+  }
+  100% {
+    transform: translateX(100%);
+  }
+}
+
+.animate-shimmer {
+  position: relative;
+  overflow: hidden;
+}
+
+.animate-shimmer::after {
+  content: "";
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background: linear-gradient(
+    90deg,
+    transparent 0%,
+    rgba(255, 255, 255, 0.3) 50%,
+    transparent 100%
+  );
+  animation: shimmer 2s infinite linear;
+  will-change: transform;
+}
+
+/* 淡入效果 - GPU 加速 */
+@keyframes fade-in {
+  from {
+    opacity: 0;
+    transform: translate3d(0, 10px, 0);
+  }
+  to {
+    opacity: 1;
+    transform: translate3d(0, 0, 0);
+  }
+}
+
+.animate-fade-in {
+  animation: fade-in 0.4s ease-out;
+  will-change: opacity, transform;
+}
+
+/* 弹跳进入 - GPU 加速 */
+@keyframes bounce-in {
+  0% {
+    opacity: 0;
+    transform: scale3d(0.3, 0.3, 0.3);
+  }
+  50% {
+    opacity: 1;
+    transform: scale3d(1.05, 1.05, 1.05);
+  }
+  70% {
+    transform: scale3d(0.95, 0.95, 0.95);
+  }
+  100% {
+    transform: scale3d(1, 1, 1);
+  }
+}
+
+.animate-bounce-in {
+  animation: bounce-in 0.5s cubic-bezier(0.68, -0.55, 0.265, 1.55);
+  will-change: opacity, transform;
+}
+
+/* 滑入效果 - GPU 加速 */
+@keyframes slide-in-right {
+  from {
+    opacity: 0;
+    transform: translate3d(20px, 0, 0);
+  }
+  to {
+    opacity: 1;
+    transform: translate3d(0, 0, 0);
+  }
+}
+
+.animate-slide-in-right {
+  animation: slide-in-right 0.4s ease-out;
+  will-change: opacity, transform;
+}
+
+/* 脉冲光晕 - 优化性能 */
+@keyframes pulse-glow {
+  0%,
+  100% {
+    opacity: 0.6;
+    transform: scale(1);
+  }
+  50% {
+    opacity: 1;
+    transform: scale(1.02);
+  }
+}
+
+.animate-pulse-glow {
+  animation: pulse-glow 2s ease-in-out infinite;
+  will-change: opacity, transform;
+  box-shadow: 0 0 20px rgba(59, 130, 246, 0.4);
+}
+
+/* 浮动效果 - GPU 加速 */
+@keyframes float {
+  0%,
+  100% {
+    transform: translate3d(0, 0, 0);
+  }
+  50% {
+    transform: translate3d(0, -10px, 0);
+  }
+}
+
+.animate-float {
+  animation: float 3s ease-in-out infinite;
+  will-change: transform;
+}
+
+/* 粒子效果 - 性能优化版本 */
+@keyframes particle-float {
+  0% {
+    transform: translate3d(0, 0, 0) scale(0);
+    opacity: 0;
+  }
+  10% {
+    opacity: 0.8;
+    transform: translate3d(0, -10vh, 0) scale(1);
+  }
+  90% {
+    opacity: 0.8;
+  }
+  100% {
+    transform: translate3d(20px, -100vh, 0) scale(0.5);
+    opacity: 0;
+  }
+}
+
+.animate-particle {
+  animation: particle-float 12s ease-out infinite;
+  will-change: transform, opacity;
+}
+
+/* 有机光带动画 */
+@keyframes aurora-flow {
+  0% {
+    transform: translate3d(-10%, -10%, 0) rotate(0deg) scale(1.05);
+  }
+  50% {
+    transform: translate3d(10%, 5%, 0) rotate(2deg) scale(1.15);
+  }
+  100% {
+    transform: translate3d(-12%, -8%, 0) rotate(-1deg) scale(1.05);
+  }
+}
+
+.animate-aurora {
+  animation: aurora-flow 18s ease-in-out infinite;
+  will-change: transform;
+}
+
+@keyframes orb-drift {
+  0% {
+    transform: translate3d(0, 0, 0) scale(0.95);
+    opacity: 0.6;
+  }
+  50% {
+    transform: translate3d(30px, -40px, 0) scale(1.1);
+    opacity: 0.9;
+  }
+  100% {
+    transform: translate3d(-30px, 40px, 0) scale(0.95);
+    opacity: 0.6;
+  }
+}
+
+.animate-orb {
+  animation: orb-drift 14s ease-in-out infinite;
+  will-change: transform, opacity;
+}
+
+/* 加载骨架屏 */
+.skeleton {
+  @apply bg-gray-200 animate-pulse rounded;
+}
+
+/* 打印样式优化 */
+@media print {
+  body {
+    @apply bg-white text-black;
+  }
+
+  .no-print {
+    display: none !important;
+  }
+}

@@ -1,0 +1,32 @@
+{
+  "name": "uploader-worker",
+  "version": "2.0.0",
+  "description": "Cloudflare Worker for handling image uploads to R2",
+  "main": "src/index.ts",
+  "scripts": {
+    "dev": "wrangler dev",
+    "deploy": "wrangler deploy",
+    "deploy:prod": "wrangler deploy --env production",
+    "tail": "wrangler tail",
+    "type-check": "tsc --noEmit"
+  },
+  "keywords": [
+    "cloudflare",
+    "workers",
+    "r2",
+    "image-upload",
+    "uploader"
+  ],
+  "author": "",
+  "license": "MIT",
+  "devDependencies": {
+    "@cloudflare/workers-types": "^4.20241022.0",
+    "typescript": "^5.6.3",
+    "wrangler": "^4.43.0"
+  },
+  "dependencies": {
+    "browser-image-compression": "^2.0.2",
+    "spark-md5": "^3.0.2",
+    "tsc": "^2.0.4"
+  }
+}
