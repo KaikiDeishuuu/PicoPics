@@ -22,9 +22,7 @@ PicoPics is a developer-focused image hosting and delivery platform optimized fo
 
 ## Visual Architecture Overview
 
-<p align="center">
-  <img src="docs/architecture.svg" alt="PicoPics Architecture Diagram" width="80%">
-</p>
+![PicoPics Architecture](./docs/architecture.svg)
 
 ---
 
