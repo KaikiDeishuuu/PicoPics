@@ -5,6 +5,7 @@
 "use client";
 
 import { motion } from "framer-motion";
+import Image from "next/image";
 import { clearAuth, type GitHubUser } from "@/services/auth";
 
 interface UserInfoProps {
@@ -20,7 +21,7 @@ export default function UserInfo({ user, onLogout }: UserInfoProps) {
 
   return (
     <motion.div
-      className="glass-modern border-gradient relative rounded-2xl p-6"
+      className="glass-modern border-gradient relative rounded-2xl p-5 md:p-6 mx-auto w-full max-w-lg"
       initial={{ opacity: 0, y: 12 }}
       animate={{ opacity: 1, y: 0 }}
       transition={{ duration: 0.3, ease: "easeOut" }}
@@ -29,11 +30,15 @@ export default function UserInfo({ user, onLogout }: UserInfoProps) {
         <div className="flex items-center gap-4">
           <div className="relative">
             <span className="absolute inset-0 rounded-full bg-gradient-to-br from-orange-500 to-red-500 blur-lg opacity-40" />
-            <img
-              src={user.avatar_url}
-              alt={user.name || user.login}
-              className="relative z-10 h-12 w-12 rounded-full border border-white/20"
-            />
+            <div className="relative z-10 h-12 w-12 rounded-full overflow-hidden border border-white/20">
+              <Image
+                src={user.avatar_url}
+                alt={user.name || user.login}
+                fill
+                sizes="48px"
+                className="object-cover"
+              />
+            </div>
           </div>
           <div>
             <p className="text-base font-semibold text-white">

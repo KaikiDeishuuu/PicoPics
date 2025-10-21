@@ -105,8 +105,10 @@ export class SimpleUploader {
         maxWidthOrHeight: 1920,
         useWebWorker: true,
         onProgress: (p: number) => {
-          // 压缩进度占 5% - 20%
-          this.options.onProgress?.(5 + p * 0.15);
+          // 压缩进度占 5% - 40%
+          const mapped = Math.min(40, Math.round(5 + p * 0.35));
+          console.log(`Compression progress: ${p} -> mapped: ${mapped}`);
+          this.options.onProgress?.(mapped);
         },
       };
 
@@ -133,7 +135,7 @@ export class SimpleUploader {
 
     for (let attempt = 1; attempt <= MAX_RETRIES; attempt++) {
       try {
-        return await this.uploadFile(file, attempt);
+        return await this.uploadFile(file);
       } catch (error) {
         lastError = error as Error;
         console.warn(`Upload attempt ${attempt} failed:`, error);
@@ -152,46 +154,80 @@ export class SimpleUploader {
     );
   }
 
-  private async uploadFile(
-    file: File,
-    attempt: number
-  ): Promise<UploadResponse> {
-    const headers: Record<string, string> = {
-      "Content-Type": file.type,
-    };
+  private async uploadFile(file: File): Promise<UploadResponse> {
+    // Use XMLHttpRequest to provide upload progress events (fetch does not provide upload progress)
+    return new Promise<UploadResponse>((resolve, reject) => {
+      try {
+        const xhr = new XMLHttpRequest();
+        xhr.open("POST", UPLOAD_API_URL);
 
-    if (this.options.turnstileToken) {
-      headers["CF-Turnstile-Token"] = this.options.turnstileToken;
-    }
+        // Set headers
+        if (this.options.turnstileToken) {
+          xhr.setRequestHeader(
+            "CF-Turnstile-Token",
+            this.options.turnstileToken
+          );
+        }
+        if (this.options.accessToken) {
+          xhr.setRequestHeader(
+            "Authorization",
+            `Bearer ${this.options.accessToken}`
+          );
+        }
+        // Content-Type will be inferred from the File object
 
-    if (this.options.accessToken) {
-      headers["Authorization"] = `Bearer ${this.options.accessToken}`;
-    }
+        // Timeout
+        xhr.timeout = 30000; // 30s
 
-    console.log(`Upload attempt ${attempt}...`);
-    const startTime = Date.now();
+        xhr.upload.onprogress = (e) => {
+          if (e.lengthComputable) {
+            // Map upload progress into 20..95 range
+            const pct = Math.round((e.loaded / e.total) * 75);
+            const mapped = Math.min(95, 20 + pct);
+            this.options.onProgress?.(mapped);
+          } else {
+            // Unknown total, give a mid-progress indication
+            this.options.onProgress?.(50);
+          }
+        };
 
-    const response = await fetch(UPLOAD_API_URL, {
-      method: "POST",
-      headers,
-      body: file,
-      signal: AbortSignal.timeout(30000), // 30 秒超时
+        xhr.onload = () => {
+          try {
+            const status = xhr.status;
+            const text = xhr.responseText;
+            const json = text ? JSON.parse(text) : null;
+
+            if (status >= 200 && status < 300) {
+              this.options.onProgress?.(100);
+              resolve(json as UploadResponse);
+            } else {
+              const errMsg =
+                (json && json.error) || xhr.statusText || `HTTP ${status}`;
+              reject(new UploadError(errMsg, json?.code || "UPLOAD_FAILED"));
+            }
+          } catch (err) {
+            console.error("Upload parse error:", err);
+            reject(
+              new UploadError(
+                "Invalid response from server",
+                "INVALID_RESPONSE"
+              )
+            );
+          }
+        };
+
+        xhr.onerror = () =>
+          reject(
+            new UploadError("Network error during upload", "NETWORK_ERROR")
+          );
+        xhr.ontimeout = () =>
+          reject(new UploadError("Upload timeout", "TIMEOUT"));
+
+        xhr.send(file);
+      } catch (err) {
+        reject(err instanceof Error ? err : new Error("Unknown upload error"));
+      }
     });
-
-    const endTime = Date.now();
-    const duration = ((endTime - startTime) / 1000).toFixed(2);
-    console.log(`Upload completed in ${duration}s`);
-
-    const data = (await response.json()) as UploadResponse;
-
-    if (!response.ok) {
-      throw new UploadError(
-        data.error || `上传失败: ${response.statusText}`,
-        data.code || "UPLOAD_FAILED"
-      );
-    }
-
-    return data;
   }
 
   private delay(ms: number): Promise<void> {

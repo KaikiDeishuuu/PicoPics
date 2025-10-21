@@ -1,0 +1,115 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Kaiki Image — 恢复页面</title>
+    <meta
+      name="description"
+      content="Kaiki Image — Cloudflare R2 + AI Powered"
+    />
+    <style>
+      :root {
+        color-scheme: dark light;
+        --bg-gradient: linear-gradient(135deg, #ff7a00 0%, #7b2bff 100%);
+        --bg-overlay: radial-gradient(
+          circle at 25% 20%,
+          rgba(255, 130, 90, 0.12),
+          transparent 30%
+        );
+        --text-color: #fff;
+        --btn-bg: rgba(255, 255, 255, 0.12);
+        --btn-border: rgba(255, 255, 255, 0.15);
+      }
+
+      html,
+      body {
+        height: 100%;
+        margin: 0;
+        font-family: Inter, system-ui, -apple-system, Segoe UI, Roboto, Helvetica, Arial, sans-serif;
+        color: var(--text-color);
+        background: var(--bg-overlay), var(--bg-gradient);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        padding: 24px;
+        text-align: center;
+      }
+
+      main {
+        max-width: 800px;
+      }
+
+      .logo {
+        width: 64px;
+        height: 64px;
+        margin: 0 auto 1rem;
+        border-radius: 12px;
+        display: grid;
+        place-items: center;
+        font-size: 28px;
+        font-weight: 700;
+        background: linear-gradient(45deg, #ff9a4c, #d64bc6, #6a5cff);
+        box-shadow: 0 8px 24px rgba(0, 0, 0, 0.25);
+      }
+
+      h1 {
+        font-size: 1.6rem;
+        margin: 0.5rem 0 0.75rem;
+      }
+
+      p {
+        opacity: 0.9;
+        line-height: 1.6;
+      }
+
+      .btn {
+        display: inline-block;
+        margin-top: 1rem;
+        padding: 0.6rem 1.4rem;
+        background: var(--btn-bg);
+        border: 1px solid var(--btn-border);
+        border-radius: 999px;
+        color: var(--text-color);
+        text-decoration: none;
+        font-weight: 500;
+        transition: background 0.25s, transform 0.25s;
+      }
+
+      .btn:hover {
+        background: rgba(255, 255, 255, 0.22);
+        transform: translateY(-1px);
+      }
+
+      code {
+        background: rgba(255, 255, 255, 0.08);
+        padding: 0.25rem 0.45rem;
+        border-radius: 6px;
+      }
+
+      footer {
+        font-size: 0.85rem;
+        opacity: 0.85;
+        margin-top: 1.5rem;
+      }
+    </style>
+  </head>
+  <body>
+    <main>
+      <div class="logo">K</div>
+      <h1>Kaiki Image</h1>
+      <p>站点已恢复临时静态首页。页面将在 <strong>5 秒</strong> 后自动跳转至应用根路径。</p>
+      <p>若未跳转，请点击下方按钮进入：</p>
+      <a class="btn" href="/" aria-label="进入应用主页">进入应用</a>
+      <footer>
+        维护者提示：如需部署完整应用，请运行 <code>npm run build</code> 并将输出部署到 Cloudflare Pages。
+      </footer>
+    </main>
+
+    <script>
+      setTimeout(() => {
+        window.location.href = "/";
+      }, 5000);
+    </script>
+  </body>
+</html>

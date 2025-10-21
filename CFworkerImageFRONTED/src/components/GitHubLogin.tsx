@@ -90,7 +90,7 @@ export default function GitHubLogin({ onSuccess, onError }: GitHubLoginProps) {
 
   return (
     <motion.div
-      className="rounded-2xl border border-white/10 bg-white/5 p-8 shadow-2xl backdrop-blur-xl"
+      className="rounded-2xl border border-white/10 bg-white/5 p-6 md:p-8 shadow-2xl mx-auto w-full max-w-lg"
       initial={{ opacity: 0, y: 16 }}
       animate={{ opacity: 1, y: 0 }}
       transition={{ duration: 0.35, ease: "easeOut" }}
@@ -137,7 +137,7 @@ export default function GitHubLogin({ onSuccess, onError }: GitHubLoginProps) {
             </span>
           </button>
 
-          <div className="rounded-xl border border-white/10 bg-black/40 p-4 text-sm text-white/60">
+          <div className="rounded-xl border border-white/10 bg-black/40 p-3 text-sm text-white/60">
             <p>
               登录过程采用 GitHub Device
               Flow，确保访问令牌仅保存在本地浏览器。授权有效期为

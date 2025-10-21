@@ -4,39 +4,44 @@
 
 /* CSS 变量定义 */
 :root {
-  /* 亮色主题 */
-  --background: #ffffff;
-  --foreground: #0f172a;
-  --card: #f8fafc;
-  --card-foreground: #1e293b;
-  --border: #e2e8f0;
-  --input: #e2e8f0;
-  --primary: #3b82f6;
+  --background: #071029;
+  --foreground: #e6eef8;
+  --card: #0b1624;
+  --card-foreground: #cfd8e6;
+  --border: #233044;
+  --input: #10202b;
+  --primary: #ff6a00; /* 主色：鲜艳橙色 */
   --primary-foreground: #ffffff;
   --secondary: #64748b;
   --success: #10b981;
   --warning: #f59e0b;
   --error: #ef4444;
-  --muted: #f1f5f9;
-  --accent: #8b5cf6;
+  --muted: #0b1220;
+  --accent: #7c3aed;
+  --glass-bg: rgba(255, 255, 255, 0);
+  --glass-border: rgba(255, 255, 255, 0.04);
+  --glass-shadow: 0 6px 18px rgba(2, 6, 23, 0.35);
 }
 
-/* 暗色主题 */
+/* Dark theme */
 .dark {
-  --background: #0f172a;
-  --foreground: #f1f5f9;
-  --card: #1e293b;
-  --card-foreground: #cbd5e1;
-  --border: #334155;
-  --input: #1e293b;
-  --primary: #3b82f6;
+  --background: #061022;
+  --foreground: #eef6ff;
+  --card: #071127;
+  --card-foreground: #cfd8e6;
+  --border: #1f2b38;
+  --input: #091018;
+  --primary: #ff6a00;
   --primary-foreground: #ffffff;
   --secondary: #64748b;
   --success: #10b981;
   --warning: #f59e0b;
   --error: #ef4444;
-  --muted: #1e293b;
-  --accent: #8b5cf6;
+  --muted: #0b1220;
+  --accent: #7c3aed;
+  --glass-bg: rgba(255, 255, 255, 0);
+  --glass-border: rgba(255, 255, 255, 0.04);
+  --glass-shadow: 0 6px 18px rgba(0, 0, 0, 0.5);
 }
 
 /* 基础样式 */
@@ -50,12 +55,17 @@ html {
 
 body {
   @apply text-white;
-  background: radial-gradient(
-    circle at 20% 20%,
-    #24123f 0%,
-    #0b0518 45%,
-    #03030a 100%
+  background: linear-gradient(
+    135deg,
+    #ff6a00 0%,
+    /* 橙色 */ #ff2d95 20%,
+    /* 粉红 */ #7c3aed 40%,
+    /* 紫色 */ #2563eb 60%,
+    /* 靛蓝 */ #06b6d4 80%,
+    /* 青色 */ #ff6a00 100% /* 橙色 */
   );
+  background-size: 400% 400%;
+  animation: gradient-shift 20s ease infinite;
   font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", "Roboto", "Oxygen",
     "Ubuntu", "Cantarell", "Fira Sans", "Droid Sans", "Helvetica Neue",
     sans-serif;
@@ -66,183 +76,351 @@ body {
   overflow-x: hidden;
 }
 
-/* 自定义滚动条 */
-::-webkit-scrollbar {
-  width: 10px;
-  height: 10px;
-}
-
 ::-webkit-scrollbar-track {
-  @apply bg-gray-100;
-}
-
-::-webkit-scrollbar-thumb {
-  @apply bg-gray-400 rounded-full;
+  background: rgba(2, 6, 23, 0.55);
+  border: 1px solid rgba(255, 255, 255, 0.04);
+  box-shadow: 0 8px 22px rgba(0, 0, 0, 0.5);
 }
 
 ::-webkit-scrollbar-thumb:hover {
-  @apply bg-blue-500;
+  background: linear-gradient(135deg, #ff6a00 0%, #ff2d95 100%);
 }
 
-/* 选中文本样式 */
+/* Selection style */
 ::selection {
-  @apply bg-blue-500 text-white;
+  background: var(--primary);
+  color: var(--primary-foreground);
 }
 
-/* ========== 工具类 ========== */
-@layer utilities {
-  .text-balance {
-    text-wrap: balance;
-  }
+/* Flat card style (replaces frosted glass) */
+.glass {
+  background: linear-gradient(
+    180deg,
+    rgba(255, 255, 255, 0.02),
+    rgba(255, 255, 255, 0.01)
+  );
+  border: 1px solid var(--glass-border);
+  box-shadow: var(--glass-shadow);
+  will-change: transform, opacity;
+}
 
-  /* 毛玻璃效果 */
-  .glass {
-    @apply bg-white/80 backdrop-blur-xl border border-white/20;
-    box-shadow: 0 8px 32px rgba(0, 0, 0, 0.1);
-  }
+.glass-dark {
+  background: rgba(2, 6, 23, 0.6);
+  border: 1px solid rgba(255, 255, 255, 0.04);
+  box-shadow: 0 8px 20px rgba(0, 0, 0, 0.5);
+}
 
-  .glass-dark {
-    @apply bg-gray-900/80 backdrop-blur-xl border border-gray-700/20;
-    box-shadow: 0 8px 32px rgba(0, 0, 0, 0.3);
-  }
+/* Selection color */
+::selection {
+  background: var(--primary);
+  color: var(--primary-foreground);
+}
 
-  /* 渐变背景 */
-  .bg-gradient-primary {
-    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-  }
+/* Flat card styles replacing heavy glass blur */
+.glass {
+  background: linear-gradient(
+    180deg,
+    rgba(255, 255, 255, 0.02),
+    rgba(255, 255, 255, 0.01)
+  );
+  border: 1px solid var(--glass-border);
+  box-shadow: var(--glass-shadow);
+  will-change: transform, opacity;
+}
 
-  .bg-gradient-aurora {
-    background: radial-gradient(
-        circle at 10% 20%,
-        rgba(255, 140, 0, 0.25),
-        transparent 60%
-      ),
-      radial-gradient(
-        circle at 80% 30%,
-        rgba(236, 72, 153, 0.25),
-        transparent 55%
-      ),
-      radial-gradient(
-        circle at 40% 80%,
-        rgba(56, 189, 248, 0.25),
-        transparent 60%
-      ),
-      #090712;
-  }
+/* 渐变背景 */
+.bg-gradient-primary {
+  background: linear-gradient(135deg, #ff6a00 0%, #ff2d95 50%, #7c3aed 100%);
+}
 
-  .bg-gradient-secondary {
-    background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);
-  }
+.bg-gradient-aurora {
+  background: radial-gradient(
+      circle at 10% 20%,
+      rgba(255, 140, 0, 0.25),
+      transparent 60%
+    ),
+    radial-gradient(
+      circle at 80% 30%,
+      rgba(236, 72, 153, 0.25),
+      transparent 55%
+    ),
+    radial-gradient(
+      circle at 40% 80%,
+      rgba(56, 189, 248, 0.25),
+      transparent 60%
+    ),
+    #090712;
+}
 
-  .bg-gradient-success {
-    background: linear-gradient(135deg, #84fab0 0%, #8fd3f4 100%);
-  }
+.bg-gradient-secondary {
+  background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);
+}
 
-  .bg-gradient-warm {
-    background: linear-gradient(135deg, #fa709a 0%, #fee140 100%);
-  }
+.bg-gradient-success {
+  background: linear-gradient(135deg, #84fab0 0%, #8fd3f4 100%);
+}
 
-  .bg-gradient-cool {
-    background: linear-gradient(135deg, #a8edea 0%, #fed6e3 100%);
-  }
+.bg-gradient-warm {
+  background: linear-gradient(135deg, #fa709a 0%, #fee140 100%);
+}
 
-  .bg-gradient-purple {
-    background: linear-gradient(135deg, #c471f5 0%, #fa71cd 100%);
-  }
+.bg-gradient-cool {
+  background: linear-gradient(135deg, #a8edea 0%, #fed6e3 100%);
+}
 
-  .bg-gradient-ocean {
-    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%, #f093fb 100%);
-  }
+.bg-gradient-purple {
+  background: linear-gradient(135deg, #c471f5 0%, #fa71cd 100%);
+}
 
-  /* 光晕效果 */
-  .glow-blue {
-    box-shadow: 0 0 30px rgba(59, 130, 246, 0.5);
-  }
+.bg-gradient-ocean {
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%, #f093fb 100%);
+}
 
-  .glow-purple {
-    box-shadow: 0 0 30px rgba(139, 92, 246, 0.5);
-  }
+/* 光晕效果 */
+.glow-blue {
+  box-shadow: 0 0 30px rgba(59, 130, 246, 0.5);
+}
 
-  .glow-green {
-    box-shadow: 0 0 30px rgba(16, 185, 129, 0.5);
-  }
+.glow-purple {
+  box-shadow: 0 0 30px rgba(139, 92, 246, 0.5);
+}
 
-  .glow-pink {
-    box-shadow: 0 0 30px rgba(236, 72, 153, 0.5);
-  }
+.glow-green {
+  box-shadow: 0 0 30px rgba(16, 185, 129, 0.5);
+}
 
-  /* 3D 卡片效果 */
-  .card-3d {
-    transform-style: preserve-3d;
-    transition: transform 0.6s;
-  }
+.glow-pink {
+  box-shadow: 0 0 30px rgba(236, 72, 153, 0.5);
+}
 
-  .card-3d:hover {
-    transform: rotateY(5deg) rotateX(5deg) scale(1.05);
-  }
+/* 3D 卡片效果 */
+.card-3d {
+  transform-style: preserve-3d;
+  transition: transform 0.6s;
+}
 
-  /* 文字渐变 */
-  .text-gradient {
-    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-    -webkit-background-clip: text;
-    -webkit-text-fill-color: transparent;
-    background-clip: text;
-  }
+.card-3d:hover {
+  transform: rotateY(5deg) rotateX(5deg) scale(1.05);
+}
 
-  .text-gradient-rainbow {
-    background: linear-gradient(
-      to right,
-      #f093fb,
-      #f5576c,
-      #feca57,
-      #48dbfb,
-      #0abde3
-    );
-    -webkit-background-clip: text;
-    -webkit-text-fill-color: transparent;
-    background-clip: text;
-  }
+/* 文字渐变 */
+.text-gradient {
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+}
 
+.text-gradient-rainbow {
+  background: linear-gradient(
+    to right,
+    #f093fb,
+    #f5576c,
+    #feca57,
+    #48dbfb,
+    #0abde3
+  );
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+}
+
+.glass-modern {
+  background: linear-gradient(
+    135deg,
+    rgba(255, 255, 255, 0.08),
+    rgba(15, 23, 42, 0.35)
+  );
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  box-shadow: 0 12px 28px rgba(2, 6, 23, 0.45);
+  will-change: transform, opacity;
+}
+
+.glass-modern-soft {
+  background: linear-gradient(
+    160deg,
+    rgba(255, 255, 255, 0.06),
+    rgba(24, 17, 50, 0.32)
+  );
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  box-shadow: 0 10px 26px rgba(2, 6, 23, 0.4);
+  will-change: transform, opacity;
+}
+
+.border-gradient::before {
+  content: "";
+  position: absolute;
+  inset: -1px;
+  z-index: -1;
+  border-radius: inherit;
+  background: linear-gradient(
+    135deg,
+    rgba(255, 106, 0, 0.45),
+    rgba(255, 45, 149, 0.2),
+    rgba(124, 58, 237, 0.25)
+  );
+  opacity: 0.5;
+  filter: blur(3px);
+  transition: opacity 0.4s ease;
+}
+
+.border-gradient:hover::before {
+  opacity: 0.85;
+}
+
+/* 桌面端增强样式 - 更强的背景和边框，完全不透明 */
+@media (min-width: 641px) {
   .glass-modern {
     background: linear-gradient(
       135deg,
-      rgba(255, 255, 255, 0.12),
-      rgba(15, 23, 42, 0.35)
+      rgba(255, 255, 255, 0.15),
+      rgba(15, 23, 42, 0.5)
     );
-    border: 1px solid rgba(255, 255, 255, 0.18);
-    box-shadow: 0 30px 60px rgba(15, 23, 42, 0.35);
+    border: 2px solid rgba(255, 255, 255, 0.2);
+    box-shadow: 0 20px 40px rgba(2, 6, 23, 0.6);
+    backdrop-filter: none !important;
+    -webkit-backdrop-filter: none !important;
   }
 
   .glass-modern-soft {
     background: linear-gradient(
       160deg,
-      rgba(255, 255, 255, 0.06),
-      rgba(24, 17, 50, 0.5)
+      rgba(255, 255, 255, 0.12),
+      rgba(24, 17, 50, 0.45)
     );
-    border: 1px solid rgba(255, 255, 255, 0.12);
-    box-shadow: 0 20px 45px rgba(8, 8, 18, 0.45);
+    border: 1px solid rgba(255, 255, 255, 0.18);
+    box-shadow: 0 16px 32px rgba(2, 6, 23, 0.55);
+    backdrop-filter: none !important;
+    -webkit-backdrop-filter: none !important;
+  }
+}
+
+/* 移动端优化：减小 padding，禁用重型粒子/光效，软化边框 */
+@media (max-width: 640px) {
+  .glass-modern,
+  .glass-modern-soft,
+  .glass,
+  .border-gradient,
+  .card,
+  .rounded-xl,
+  .rounded-2xl {
+    padding: 1rem !important;
+    margin: 0.5rem 0 !important;
+    border-radius: 0.75rem !important;
+  }
+
+  .animate-orb,
+  .animate-aurora {
+    display: none !important;
+    will-change: auto !important;
+  }
+
+  .bg-gradient-aurora {
+    opacity: 0.8 !important;
+  }
+
+  /* 优化动画与滚动性能 */
+  @media (hover: none), (pointer: coarse) {
+    /* 移动端和触控设备：禁用/简化重动画 */
+    .animate-orb,
+    .animate-aurora,
+    .animate-aurora *,
+    .animate-orb * {
+      animation: none !important;
+      transition: none !important;
+    }
+
+    .bg-gradient-aurora {
+      background: linear-gradient(
+        135deg,
+        rgba(255, 140, 0, 0.18),
+        rgba(236, 72, 153, 0.12)
+      );
+    }
+  }
+
+  /* 如果用户偏好减少动画，禁用所有非必要动画 */
+  @media (prefers-reduced-motion: reduce) {
+    * {
+      animation-duration: 0s !important;
+      animation-delay: 0s !important;
+      transition-duration: 0s !important;
+    }
+  }
+
+  /* 在性能低的设备上降低视觉开销 */
+  @media (max-width: 1024px) {
+    .shadow-2xl,
+    .shadow-lg,
+    .shadow-emerald-500\/30,
+    .shadow-orange-500\/30 {
+      box-shadow: none !important;
+    }
+
+    .backdrop-blur-xl,
+    .backdrop-blur-2xl,
+    .backdrop-blur-md {
+      /* removed blur on small devices for perf */
+    }
   }
 
   .border-gradient::before {
-    content: "";
-    position: absolute;
-    inset: -1px;
-    z-index: -1;
-    border-radius: inherit;
-    background: linear-gradient(
-      135deg,
-      rgba(249, 115, 22, 0.65),
-      rgba(236, 72, 153, 0.35),
-      rgba(56, 189, 248, 0.4)
-    );
-    opacity: 0.65;
-    filter: blur(6px);
-    transition: opacity 0.4s ease;
+    filter: blur(3px) !important;
+    opacity: 0.35 !important;
   }
+}
 
-  .border-gradient:hover::before {
-    opacity: 0.9;
-  }
+/* During scroll, reduce heavy visual effects to improve smoothness */
+.is-scrolling .glass,
+.is-scrolling .glass-modern,
+.is-scrolling .glass-modern-soft,
+.is-scrolling .border-gradient::before,
+.is-scrolling .animate-orb,
+.is-scrolling .animate-aurora {
+  animation: none !important;
+  transition: none !important;
+  /* retain box-shadow for visual consistency */
+}
+
+/* stable scroll region helper for upload history */
+.scroll-area {
+  -webkit-overflow-scrolling: touch;
+  overflow-anchor: auto;
+  scrollbar-gutter: stable both-edges;
+}
+
+.scroll-area::-webkit-scrollbar {
+  width: 10px;
+}
+.scroll-area::-webkit-scrollbar-track {
+  background: transparent;
+}
+.scroll-area::-webkit-scrollbar-thumb {
+  background: rgba(255, 255, 255, 0.08);
+  border-radius: 999px;
+}
+.scroll-area::-webkit-scrollbar-thumb:hover {
+  background: rgba(255, 255, 255, 0.14);
+}
+
+/* History thumbnails: reduce aliasing/contrast at small sizes to avoid cutoff artifacts */
+.history-thumb img,
+.history-thumb .thumb-img {
+  image-rendering: auto;
+  object-fit: cover;
+  width: 100%;
+  height: 100%;
+  transform-origin: center center;
+  filter: contrast(0.92) saturate(0.95) blur(0.15px);
+  backface-visibility: hidden;
+  -webkit-backface-visibility: hidden;
+  transform: translateZ(0);
+}
+
+.history-thumb {
+  overflow: hidden;
+  contain: paint; /* isolate rendering */
+  background: linear-gradient(180deg, rgba(0, 0, 0, 0.25), rgba(0, 0, 0, 0.15));
 }
 
 /* 组件样式 */
@@ -279,12 +457,20 @@ body {
 
 /* 渐变背景动画 - 使用 transform 优化 */
 @keyframes gradient-shift {
-  0%,
-  100% {
+  0% {
     background-position: 0% 50%;
   }
+  25% {
+    background-position: 100% 0%;
+  }
   50% {
-    background-position: 100% 50%;
+    background-position: 100% 100%;
+  }
+  75% {
+    background-position: 0% 100%;
+  }
+  100% {
+    background-position: 0% 50%;
   }
 }
 
@@ -416,6 +602,55 @@ body {
 .animate-float {
   animation: float 3s ease-in-out infinite;
   will-change: transform;
+}
+
+/* ======= Stability & Accessibility Fixes ======= */
+
+/* Disable backdrop blur utilities globally to avoid frosted-glass reappearances */
+[class*="backdrop-blur"],
+.backdrop-blur,
+.backdrop-blur-sm,
+.backdrop-blur-md,
+.backdrop-blur-lg,
+.backdrop-blur-xl,
+.backdrop-blur-2xl {
+  -webkit-backdrop-filter: none !important;
+  backdrop-filter: none !important;
+  filter: none !important;
+}
+
+/* Keep aurora gradient visible to avoid flicker between scroll and idle */
+.bg-gradient-aurora {
+  opacity: 1 !important;
+}
+
+/* Keep heavy visuals stable during scroll but still disable animations */
+.is-scrolling .glass,
+.is-scrolling .glass-modern,
+.is-scrolling .glass-modern-soft,
+.is-scrolling .border-gradient::before,
+.is-scrolling .animate-orb,
+.is-scrolling .animate-aurora {
+  animation: none !important;
+  transition: none !important;
+  /* retain box-shadow for visual consistency */
+}
+
+/* Prevent iOS from auto-zooming inputs: enforce at least 16px */
+input,
+select,
+textarea,
+button {
+  font-size: 16px;
+}
+
+/* Stabilize header height across zoom levels */
+header {
+  min-height: 56px;
+}
+header > div {
+  display: flex;
+  align-items: center;
 }
 
 /* 粒子效果 - 性能优化版本 */

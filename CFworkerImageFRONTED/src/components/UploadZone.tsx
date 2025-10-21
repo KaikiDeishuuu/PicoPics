@@ -13,7 +13,6 @@ import {
   DragEvent,
   ChangeEvent,
 } from "react";
-import { uploadImage } from "@/services/upload";
 import { UploadStatus } from "@/types";
 import type { UploadSuccessResponse } from "@/types";
 import clsx from "clsx";
@@ -207,7 +206,7 @@ export default function UploadZone({
   return (
     <div
       className={clsx(
-        "relative overflow-hidden rounded-2xl border-2 border-dashed p-12 transition-all duration-300 cursor-pointer group backdrop-blur-xl shadow-2xl",
+        "relative overflow-hidden rounded-2xl border-2 border-dashed p-8 md:p-12 transition-all duration-300 cursor-pointer group shadow-2xl mx-auto w-full max-w-3xl",
         "hover:-translate-y-1 hover:shadow-orange-500/30",
         {
           "border-white/15 bg-black/40":

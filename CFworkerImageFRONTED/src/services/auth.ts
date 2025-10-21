@@ -124,9 +124,26 @@ export async function getGitHubUser(accessToken: string): Promise<GitHubUser> {
 /**
  * 保存认证信息到 localStorage
  */
+const PRIMARY_AUTH_KEY = "github_auth";
+const BACKUP_AUTH_KEYS = ["github_auth_v2", "github_token", "gh_auth"];
+
 export function saveAuth(token: AuthToken): void {
   if (typeof window === "undefined") return;
-  localStorage.setItem("github_auth", JSON.stringify(token));
+  try {
+    const json = JSON.stringify(token);
+    // write primary
+    localStorage.setItem(PRIMARY_AUTH_KEY, json);
+    // best-effort backups
+    for (const k of BACKUP_AUTH_KEYS) {
+      try {
+        localStorage.setItem(k, json);
+      } catch {
+        // ignore
+      }
+    }
+  } catch (e) {
+    console.error("saveAuth error:", e);
+  }
 }
 
 /**
@@ -135,22 +152,28 @@ export function saveAuth(token: AuthToken): void {
 export function getAuth(): AuthToken | null {
   if (typeof window === "undefined") return null;
 
-  const stored = localStorage.getItem("github_auth");
-  if (!stored) return null;
+  const keys = [PRIMARY_AUTH_KEY, ...BACKUP_AUTH_KEYS];
 
-  try {
-    const token: AuthToken = JSON.parse(stored);
+  for (const key of keys) {
+    const stored = localStorage.getItem(key);
+    if (!stored) continue;
 
-    // 检查是否过期
-    if (Date.now() > token.expiresAt) {
-      clearAuth();
-      return null;
+    try {
+      const token: AuthToken = JSON.parse(stored);
+      if (!token || !token.accessToken || !token.user) continue;
+      if (typeof token.expiresAt !== "number") continue;
+      if (Date.now() > token.expiresAt) {
+        clearAuth();
+        return null;
+      }
+      return token;
+    } catch {
+      // ignore and try next key
+      continue;
     }
-
-    return token;
-  } catch {
-    return null;
   }
+
+  return null;
 }
 
 /**
@@ -158,7 +181,18 @@ export function getAuth(): AuthToken | null {
  */
 export function clearAuth(): void {
   if (typeof window === "undefined") return;
-  localStorage.removeItem("github_auth");
+  try {
+    localStorage.removeItem(PRIMARY_AUTH_KEY);
+    for (const k of BACKUP_AUTH_KEYS) {
+      try {
+        localStorage.removeItem(k);
+      } catch {
+        // ignore
+      }
+    }
+  } catch {
+    console.error("clearAuth error");
+  }
 }
 
 /**

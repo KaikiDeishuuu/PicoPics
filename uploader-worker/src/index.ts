@@ -330,24 +330,9 @@ async function handleUpload(
       return errorResponse("只允许上传图片文件", 400, env, request);
     }
 
-    // 4. 内容审核（如果启用）
-    if (env.CONTENT_MODERATION_ENABLED === "true" && env.AI) {
-      try {
-        const moderationResult = await moderateImage(file, env);
-        if (!moderationResult.safe) {
-          console.log("Content moderation blocked:", moderationResult.reason);
-          return errorResponse(
-            `图片内容不符合规范: ${moderationResult.reason}`,
-            400,
-            env,
-            request
-          );
-        }
-      } catch (error) {
-        console.error("Content moderation error:", error);
-        // 审核失败时继续上传，但记录错误
-      }
-    }
+    // 内容审核移到异步任务，以避免阻塞用户上传体验
+    const moderationEnabled =
+      env.CONTENT_MODERATION_ENABLED === "true" && !!env.AI;
 
     // 5. 检查每日配额（通过 Durable Object）
     const bytes = file.size;
@@ -416,20 +401,62 @@ async function handleUpload(
       }
     }
 
-    // 8. 发送 Telegram 通知
-    if (env.TELEGRAM_BOT_TOKEN && env.TELEGRAM_CHAT_ID) {
-      ctx.waitUntil(
-        sendTelegramNotification(env, {
-          ip: clientIP,
-          fileName,
-          fileSize: file.size,
-          fileType,
-          url: imageUrl,
-        }).catch((err) => {
-          console.error("Telegram notification failed:", err);
-        })
-      );
-    }
+    // 8. 异步：发送 Telegram 通知 & 内容审核
+    ctx.waitUntil(
+      (async () => {
+        // 8a. 发送 Telegram 通知（可选）
+        if (env.TELEGRAM_BOT_TOKEN && env.TELEGRAM_CHAT_ID) {
+          try {
+            await sendTelegramNotification(env, {
+              ip: clientIP,
+              fileName,
+              fileSize: file.size,
+              fileType,
+              url: imageUrl,
+            });
+          } catch (err) {
+            console.error("Telegram notification failed:", err);
+          }
+        }
+
+        // 8b. 内容审核（异步执行）
+        if (moderationEnabled) {
+          try {
+            const moderationResult = await moderateImage(file, env);
+            if (!moderationResult.safe) {
+              console.log("Async moderation blocked:", moderationResult.reason);
+              // 尝试删除 R2 对象
+              try {
+                await env.IMAGES.delete(fileName);
+                console.log("Deleted image due to moderation:", fileName);
+              } catch (delErr) {
+                console.error(
+                  "Failed to delete R2 object after moderation:",
+                  delErr
+                );
+              }
+
+              // 通知 Telegram 或其他系统
+              if (env.TELEGRAM_BOT_TOKEN && env.TELEGRAM_CHAT_ID) {
+                try {
+                  await sendTelegramMessage(
+                    env,
+                    `Image removed after moderation: ${fileName} Reason: ${moderationResult.reason}`
+                  );
+                } catch (notifyErr) {
+                  console.error(
+                    "Failed to send post-moderation notification:",
+                    notifyErr
+                  );
+                }
+              }
+            }
+          } catch (modErr) {
+            console.error("Async moderation error:", modErr);
+          }
+        }
+      })()
+    );
 
     // 9. 返回响应
     const response: UploadResponse = {

@@ -6,6 +6,7 @@
 "use client";
 
 import { useState } from "react";
+import Image from "next/image";
 import type { UploadSuccessResponse } from "@/types";
 import { generateLinkFormats } from "@/services/upload";
 
@@ -76,15 +77,21 @@ export default function ResultDisplay({ data }: ResultDisplayProps) {
   return (
     <div className="mt-8 space-y-6">
       {/* Image preview */}
-      <div className="glass-modern border-gradient relative rounded-2xl p-6 transition-transform duration-300 hover:-translate-y-1">
+      <div className="glass-modern border-gradient relative rounded-2xl p-5 md:p-6 transition-transform duration-300 hover:-translate-y-1 mx-auto w-full max-w-3xl">
         <h3 className="mb-4 text-xl font-semibold text-white">Image Preview</h3>
         <div className="flex justify-center rounded-2xl border border-white/10 bg-black/50 p-4">
-          <img
-            src={data.url}
-            alt="Uploaded"
-            className="max-w-full max-h-96 rounded hover:scale-105 transition-transform cursor-pointer"
+          <div
+            className="relative max-w-full max-h-96 rounded overflow-hidden cursor-pointer"
             onClick={() => window.open(data.url, "_blank")}
-          />
+          >
+            <Image
+              src={data.url}
+              alt="Uploaded"
+              fill
+              sizes="(max-width: 768px) 100vw, 50vw"
+              className="object-contain"
+            />
+          </div>
         </div>
         <div className="mt-4 grid grid-cols-2 md:grid-cols-4 gap-3 text-sm">
           <div className="rounded-xl border border-white/10 bg-white/5 p-3">
@@ -121,7 +128,7 @@ export default function ResultDisplay({ data }: ResultDisplayProps) {
       </div>
 
       {/* Link formats */}
-      <div className="glass-modern border-gradient relative rounded-2xl p-6 transition-transform duration-300 hover:-translate-y-1">
+      <div className="glass-modern border-gradient relative rounded-2xl p-5 md:p-6 transition-transform duration-300 hover:-translate-y-1">
         <h3 className="mb-4 flex items-center justify-between text-xl font-semibold text-white">
           <span>Link Formats</span>
           <span className="rounded-full bg-white/10 px-3 py-1 text-xs text-white/60">
@@ -174,7 +181,7 @@ export default function ResultDisplay({ data }: ResultDisplayProps) {
       </div>
 
       {/* Success message */}
-      <div className="glass-modern-soft border border-emerald-400/40 rounded-2xl p-5">
+      <div className="glass-modern-soft border border-emerald-400/40 rounded-2xl p-4 md:p-5">
         <div className="flex items-start">
           <div className="flex-shrink-0">
             <div className="flex h-10 w-10 items-center justify-center rounded-full bg-emerald-500/30 text-xl text-emerald-200">

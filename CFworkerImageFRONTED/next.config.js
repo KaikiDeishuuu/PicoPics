@@ -76,40 +76,9 @@ const nextConfig = {
     return config;
   },
 
-  // Headers 配置（安全和性能）
-  async headers() {
-    return [
-      {
-        source: "/:path*",
-        headers: [
-          {
-            key: "X-DNS-Prefetch-Control",
-            value: "on",
-          },
-          {
-            key: "Strict-Transport-Security",
-            value: "max-age=63072000; includeSubDomains; preload",
-          },
-          {
-            key: "X-Content-Type-Options",
-            value: "nosniff",
-          },
-          {
-            key: "X-Frame-Options",
-            value: "SAMEORIGIN",
-          },
-          {
-            key: "X-XSS-Protection",
-            value: "1; mode=block",
-          },
-          {
-            key: "Referrer-Policy",
-            value: "strict-origin-when-cross-origin",
-          },
-        ],
-      },
-    ];
-  },
+  // Note: headers(), redirects() and rewrites() are not supported when using
+  // `output: 'export'` (static export). Configure security headers for Cloudflare
+  // Pages in `wrangler.toml` (we already set them there).
 };
 
 module.exports = nextConfig;

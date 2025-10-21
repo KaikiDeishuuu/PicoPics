@@ -6,6 +6,7 @@
 "use client";
 
 import { useState, useEffect } from "react";
+import Image from "next/image";
 import { motion } from "framer-motion";
 import UploadZone from "@/components/UploadZone";
 import ResultDisplay from "@/components/ResultDisplay";
@@ -47,6 +48,33 @@ export default function Home() {
         console.error("Failed to load upload history:", e);
       }
     }
+  }, []);
+
+  // Listen for localStorage changes to sync auth across tabs
+  useEffect(() => {
+    if (typeof window === "undefined") return;
+
+    const onStorage = (e: StorageEvent) => {
+      if (e.key === null) return;
+      if (
+        e.key === "github_auth" ||
+        e.key === "github_auth_v2" ||
+        e.key === "github_token" ||
+        e.key === "gh_auth"
+      ) {
+        const auth = getAuth();
+        if (auth) {
+          setCurrentUser(auth.user);
+          setAccessToken(auth.accessToken);
+        } else {
+          setCurrentUser(null);
+          setAccessToken(null);
+        }
+      }
+    };
+
+    window.addEventListener("storage", onStorage);
+    return () => window.removeEventListener("storage", onStorage);
   }, []);
 
   // Save history to localStorage whenever it changes
@@ -96,7 +124,6 @@ export default function Home() {
     <div className="min-h-screen">
       {/* 现代艺术感背景 */}
       <div className="pointer-events-none fixed inset-0 -z-10 overflow-hidden">
-        <div className="absolute inset-0 bg-gradient-aurora" />
         <motion.div
           className="animate-aurora absolute -left-56 -top-40 h-[520px] w-[520px] rounded-full bg-gradient-to-br from-orange-500/35 via-pink-500/20 to-purple-600/30 blur-3xl"
           animate={{ rotate: [0, 6, -4, 0] }}
@@ -117,8 +144,8 @@ export default function Home() {
       </div>
 
       {/* 头部 */}
-      <header className="sticky top-0 z-50 border-b border-white/10 bg-black/30 backdrop-blur-2xl shadow-[0_18px_35px_rgba(10,10,25,0.45)]">
-        <div className="max-w-7xl mx-auto px-4 py-4">
+      <header className="sticky top-0 z-50 border-b border-white/10 bg-black/40 shadow-[0_18px_35px_rgba(10,10,25,0.45)]">
+        <div className="max-w-6xl mx-auto px-4 py-4">
           <div className="flex items-center justify-between">
             <div className="flex items-center space-x-3">
               <div className="grid h-10 w-10 place-items-center rounded-lg border border-white/20 bg-gradient-to-br from-orange-500 via-rose-500 to-purple-600 text-white font-bold text-xl shadow-lg shadow-orange-500/40">
@@ -144,10 +171,10 @@ export default function Home() {
       </header>
 
       {/* 主内容区 */}
-      <main className="max-w-7xl mx-auto px-4 py-8 relative z-10">
+      <main className="max-w-6xl mx-auto px-4 py-8 relative z-10">
         {/* Error message */}
         {errorMessage && (
-          <div className="mb-6 backdrop-blur-xl bg-red-600/30 border border-red-500/50 rounded-xl p-4 shadow-2xl animate-shake">
+          <div className="mb-6 bg-red-600/30 border border-red-500/50 rounded-xl p-4 shadow-2xl animate-shake">
             <div className="flex items-center">
               <svg
                 className="h-5 w-5 text-red-300 mr-3 flex-shrink-0"
@@ -171,9 +198,9 @@ export default function Home() {
         )}
 
         {/* Two Column Layout */}
-        <div className="grid gap-6 lg:grid-cols-3">
+        <div className="flex flex-col gap-6 lg:grid lg:grid-cols-3">
           {/* Left Column - Upload */}
-          <div className="space-y-6 lg:col-span-2">
+          <div className="flex flex-col items-center space-y-6 lg:col-span-2 lg:items-start">
             {/* GitHub 登录/用户信息 */}
             {currentUser ? (
               <UserInfo user={currentUser} onLogout={handleLogout} />
@@ -200,7 +227,7 @@ export default function Home() {
 
             {/* 未登录提示 */}
             {!currentUser && (
-              <div className="relative overflow-hidden rounded-2xl border-gradient p-8 text-center text-white/80 glass-modern-soft">
+              <div className="relative overflow-hidden rounded-2xl border-gradient p-6 md:p-8 text-center text-white/80 glass-modern-soft w-full max-w-3xl">
                 <div className="absolute inset-0 opacity-40">
                   <div className="animate-orb absolute -top-24 left-1/2 h-52 w-52 -translate-x-1/2 rounded-full bg-gradient-to-br from-cyan-400/35 to-blue-500/25 blur-2xl" />
                 </div>
@@ -230,10 +257,10 @@ export default function Home() {
           </div>
 
           {/* Right Column - History */}
-          <div className="lg:col-span-1">
+          <div className="flex justify-center lg:col-span-1 lg:justify-start">
             {uploadHistory.length > 0 && (
-              <div className="sticky top-4 max-h-[calc(100vh-6rem)] overflow-y-auto">
-                <div className="glass-modern-soft border-gradient relative rounded-2xl p-6">
+              <div className="lg:sticky lg:top-4 max-h-[calc(100vh-6rem)] overflow-y-auto scroll-area w-full max-w-md">
+                <div className="glass-modern-soft border-gradient relative rounded-2xl p-6 mx-auto w-full">
                   <div className="mb-4 flex items-center justify-between">
                     <h2 className="text-xl font-semibold text-white">
                       Upload History ({uploadHistory.length})
@@ -259,12 +286,13 @@ export default function Home() {
                       >
                         <div className="flex gap-3 rounded-xl bg-black/40 p-3">
                           {/* Image Preview */}
-                          <div className="relative h-16 w-16 flex-shrink-0 overflow-hidden rounded bg-black/60">
-                            <img
+                          <div className="relative h-16 w-16 flex-shrink-0 overflow-hidden rounded bg-black/60 history-thumb">
+                            <Image
                               src={item.url}
                               alt={item.fileName}
-                              className="w-full h-full object-cover"
-                              loading="lazy"
+                              fill
+                              sizes="64px"
+                              className="object-cover"
                             />
                           </div>
                           {/* Info */}
@@ -315,7 +343,7 @@ export default function Home() {
         </div>
 
         {/* 使用说明 */}
-        <div className="glass-modern-soft border-gradient relative mt-12 rounded-2xl p-6 transition-transform hover:-translate-y-1">
+        <div className="glass-modern-soft border-gradient relative mt-12 rounded-2xl p-5 md:p-6 transition-transform hover:-translate-y-1">
           <h2 className="mb-4 text-xl font-semibold text-white">How to Use</h2>
           <div className="grid gap-4 text-sm md:grid-cols-3">
             <div className="relative rounded-xl border border-white/10 bg-white/10 p-4 transition-transform duration-300 hover:-translate-y-1 hover:bg-white/5">
@@ -351,8 +379,8 @@ export default function Home() {
       </main>
 
       {/* Footer */}
-      <footer className="mt-16 py-8 backdrop-blur-md bg-white/5 border-t border-white/10">
-        <div className="max-w-7xl mx-auto px-4">
+      <footer className="mt-16 py-8 bg-white/3 border-t border-white/10">
+        <div className="max-w-6xl mx-auto px-4">
           <div className="text-center space-y-6">
             {/* Tech Stack */}
             <div className="flex flex-wrap items-center justify-center gap-3">
@@ -376,7 +404,7 @@ export default function Home() {
             {/* Links */}
             <div className="flex items-center justify-center space-x-6">
               <a
-                href="https://github.com/KaikiDeishuuu"
+                href="https://github.com/KaikiDeishuuu/PicoPics"
                 target="_blank"
                 rel="noopener noreferrer"
                 className="flex items-center space-x-2 text-white/80 hover:text-white transition-all hover:scale-110"
@@ -388,6 +416,21 @@ export default function Home() {
                   viewBox="0 0 24 24"
                 >
                   <path d="M12 0c-6.626 0-12 5.373-12 12 0 5.302 3.438 9.8 8.207 11.387.599.111.793-.261.793-.577v-2.234c-3.338.726-4.033-1.416-4.033-1.416-.546-1.387-1.333-1.756-1.333-1.756-1.089-.745.083-.729.083-.729 1.205.084 1.839 1.237 1.839 1.237 1.07 1.834 2.807 1.304 3.492.997.107-.775.418-1.305.762-1.604-2.665-.305-5.467-1.334-5.467-5.931 0-1.311.469-2.381 1.236-3.221-.124-.303-.535-1.524.117-3.176 0 0 1.008-.322 3.301 1.23.957-.266 1.983-.399 3.003-.404 1.02.005 2.047.138 3.006.404 2.291-1.552 3.297-1.23 3.297-1.23.653 1.653.242 2.874.118 3.176.77.84 1.235 1.911 1.235 3.221 0 4.609-2.807 5.624-5.479 5.921.43.372.823 1.102.823 2.222v3.293c0 .319.192.694.801.576 4.765-1.589 8.199-6.086 8.199-11.386 0-6.627-5.373-12-12-12z" />
+                </svg>
+              </a>
+              <a
+                href="https://t.me/OnonokiiBOT"
+                target="_blank"
+                rel="noopener noreferrer"
+                className="flex items-center space-x-2 text-white/80 hover:text-white transition-all hover:scale-110"
+                title="Telegram"
+              >
+                <svg
+                  className="w-6 h-6"
+                  fill="currentColor"
+                  viewBox="0 0 24 24"
+                >
+                  <path d="M11.944 0A12 12 0 0 0 0 12a12 12 0 0 0 12 12 12 12 0 0 0 12-12A12 12 0 0 0 12 0a12 12 0 0 0-.056 0zm4.962 7.224c.1-.002.321.023.465.14a.506.506 0 0 1 .171.325c.016.093.036.306.02.472-.18 1.898-.962 6.502-1.36 8.627-.168.9-.499 1.201-.82 1.23-.696.065-1.225-.46-1.9-.902-1.056-.693-1.653-1.124-2.678-1.8-1.185-.78-.417-1.21.258-1.91.177-.184 3.247-2.977 3.307-3.23.007-.032.014-.15-.056-.212s-.174-.041-.249-.024c-.106.024-1.793 1.14-5.061 3.345-.48.33-.913.49-1.302.48-.428-.008-1.252-.241-1.865-.44-.752-.245-1.349-.374-1.297-.789.027-.216.325-.437.893-.663 3.498-1.524 5.83-2.529 6.998-3.014 3.332-1.386 4.025-1.627 4.476-1.635z" />
                 </svg>
               </a>
               <a
