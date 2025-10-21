@@ -19,13 +19,6 @@ A full-stack, AI-powered image hosting service built on the Cloudflare ecosystem
 PicoPics is a developer-focused image hosting and delivery platform optimized for performance and cost-efficiency on Cloudflare. It provides secure upload flows, AI-powered moderation, quota and abuse protections, and global delivery at the edge.
 
 ---
-
-## Visual Architecture Overview
-
-![PicoPics Architecture](./docs/architecture.svg)
-
----
-
 ## Architecture — Explanation
 
 **Design goals**
