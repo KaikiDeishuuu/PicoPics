@@ -5,11 +5,11 @@ A full-stack, AI-powered image hosting service built on the Cloudflare ecosystem
 ---
 
 <p align="center">
-  <img src="https://img.shields.io/badge/license-MIT-blue.svg" alt="License">
-  <img src="https://img.shields.io/badge/Cloudflare-Workers%20%26%20R2-F38020?logo=cloudflare" alt="Cloudflare Stack">
-  <img src="https://img.shields.io/badge/Next.js-14-black?logo=next.js" alt="Next.js">
-  <img src="https://img.shields.io/badge/TypeScript-blue?logo=typescript" alt="TypeScript">
-  <img src="https://img.shields.io/badge/Tailwind%20CSS-blueviolet?logo=tailwind-css" alt="Tailwind CSS">
+  <img src="https://img.shields.io/badge/license-MIT-blue?style=for-the-badge" alt="License">
+  <img src="https://img.shields.io/badge/Cloudflare-F38020?style=for-the-badge&logo=cloudflare&logoColor=white" alt="Cloudflare Stack">
+  <img src="https://img.shields.io/badge/Next.js-000000?style=for-the-badge&logo=next.js&logoColor=white" alt="Next.js">
+  <img src="https://img.shields.io/badge/TypeScript-3178C6?style=for-the-badge&logo=typescript&logoColor=white" alt="TypeScript">
+  <img src="https://img.shields.io/badge/Tailwind_CSS-38B2AC?style=for-the-badge&logo=tailwind-css&logoColor=white" alt="Tailwind CSS">
 </p>
 
 ---
@@ -43,7 +43,6 @@ Below is a concise, publication-ready SVG diagram that represents the system com
       </marker>
     </defs>
 
-```
 <!-- Top row: Frontend -->
 <g transform="translate(40,20)">
   <rect class="box" width="260" height="80" fill="#e6f0ff" />
@@ -131,7 +130,6 @@ Below is a concise, publication-ready SVG diagram that represents the system com
   <rect x="520" y="22" width="12" height="12" fill="#e6fff5" stroke="#222"/>
   <text class="desc" x="540" y="32">Delivery</text>
 </g>
-```
 
   </svg>
 </p>
