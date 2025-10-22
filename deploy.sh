@@ -145,12 +145,18 @@ check_and_update_cors() {
         log_info "$worker_name 使用 secret 设置的 ALLOWED_ORIGINS，跳过值检查"
         return 0
     elif grep -q "^ALLOWED_ORIGINS.*=" wrangler.toml 2>/dev/null; then
-        current_origins=$(grep "^ALLOWED_ORIGINS.*=" wrangler.toml | sed 's/.*= *"\?\([^"]*\)"\?.*/\1/')
+        current_origins=$(grep "^ALLOWED_ORIGINS.*=" wrangler.toml | head -n 1 | sed 's/.*= *"\?\([^"]*\)"\?.*/\1/' | sed 's/ *#.*//')
     fi
 
     # 如果没有设置 origins 或设置为 *，跳过
     if [ -z "$current_origins" ] || [ "$current_origins" = "*" ]; then
-        log_info "$worker_name CORS 配置无需更新"
+        log_info "$worker_name CORS 配置无需更新（设置为允许所有域名）"
+        return 0
+    fi
+
+    # 对于 CDN Worker，如果设置为 *，也不要更新
+    if [ "$worker_name" = "CDN Worker" ] && [ "$current_origins" = "*" ]; then
+        log_info "$worker_name CORS 配置正确（CDN 允许所有域名）"
         return 0
     fi
 
@@ -179,7 +185,8 @@ check_and_update_cors() {
 
         # 更新 wrangler.toml
         if grep -q "^ALLOWED_ORIGINS.*=" wrangler.toml; then
-            sed -i "s/^ALLOWED_ORIGINS.*=.*/ALLOWED_ORIGINS = \"$new_origins\"/" wrangler.toml
+            # 使用更精确的sed替换
+            sed -i "s|^ALLOWED_ORIGINS.*=.*|ALLOWED_ORIGINS = \"$new_origins\"|" wrangler.toml
         fi
 
         # 如果是 production 环境，也更新
