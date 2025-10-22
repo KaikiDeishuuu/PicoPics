@@ -63,6 +63,30 @@ if [ -z "$ACCOUNT_ID" ]; then
 fi
 log_info "账户 ID: $ACCOUNT_ID"
 
+# 获取前端应用域名
+log_info "检测前端应用域名..."
+PAGES_URL=$(npx wrangler pages deployment list 2>/dev/null | head -n 1 | awk '{print $2}' || echo "")
+if [ -n "$PAGES_URL" ]; then
+    FRONTEND_DOMAIN=$(echo "$PAGES_URL" | sed 's|https://||' | sed 's|http://||')
+    log_info "检测到前端域名: $FRONTEND_DOMAIN"
+else
+    FRONTEND_DOMAIN=""
+    log_info "无法检测到前端域名，将使用默认配置"
+fi
+
+# 设置必需的域名列表
+REQUIRED_DOMAINS=("https://*.pages.dev")
+if [ -n "$FRONTEND_DOMAIN" ]; then
+    REQUIRED_DOMAINS+=("https://$FRONTEND_DOMAIN")
+    # 添加通配符版本
+    DOMAIN_PARTS=(${FRONTEND_DOMAIN//./ })
+    if [ ${#DOMAIN_PARTS[@]} -gt 1 ]; then
+        WILDCARD_DOMAIN="https://*.${DOMAIN_PARTS[1]}"
+        REQUIRED_DOMAINS+=("$WILDCARD_DOMAIN")
+    fi
+fi
+log_info "必需域名列表: ${REQUIRED_DOMAINS[*]}"
+
 # 检查必要的配置
 check_worker_config() {
     local worker_name=$1
@@ -105,6 +129,111 @@ check_worker_config() {
     return 0
 }
 
+# 检查并更新 CORS 配置
+check_and_update_cors() {
+    local worker_name=$1
+    local worker_dir=$2
+
+    log_info "检查 $worker_name CORS 配置..."
+
+    cd "$PROJECT_ROOT/$worker_dir"
+
+    # 获取当前 ALLOWED_ORIGINS 值
+    local current_origins=""
+    if npx wrangler secret list --env production 2>/dev/null | grep -q "ALLOWED_ORIGINS"; then
+        # 如果是 secret，暂时无法获取值，跳过检查
+        log_info "$worker_name 使用 secret 设置的 ALLOWED_ORIGINS，跳过值检查"
+        return 0
+    elif grep -q "^ALLOWED_ORIGINS.*=" wrangler.toml 2>/dev/null; then
+        current_origins=$(grep "^ALLOWED_ORIGINS.*=" wrangler.toml | sed 's/.*= *"\?\([^"]*\)"\?.*/\1/')
+    fi
+
+    # 如果没有设置 origins 或设置为 *，跳过
+    if [ -z "$current_origins" ] || [ "$current_origins" = "*" ]; then
+        log_info "$worker_name CORS 配置无需更新"
+        return 0
+    fi
+
+    # 检查是否包含必要的域名
+    local needs_update=false
+    for domain in "${REQUIRED_DOMAINS[@]}"; do
+        if ! echo "$current_origins" | grep -q "$domain"; then
+            needs_update=true
+            break
+        fi
+    done
+
+    if [ "$needs_update" = true ]; then
+        local new_origins="$current_origins"
+        for domain in "${REQUIRED_DOMAINS[@]}"; do
+            if ! echo "$new_origins" | grep -q "$domain"; then
+                if [ -z "$new_origins" ]; then
+                    new_origins="$domain"
+                else
+                    new_origins="$new_origins,$domain"
+                fi
+            fi
+        done
+
+        log_info "更新 $worker_name ALLOWED_ORIGINS: $current_origins -> $new_origins"
+
+        # 更新 wrangler.toml
+        if grep -q "^ALLOWED_ORIGINS.*=" wrangler.toml; then
+            sed -i "s/^ALLOWED_ORIGINS.*=.*/ALLOWED_ORIGINS = \"$new_origins\"/" wrangler.toml
+        fi
+
+        # 如果是 production 环境，也更新
+        if grep -q "^ALLOWED_ORIGINS.*=" wrangler.toml && grep -q "\[env.production.vars\]" wrangler.toml; then
+            sed -i "/\[env.production.vars\]/,/^$/ s/^ALLOWED_ORIGINS.*=.*/ALLOWED_ORIGINS = \"$new_origins\"/" wrangler.toml
+        fi
+    else
+        log_info "$worker_name CORS 配置已是最新"
+    fi
+
+    return 0
+}
+
+# 测试 CORS 配置
+test_cors() {
+    local worker_name=$1
+    local worker_url=$2
+    local test_origin=$3
+
+    log_info "测试 $worker_name CORS 配置..."
+
+    # 发送 OPTIONS 预检请求
+    local response
+    response=$(curl -s -X OPTIONS \
+        -H "Origin: $test_origin" \
+        -H "Access-Control-Request-Method: POST" \
+        -H "Access-Control-Request-Headers: Content-Type" \
+        -w "%{http_code}" \
+        --max-time 10 \
+        "$worker_url" 2>/dev/null)
+
+    if [ "$response" != "204" ]; then
+        log_error "$worker_name CORS 测试失败: HTTP $response"
+        return 1
+    fi
+
+    # 检查响应头
+    local cors_headers
+    cors_headers=$(curl -s -X OPTIONS \
+        -H "Origin: $test_origin" \
+        -H "Access-Control-Request-Method: POST" \
+        -H "Access-Control-Request-Headers: Content-Type" \
+        --max-time 10 \
+        "$worker_url" 2>/dev/null -I)
+
+    if ! echo "$cors_headers" | grep -q "access-control-allow-origin: $test_origin"; then
+        log_error "$worker_name CORS 头检查失败"
+        return 1
+    fi
+
+    log_success "$worker_name CORS 测试通过"
+    return 0
+}
+
 # 部署前的配置检查
 log_info "执行部署前配置检查..."
 
@@ -113,6 +242,13 @@ if ! check_worker_config "Uploader Worker" "uploader-worker" "ADMIN_USERS" "ADMI
     log_error "Uploader Worker 配置检查失败，请修复后重新运行"
     exit 1
 fi
+
+# 检查并更新 CORS 配置
+log_info "检查并更新 CORS 配置..."
+check_and_update_cors "Uploader Worker" "uploader-worker"
+check_and_update_cors "History Worker" "history-worker"
+check_and_update_cors "R2 Browser Worker" "r2-browser-worker"
+check_and_update_cors "CDN Worker" "cdn-worker"
 
 # 检查 R2 Browser Worker
 if ! check_worker_config "R2 Browser Worker" "r2-browser-worker" "ADMIN_USERS" "ALLOWED_ORIGINS"; then
@@ -219,6 +355,16 @@ if [ -n "$PAGES_URL" ]; then
     health_check "前端应用" "$PAGES_URL" 200
 else
     log_info "前端应用 URL 无法自动获取，请手动验证"
+fi
+
+# 测试 CORS 配置
+if [ -n "$FRONTEND_DOMAIN" ]; then
+    log_info "执行 CORS 配置测试..."
+    test_cors "Uploader Worker" "https://uploader-worker-prod.$ACCOUNT_ID.workers.dev/auth/github/device" "https://$FRONTEND_DOMAIN"
+    test_cors "History Worker" "https://history-worker-prod.$ACCOUNT_ID.workers.dev/api/history" "https://$FRONTEND_DOMAIN"
+    test_cors "R2 Browser Worker" "https://r2-browser-worker-prod.$ACCOUNT_ID.workers.dev/api/files" "https://$FRONTEND_DOMAIN"
+else
+    log_info "跳过 CORS 测试（未检测到前端域名）"
 fi
 
 # 部署总结
