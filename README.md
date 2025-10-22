@@ -7,10 +7,10 @@
 [![Next.js](https://img.shields.io/badge/Next.js-000000?style=for-the-badge&logo=next.js&logoColor=white)](https://nextjs.org)
 [![TypeScript](https://img.shields.io/badge/TypeScript-3178C6?style=for-the-badge&logo=typescript&logoColor=white)](https://www.typescriptlang.org)
 [![Tailwind CSS](https://img.shields.io/badge/Tailwind_CSS-38B2AC?style=for-the-badge&logo=tailwind-css&logoColor=white)](https://tailwindcss.com)
-[![Deployed](https://img.shields.io/badge/🚀_Deployed_on_Cloudflare-0615a405.cfworker--image--frontend.pages.dev-blue?style=for-the-badge)](https://0615a405.cfworker-image-frontend.pages.dev)
+[![Deployed](https://img.shields.io/badge/🚀_Deployed_on_Cloudflare-a6880d5f.cfworker--image--frontend.pages.dev-blue?style=for-the-badge)](https://a6880d5f.cfworker-image-frontend.pages.dev)
 
 <div align="center">
-  <a href="https://0615a405.cfworker-image-frontend.pages.dev" target="_blank">
+  <a href="https://a6880d5f.cfworker-image-frontend.pages.dev" target="_blank">
     <img src="https://img.shields.io/badge/🚀_Live_Demo-访问体验-blue?style=for-the-badge" alt="Live Demo">
   </a>
   <br>
@@ -258,7 +258,7 @@ PicoPics/
 
 | 服务名称     | 部署地址                                                                                                 | 状态      | 功能描述           |
 | ------------ | -------------------------------------------------------------------------------------------------------- | --------- | ------------------ |
-| **前端应用** | [https://0615a405.cfworker-image-frontend.pages.dev](https://0615a405.cfworker-image-frontend.pages.dev) | ✅ 运行中 | 用户界面和文件上传 |
+| **前端应用** | [https://a6880d5f.cfworker-image-frontend.pages.dev](https://a6880d5f.cfworker-image-frontend.pages.dev) | ✅ 运行中 | 用户界面和文件上传 |
 | **上传服务** | https://uploader-worker-prod.haoweiw370.workers.dev                                                      | ✅ 运行中 | 图片上传和 AI 审核 |
 | **历史查询** | https://history-worker-prod.haoweiw370.workers.dev                                                       | ✅ 运行中 | 上传历史查询       |
 | **管理界面** | https://r2-browser-worker-prod.haoweiw370.workers.dev                                                    | ✅ 运行中 | 存储桶内容管理     |
@@ -288,7 +288,7 @@ npx wrangler deployments list
 
 ### 🚀 立即开始
 
-1. **访问网站** - [https://0615a405.cfworker-image-frontend.pages.dev](https://0615a405.cfworker-image-frontend.pages.dev)
+1. **访问网站** - [https://a6880d5f.cfworker-image-frontend.pages.dev](https://a6880d5f.cfworker-image-frontend.pages.dev)
 2. **GitHub 登录** - 使用 GitHub 账户授权登录
 3. **上传图片** - 支持多种上传方式
 4. **获取链接** - 上传完成后自动生成多种格式的链接
@@ -314,7 +314,7 @@ npx wrangler deployments list
 
 ### 👑 管理功能
 
-访问管理界面：[前端地址]/admin](https://0615a405.cfworker-image-frontend.pages.dev/admin)
+访问管理界面：[前端地址]/admin](https://a6880d5f.cfworker-image-frontend.pages.dev/admin)
 
 - **用户管理**: 查看和管理用户账户
 - **配额监控**: 实时查看上传配额使用情况
@@ -481,7 +481,7 @@ git commit -m "security: update dependency versions"
 
 ## 📞 联系我们
 
-- **🌐 官方网站**: [https://0615a405.cfworker-image-frontend.pages.dev](https://0615a405.cfworker-image-frontend.pages.dev)
+- **🌐 官方网站**: [https://a6880d5f.cfworker-image-frontend.pages.dev](https://a6880d5f.cfworker-image-frontend.pages.dev)
 - **📚 GitHub**: [https://github.com/KaikiDeishuuu/PicoPics](https://github.com/KaikiDeishuuu/PicoPics)
 - **💬 Telegram**: [@OnonokiiBOT](https://t.me/OnonokiiBOT)
 - **👨‍💻 作者**: [Kaiki](https://github.com/KaikiDeishuuu)
