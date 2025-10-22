@@ -95,7 +95,38 @@ export default function AdminPage() {
                 <h2 className="text-xl font-bold text-white mb-2">
                   管理员验证
                 </h2>
-                <p className="text-white/60 text-sm">请输入管理员访问令牌</p>
+                <p className="text-white/60 text-sm mb-4">
+                  请输入管理员访问令牌
+                </p>
+
+                {/* 管理员令牌提示 */}
+                <div className="bg-blue-500/10 border border-blue-400/20 rounded-lg p-3 mb-4 max-w-md mx-auto">
+                  <div className="flex items-start space-x-2">
+                    <svg
+                      className="w-4 h-4 text-blue-400 mt-0.5 flex-shrink-0"
+                      fill="currentColor"
+                      viewBox="0 0 20 20"
+                    >
+                      <path
+                        fillRule="evenodd"
+                        d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7-4a1 1 0 11-2 0 1 1 0 012 0zM9 9a1 1 0 000 2v3a1 1 0 001 1h1a1 1 0 100-2v-3a1 1 0 00-1-1H9z"
+                        clipRule="evenodd"
+                      />
+                    </svg>
+                    <div className="text-left">
+                      <p className="text-blue-300 text-xs font-medium mb-1">
+                        如何获取管理员令牌？
+                      </p>
+                      <p className="text-blue-200/80 text-xs">
+                        管理员令牌通过 Cloudflare Workers secret
+                        设置。如需查看或修改，请运行：
+                      </p>
+                      <code className="block bg-black/30 text-blue-300 text-xs p-2 rounded mt-2 font-mono">
+                        npx wrangler secret put ADMIN_TOKEN --env production
+                      </code>
+                    </div>
+                  </div>
+                </div>
               </div>
 
               <form

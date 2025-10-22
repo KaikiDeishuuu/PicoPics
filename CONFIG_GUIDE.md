@@ -144,7 +144,13 @@ cd uploader-worker
 
 # 管理员配置
 npx wrangler secret put ADMIN_USERS --env production
+# 输入管理员的 GitHub 用户名，多个用逗号分隔
+# 例如: KaikiDeishuuu,admin1,admin2
+
 npx wrangler secret put ADMIN_TOKEN --env production
+# 输入安全的管理员访问令牌
+# 建议使用强密码或随机生成的字符串
+# 例如: a1b2c3d4e5f678901234567890abcdef
 
 # Telegram 通知（可选）
 npx wrangler secret put TELEGRAM_BOT_TOKEN --env production
@@ -153,6 +159,18 @@ npx wrangler secret put TELEGRAM_CHAT_ID --env production
 # Cloudflare Turnstile（可选）
 npx wrangler secret put TURNSTILE_SECRET_KEY --env production
 ```
+
+#### 管理员令牌管理
+
+**重要**: 管理员令牌是访问管理界面的关键凭据，请妥善保管。
+
+- **设置令牌**: 使用 `wrangler secret put ADMIN_TOKEN --env production`
+- **修改令牌**: 重新运行上述命令，会覆盖原有令牌
+- **安全建议**:
+  - 使用强密码（至少 16 位，包含字母、数字、符号）
+  - 定期更换令牌
+  - 不要在聊天记录或文档中明文记录令牌
+- **忘记令牌**: 如果忘记令牌，可以重新设置，但会使旧令牌失效
 
 ## History Worker 配置
 
