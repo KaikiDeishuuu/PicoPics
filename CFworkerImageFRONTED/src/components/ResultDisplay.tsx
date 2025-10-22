@@ -77,7 +77,7 @@ export default function ResultDisplay({ data }: ResultDisplayProps) {
   return (
     <div className="mt-8 space-y-6">
       {/* Image preview */}
-      <div className="glass-modern border-gradient relative rounded-2xl p-5 md:p-6 transition-transform duration-300 hover:-translate-y-1 mx-auto w-full max-w-3xl">
+      <div className="glass-modern border-gradient relative rounded-2xl p-5 md:p-6 transition-transform duration-300 hover:-translate-y-1 w-full">
         <h3 className="mb-4 text-xl font-semibold text-white">Image Preview</h3>
         <div className="flex justify-center rounded-2xl border border-white/10 bg-black/50 p-4">
           <div

@@ -196,18 +196,53 @@ export function clearAuth(): void {
 }
 
 /**
- * 验证 token 是否有效
+ * 检查用户是否为管理员
+ * 注意：此函数仅用于UI渲染，实际权限验证在后端进行
  */
-export async function verifyToken(accessToken: string): Promise<boolean> {
+export async function checkAdminStatus(
+  accessToken: string,
+  adminToken?: string
+): Promise<boolean> {
   try {
-    const response = await fetch("https://api.github.com/user", {
-      headers: {
-        Authorization: `Bearer ${accessToken}`,
-        Accept: "application/vnd.github.v3+json",
-      },
+    const headers: Record<string, string> = {
+      Authorization: `Bearer ${accessToken}`,
+      "Content-Type": "application/json",
+    };
+
+    // 如果提供了管理员令牌，添加到请求头
+    if (adminToken) {
+      headers["X-Admin-Token"] = adminToken;
+    }
+
+    const response = await fetch(`${API_BASE_URL}/auth/admin/check`, {
+      method: "GET",
+      headers,
     });
-    return response.ok;
-  } catch {
+
+    if (!response.ok) {
+      return false;
+    }
+
+    const data = await response.json();
+    return data.isAdmin === true;
+  } catch (error) {
+    console.error("Admin check error:", error);
     return false;
   }
+}
+
+/**
+ * 检查用户是否为管理员（仅UI显示用，不安全）
+ * @deprecated 此函数仅用于UI渲染，请使用 checkAdminStatus 进行安全的后端验证
+ */
+export function isAdmin(user: GitHubUser | null): boolean {
+  if (!user) return false;
+
+  // 管理员GitHub用户名列表
+  const adminUsernames = [
+    "KaikiDeishuuu", // 项目所有者
+    // 可以在这里添加其他管理员用户名
+  ];
+
+  return adminUsernames.includes(user.login);
 }

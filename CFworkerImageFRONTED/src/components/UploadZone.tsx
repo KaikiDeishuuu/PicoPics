@@ -206,7 +206,7 @@ export default function UploadZone({
   return (
     <div
       className={clsx(
-        "relative overflow-hidden rounded-2xl border-2 border-dashed p-8 md:p-12 transition-all duration-300 cursor-pointer group shadow-2xl mx-auto w-full max-w-3xl",
+        "relative overflow-hidden rounded-2xl border-2 border-dashed p-8 md:p-12 transition-all duration-300 cursor-pointer group shadow-2xl w-full",
         "hover:-translate-y-1 hover:shadow-orange-500/30",
         {
           "border-white/15 bg-black/40":

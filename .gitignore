@@ -15,6 +15,9 @@ build/
 .env*.local
 wrangler.toml.backup
 
+# Cloudflare Workers configuration (contains sensitive account info)
+wrangler.toml
+
 # TypeScript
 *.tsbuildinfo
 

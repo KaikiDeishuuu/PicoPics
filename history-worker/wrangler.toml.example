@@ -1,0 +1,29 @@
+name = "history-worker-prod"
+main = "src/index.ts"
+compatibility_date = "2025-10-20"
+
+# Replace with your account ID (get from: wrangler whoami)
+account_id = "YOUR_CLOUDFLARE_ACCOUNT_ID"
+
+# D1 Database binding
+[[d1_databases]]
+binding = "DB"
+database_name = "YOUR_D1_DATABASE_NAME"
+database_id = "YOUR_D1_DATABASE_ID"
+
+# Environment variables
+[vars]
+ALLOWED_ORIGINS = "https://yourdomain.com,https://www.yourdomain.com,https://github.com,https://*.yourproject.pages.dev,http://localhost:3000"
+
+# Production environment
+[env.production]
+name = "history-worker-prod"
+
+# D1 Database binding for production
+[[env.production.d1_databases]]
+binding = "DB"
+database_name = "YOUR_D1_DATABASE_NAME"
+database_id = "YOUR_D1_DATABASE_ID"
+
+[env.production.vars]
+ALLOWED_ORIGINS = "https://yourdomain.com,https://www.yourdomain.com,https://github.com,https://*.yourproject.pages.dev,http://localhost:3000"

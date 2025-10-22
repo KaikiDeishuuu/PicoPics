@@ -21,12 +21,22 @@ const nextConfig = {
     NEXT_PUBLIC_UPLOAD_API:
       process.env.NEXT_PUBLIC_UPLOAD_API ||
       "https://your-worker.workers.dev/upload",
+    NEXT_PUBLIC_HISTORY_API:
+      process.env.NEXT_PUBLIC_HISTORY_API ||
+      "https://your-history-worker.workers.dev/api/history",
+    NEXT_PUBLIC_CDN_BASE:
+      process.env.NEXT_PUBLIC_CDN_BASE || "https://pic.lambdax.me",
   },
 
   // 图片优化配置
   images: {
     unoptimized: true, // Cloudflare Pages 不支持 Next.js 图片优化
-    domains: ["pic.lambdax.me", "localhost"],
+    domains: [
+      "pic.lambdax.me",
+      "localhost",
+      "your-worker.workers.dev",
+      "your-history-worker.workers.dev",
+    ],
     formats: ["image/avif", "image/webp"],
   },
 

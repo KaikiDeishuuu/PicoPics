@@ -21,7 +21,37 @@ wrangler whoami
 
 记下你的 **Account ID**。
 
-## 步骤 2：部署 Uploader Worker
+## 步骤 2：创建 D1 数据库
+
+```bash
+# 创建 D1 数据库
+wrangler d1 create pico-pics-db
+
+# 记下返回的 database_id，例如：9f276330-cc71-41e8-a271-e18ae473711c
+```
+
+## 步骤 1：获取账户信息
+
+```bash
+# 登录 Cloudflare
+wrangler login
+
+# 获取账户 ID
+wrangler whoami
+```
+
+记下你的 **Account ID**。
+
+## 步骤 2：创建 D1 数据库
+
+```bash
+# 创建 D1 数据库
+wrangler d1 create pico-pics-db
+
+# 记下返回的 database_id，例如：9f276330-cc71-41e8-a271-e18ae473711c
+```
+
+## 步骤 3：配置和部署 Uploader Worker
 
 ```bash
 cd uploader-worker
@@ -29,7 +59,8 @@ cd uploader-worker
 # 安装依赖
 npm install
 
-# 编辑配置文件
+# 复制配置模板并编辑
+cp wrangler.toml.example wrangler.toml
 nano wrangler.toml
 ```
 
@@ -41,6 +72,12 @@ account_id = "你的账户ID"  # 替换为第 1 步获取的 ID
 [[r2_buckets]]
 binding = "IMAGES"
 bucket_name = "你的存储桶名称"  # 替换为你的 R2 存储桶
+
+# D1 Database binding
+[[d1_databases]]
+binding = "DB"
+database_name = "pico-pics-db"
+database_id = "你的数据库ID"  # 替换为第 2 步获取的 ID
 
 [vars]
 R2_PUBLIC_BASE = "https://pic.yourdomain.com"  # 你的 CDN 域名（稍后配置）
@@ -54,7 +91,40 @@ npm run deploy:prod
 
 记下部署后的 URL，例如：`https://uploader-worker-prod.你的账户.workers.dev`
 
-## 步骤 3：部署 CDN Worker
+## 步骤 4：配置和部署 History Worker
+
+```bash
+cd ../history-worker
+
+# 安装依赖
+npm install
+
+# 复制配置模板并编辑
+cp wrangler.toml.example wrangler.toml
+nano wrangler.toml
+```
+
+修改以下内容：
+
+```toml
+account_id = "你的账户ID"  # 同步骤 1
+
+# D1 Database binding
+[[d1_databases]]
+binding = "DB"
+database_name = "pico-pics-db"
+database_id = "你的数据库ID"  # 同步骤 2
+```
+
+部署：
+
+```bash
+npm run deploy:prod
+```
+
+记下部署后的 URL，例如：`https://history-worker-prod.你的账户.workers.dev`
+
+## 步骤 5：配置和部署 CDN Worker
 
 ```bash
 cd ../cdn-worker
@@ -62,18 +132,19 @@ cd ../cdn-worker
 # 安装依赖
 npm install
 
-# 编辑配置文件
+# 复制配置模板并编辑
+cp wrangler.toml.example wrangler.toml
 nano wrangler.toml
 ```
 
 修改以下内容：
 
 ```toml
-account_id = "你的账户ID"  # 同步骤 2
+account_id = "你的账户ID"  # 同步骤 1
 
 [[r2_buckets]]
 binding = "IMAGES"
-bucket_name = "你的存储桶名称"  # 同步骤 2
+bucket_name = "你的存储桶名称"  # 同步骤 3
 
 # 如果要绑定自定义域名，取消注释并修改
 routes = [
@@ -133,8 +204,12 @@ nano .env.local
 
 ```env
 NEXT_PUBLIC_UPLOAD_API=https://upload.yourdomain.com/upload
+NEXT_PUBLIC_HISTORY_API=https://history.yourdomain.com/api/history
+NEXT_PUBLIC_CDN_BASE=https://pic.yourdomain.com
 # 或者使用 Worker 默认域名：
 # NEXT_PUBLIC_UPLOAD_API=https://uploader-worker-prod.你的账户.workers.dev/upload
+# NEXT_PUBLIC_HISTORY_API=https://history-worker-prod.你的账户.workers.dev/api/history
+# NEXT_PUBLIC_CDN_BASE=https://cdn-worker-prod.你的账户.workers.dev
 ```
 
 ### 5.1 部署到 Cloudflare Pages
@@ -157,6 +232,8 @@ wrangler pages deploy .next --project-name=image-uploader
    - **Root directory**: `CFworkerImageFRONTED`
 4. 添加环境变量：
    - `NEXT_PUBLIC_UPLOAD_API`: 你的上传 API 地址
+   - `NEXT_PUBLIC_HISTORY_API`: 你的历史记录 API 地址
+   - `NEXT_PUBLIC_CDN_BASE`: 你的 CDN 基础地址
 5. **保存并部署**
 
 ## 步骤 6：测试
@@ -176,19 +253,50 @@ curl -X POST \
 ```json
 {
   "success": true,
-  "url": "https://pic.yourdomain.com/abc123.jpg",
-  "fileName": "abc123.jpg",
+  "url": "https://pic.yourdomain.com/12345/abc123.jpg",
+  "fileName": "12345/abc123.jpg",
   ...
 }
 ```
 
-### 6.2 测试分发功能
+### 6.2 测试历史记录功能
+
+```bash
+# 测试历史记录 API（需要有效的 GitHub token）
+curl -X GET \
+  https://history.yourdomain.com/api/history \
+  -H "Authorization: Bearer YOUR_GITHUB_TOKEN"
+```
+
+应该返回：
+
+```json
+{
+  "success": true,
+  "data": [
+    {
+      "id": 1,
+      "imageId": "abc123",
+      "userId": "12345",
+      "r2ObjectKey": "12345/abc123.jpg",
+      "filename": "abc123.jpg",
+      "uploadDate": "2025-10-22T04:00:00.000Z",
+      "fileSize": 1024000,
+      "mimeType": "image/jpeg",
+      "createdAt": "2025-10-22T04:00:00.000Z",
+      "updatedAt": "2025-10-22T04:00:00.000Z"
+    }
+  ]
+}
+```
+
+### 6.3 测试分发功能
 
 在浏览器中访问返回的图片 URL，应该能看到图片。
 
-### 6.3 测试前端
+### 6.4 测试前端
 
-访问你的 Pages 域名（如 `https://image-uploader.pages.dev`），尝试上传图片。
+访问你的 Pages 域名（如 `https://image-uploader.pages.dev`），尝试上传图片并查看历史记录。
 
 ## 步骤 7：查看配额状态
 
@@ -264,8 +372,14 @@ ALLOWED_ORIGINS = "https://yourdomain.com,https://www.yourdomain.com"
 ## 快速命令总结
 
 ```bash
+# 创建 D1 数据库
+wrangler d1 create pico-pics-db
+
 # 部署 Uploader Worker
 cd uploader-worker && npm install && npm run deploy:prod
+
+# 部署 History Worker
+cd ../history-worker && npm install && npm run deploy:prod
 
 # 部署 CDN Worker
 cd ../cdn-worker && npm install && npm run deploy:prod
@@ -275,8 +389,6 @@ cd ../CFworkerImageFRONTED && npm install && npm run build && wrangler pages dep
 
 # 查看日志
 wrangler tail --name uploader-worker-prod
+wrangler tail --name history-worker-prod
 wrangler tail --name cdn-worker-prod
 ```
-
-
-

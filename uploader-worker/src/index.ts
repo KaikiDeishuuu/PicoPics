@@ -83,6 +83,20 @@ export default {
       return handleGitHubTokenPoll(request, env);
     }
 
+    // 管理员权限验证
+    if (pathname === "/auth/admin/check" && request.method === "GET") {
+      return handleAdminCheck(request, env);
+    }
+
+    // R2 存储浏览器 API (管理员专用)
+    if (pathname === "/api/browse" && request.method === "GET") {
+      return handleBrowseR2(request, env);
+    }
+
+    if (pathname === "/api/delete" && request.method === "DELETE") {
+      return handleDeleteR2(request, env);
+    }
+
     // 测试 Telegram 通知
     if (pathname === "/test-telegram" && request.method === "GET") {
       return handleTestTelegram(request, env);
@@ -184,8 +198,207 @@ async function handleGitHubDeviceAuth(
 }
 
 /**
- * GitHub Device Flow - 轮询获取 token
+ * 处理管理员权限验证
  */
+async function handleAdminCheck(request: Request, env: Env): Promise<Response> {
+  try {
+    // 1. 验证 Authorization 头
+    const authHeader = request.headers.get("Authorization");
+
+    if (!authHeader || !authHeader.startsWith("Bearer ")) {
+      return errorResponse("需要提供有效的访问令牌", 401, env, request);
+    }
+
+    const token = authHeader.substring(7); // Remove "Bearer " prefix
+
+    // 2. 验证 GitHub token 并获取用户信息
+    const authResult = await verifyGitHubTokenCached(token, env);
+    if (!authResult.valid || !authResult.user) {
+      return errorResponse("无效的访问令牌", 403, env, request);
+    }
+
+    // 3. 检查是否为管理员（增强验证）
+    const adminUsers = env.ADMIN_USERS
+      ? env.ADMIN_USERS.split(",").map((u: string) => u.trim())
+      : [];
+    const isAdmin = adminUsers.includes(authResult.user.login);
+
+    // 4. 如果是管理员，验证额外的管理员令牌
+    if (isAdmin) {
+      const adminTokenHeader = request.headers.get("X-Admin-Token");
+      if (!adminTokenHeader || adminTokenHeader !== env.ADMIN_TOKEN) {
+        return errorResponse("管理员令牌验证失败", 403, env, request);
+      }
+    }
+
+    // 记录管理员访问日志
+    if (isAdmin) {
+      console.log(
+        `Admin access: ${authResult.user.login} (${authResult.user.id})`
+      );
+    }
+
+    // 5. 返回结果
+    const response = {
+      success: true,
+      isAdmin,
+      user: {
+        id: authResult.user.id,
+        login: authResult.user.login,
+      },
+    };
+
+    return new Response(JSON.stringify(response), {
+      status: 200,
+      headers: {
+        "Content-Type": "application/json",
+        ...getCorsHeaders(env, request),
+      },
+    });
+  } catch (error) {
+    console.error("Admin check error:", error);
+    return errorResponse("管理员验证失败", 500, env, request);
+  }
+}
+
+/**
+ * 处理R2存储桶浏览（管理员专用）
+ */
+async function handleBrowseR2(request: Request, env: Env): Promise<Response> {
+  try {
+    // 1. 验证管理员权限
+    const authHeader = request.headers.get("Authorization");
+    if (!authHeader || !authHeader.startsWith("Bearer ")) {
+      return errorResponse("需要提供有效的访问令牌", 401, env, request);
+    }
+
+    const token = authHeader.substring(7);
+    const authResult = await verifyGitHubTokenCached(token, env);
+    if (!authResult.valid || !authResult.user) {
+      return errorResponse("无效的访问令牌", 403, env, request);
+    }
+
+    const adminUsers = env.ADMIN_USERS
+      ? env.ADMIN_USERS.split(",").map((u: string) => u.trim())
+      : [];
+    const isAdmin = adminUsers.includes(authResult.user.login);
+    if (!isAdmin) {
+      return errorResponse("需要管理员权限", 403, env, request);
+    }
+
+    // 2. 验证管理员令牌
+    const adminTokenHeader = request.headers.get("X-Admin-Token");
+    if (!adminTokenHeader || adminTokenHeader !== env.ADMIN_TOKEN) {
+      return errorResponse("管理员令牌验证失败", 403, env, request);
+    }
+
+    // 3. 解析查询参数
+    const url = new URL(request.url);
+    const cursor = url.searchParams.get("cursor");
+    const limit = Math.min(
+      parseInt(url.searchParams.get("limit") || "50"),
+      100
+    );
+
+    // 3. 列出R2对象
+    const objects = await env.IMAGES.list({
+      limit,
+      cursor: cursor || undefined,
+    });
+
+    const objectInfos = objects.objects.map((obj) => ({
+      key: obj.key,
+      size: obj.size,
+      uploaded: obj.uploaded.toISOString(),
+      httpEtag: obj.httpEtag,
+      checksums: obj.checksums,
+    }));
+
+    const response = {
+      success: true,
+      data: {
+        objects: objectInfos,
+        truncated: objects.truncated,
+        cursor: objects.truncated ? "next" : null, // 简化cursor处理
+      },
+    };
+
+    return new Response(JSON.stringify(response), {
+      status: 200,
+      headers: {
+        "Content-Type": "application/json",
+        ...getCorsHeaders(env, request),
+      },
+    });
+  } catch (error) {
+    console.error("Browse R2 error:", error);
+    return errorResponse("浏览存储桶失败", 500, env, request);
+  }
+}
+
+/**
+ * 处理R2对象删除（管理员专用）
+ */
+async function handleDeleteR2(request: Request, env: Env): Promise<Response> {
+  try {
+    // 1. 验证管理员权限
+    const authHeader = request.headers.get("Authorization");
+    if (!authHeader || !authHeader.startsWith("Bearer ")) {
+      return errorResponse("需要提供有效的访问令牌", 401, env, request);
+    }
+
+    const token = authHeader.substring(7);
+    const authResult = await verifyGitHubTokenCached(token, env);
+    if (!authResult.valid || !authResult.user) {
+      return errorResponse("无效的访问令牌", 403, env, request);
+    }
+
+    const adminUsers = env.ADMIN_USERS
+      ? env.ADMIN_USERS.split(",").map((u: string) => u.trim())
+      : [];
+    const isAdmin = adminUsers.includes(authResult.user.login);
+    if (!isAdmin) {
+      return errorResponse("需要管理员权限", 403, env, request);
+    }
+
+    // 2. 验证管理员令牌
+    const adminTokenHeader = request.headers.get("X-Admin-Token");
+    if (!adminTokenHeader || adminTokenHeader !== env.ADMIN_TOKEN) {
+      return errorResponse("管理员令牌验证失败", 403, env, request);
+    }
+
+    // 3. 解析要删除的对象键
+    const url = new URL(request.url);
+    const keys = url.searchParams.getAll("key");
+
+    if (keys.length === 0) {
+      return errorResponse("请指定要删除的对象键", 400, env, request);
+    }
+
+    // 3. 删除对象
+    const deletePromises = keys.map((key) => env.IMAGES.delete(key));
+    await Promise.all(deletePromises);
+
+    // 4. 记录删除操作
+    console.log(`Admin ${authResult.user.login} deleted objects:`, keys);
+
+    const response = {
+      success: true,
+      deleted: keys,
+    };
+
+    return new Response(JSON.stringify(response), {
+      status: 200,
+      headers: {
+        "Content-Type": "application/json",
+        ...getCorsHeaders(env, request),
+      },
+    });
+  } catch (error) {
+    console.error("Delete R2 error:", error);
+    return errorResponse("删除对象失败", 500, env, request);
+  }
+}
 async function handleGitHubTokenPoll(
   request: Request,
   env: Env
@@ -266,6 +479,7 @@ async function handleUpload(
 
   try {
     // 1. GitHub OAuth 验证（如果启用）
+    let userInfo: { id: number; login: string } | null = null;
     if (env.AUTH_ENABLED === "true") {
       const authHeader = request.headers.get("Authorization");
 
@@ -275,10 +489,12 @@ async function handleUpload(
 
       const token = authHeader.substring(7); // Remove "Bearer " prefix
 
-      const isValid = await verifyGitHubToken(token);
-      if (!isValid) {
+      const authResult = await verifyGitHubTokenCached(token, env);
+      if (!authResult.valid || !authResult.user) {
         return errorResponse("认证失败，请重新登录", 403, env, request);
       }
+
+      userInfo = authResult.user;
     }
 
     // 2. Cloudflare Turnstile 验证（如果启用）
@@ -371,26 +587,54 @@ async function handleUpload(
       return errorResponse("配额检查失败", 500, env, request);
     }
 
-    // 4. 生成文件名
+    // 4. 生成文件名和R2对象键
     const timestamp = Date.now().toString(36);
     const randomName = generateRandomName(24);
     const extension = getFileExtension(fileType);
-    const fileName = `${timestamp}-${randomName}.${extension}`;
+    const imageId = `${timestamp}-${randomName}`;
+    const fileName = `${imageId}.${extension}`;
+
+    // 如果有用户信息，使用用户专属文件夹
+    const r2ObjectKey = userInfo ? `${userInfo.id}/${fileName}` : fileName;
 
     // 5. 上传到 R2
-    await env.IMAGES.put(fileName, file, {
+    await env.IMAGES.put(r2ObjectKey, file, {
       httpMetadata: {
         contentType: fileType,
       },
       customMetadata: {
         uploadedAt: new Date().toISOString(),
         size: file.size.toString(),
+        userId: userInfo?.id?.toString() || "",
       },
     });
 
     // 6. 生成 URL
     const publicBase = env.R2_PUBLIC_BASE || new URL(request.url).origin;
-    const imageUrl = `${publicBase}/${fileName}`;
+    const imageUrl = `${publicBase}/${r2ObjectKey}`;
+
+    // 7. 如果有用户信息，写入D1数据库记录
+    if (userInfo && env.DB) {
+      try {
+        await env.DB.prepare(
+          `INSERT INTO user_images (image_id, user_id, r2_object_key, filename, upload_date, file_size, mime_type)
+           VALUES (?, ?, ?, ?, ?, ?, ?)`
+        )
+          .bind(
+            imageId,
+            userInfo.id.toString(),
+            r2ObjectKey,
+            fileName,
+            new Date().toISOString(),
+            file.size,
+            fileType
+          )
+          .run();
+      } catch (dbError) {
+        console.error("Failed to save to database:", dbError);
+        // 数据库写入失败不应该阻止上传成功，但要记录错误
+      }
+    }
 
     // 7. 记录到防滥用系统
     if (env.ABUSE_DETECTION_ENABLED === "true" && env.IP_BLACKLIST) {
@@ -409,10 +653,11 @@ async function handleUpload(
           try {
             await sendTelegramNotification(env, {
               ip: clientIP,
-              fileName,
+              fileName: r2ObjectKey, // 使用完整的R2对象键
               fileSize: file.size,
               fileType,
               url: imageUrl,
+              user: userInfo?.login,
             });
           } catch (err) {
             console.error("Telegram notification failed:", err);
@@ -427,8 +672,8 @@ async function handleUpload(
               console.log("Async moderation blocked:", moderationResult.reason);
               // 尝试删除 R2 对象
               try {
-                await env.IMAGES.delete(fileName);
-                console.log("Deleted image due to moderation:", fileName);
+                await env.IMAGES.delete(r2ObjectKey);
+                console.log("Deleted image due to moderation:", r2ObjectKey);
               } catch (delErr) {
                 console.error(
                   "Failed to delete R2 object after moderation:",
@@ -441,7 +686,7 @@ async function handleUpload(
                 try {
                   await sendTelegramMessage(
                     env,
-                    `Image removed after moderation: ${fileName} Reason: ${moderationResult.reason}`
+                    `Image removed after moderation: ${r2ObjectKey} Reason: ${moderationResult.reason}`
                   );
                 } catch (notifyErr) {
                   console.error(
@@ -462,7 +707,7 @@ async function handleUpload(
     const response: UploadResponse = {
       success: true,
       url: imageUrl,
-      fileName: fileName,
+      fileName: r2ObjectKey, // 返回完整的R2对象键
       size: file.size,
       type: fileType,
       uploadedAt: new Date().toISOString(),
@@ -646,9 +891,61 @@ async function handleTelegramTest(
 }
 
 /**
- * 验证 GitHub Access Token
+ * 缓存的GitHub Token验证（带KV缓存）
  */
-async function verifyGitHubToken(token: string): Promise<boolean> {
+async function verifyGitHubTokenCached(
+  token: string,
+  env: Env
+): Promise<{ valid: boolean; user?: { id: number; login: string } }> {
+  // 生成缓存键
+  const cacheKey = `github_token:${token.substring(0, 16)}`; // 使用token前16位作为缓存键
+
+  try {
+    // 尝试从缓存获取
+    const cached = await env.USER_CACHE.get(cacheKey);
+    if (cached) {
+      const cachedData = JSON.parse(cached);
+      // 检查缓存是否过期（1小时）
+      if (Date.now() - cachedData.timestamp < 3600000) {
+        return cachedData.result;
+      }
+    }
+  } catch (cacheError) {
+    console.warn("Cache read error:", cacheError);
+    // 缓存读取失败，继续验证
+  }
+
+  // 调用原始验证函数
+  const result = await verifyGitHubToken(token);
+
+  // 缓存结果（只缓存成功的结果）
+  if (result.valid && result.user) {
+    try {
+      await env.USER_CACHE.put(
+        cacheKey,
+        JSON.stringify({
+          result,
+          timestamp: Date.now(),
+        }),
+        {
+          expirationTtl: 3600, // 1小时过期
+        }
+      );
+    } catch (cacheError) {
+      console.warn("Cache write error:", cacheError);
+      // 缓存写入失败不影响正常功能
+    }
+  }
+
+  return result;
+}
+
+/**
+ * 验证 GitHub Access Token 并获取用户信息
+ */
+async function verifyGitHubToken(
+  token: string
+): Promise<{ valid: boolean; user?: { id: number; login: string } }> {
   try {
     const response = await fetch("https://api.github.com/user", {
       headers: {
@@ -658,10 +955,21 @@ async function verifyGitHubToken(token: string): Promise<boolean> {
       },
     });
 
-    return response.ok;
+    if (!response.ok) {
+      return { valid: false };
+    }
+
+    const userData: { id: number; login: string } = await response.json();
+    return {
+      valid: true,
+      user: {
+        id: userData.id,
+        login: userData.login,
+      },
+    };
   } catch (error) {
     console.error("GitHub token verification error:", error);
-    return false;
+    return { valid: false };
   }
 }
 
@@ -786,12 +1094,14 @@ async function sendTelegramNotification(
     fileSize: number;
     fileType: string;
     url: string;
+    user?: string;
   }
 ): Promise<void> {
   const message = `
 🖼️ <b>图片上传通知</b>
 
-📝 文件名: <code>${data.fileName}</code>
+� 用户: ${data.user ? `<code>${data.user}</code>` : "未登录"}
+�📝 文件名: <code>${data.fileName}</code>
 📦 大小: ${(data.fileSize / 1024 / 1024).toFixed(2)} MB
 🎨 类型: ${data.fileType}
 🌐 IP: <code>${data.ip}</code>
@@ -927,7 +1237,7 @@ function getCorsHeaders(env: Env, request?: Request): Record<string, string> {
     if (allowed.includes("*")) {
       // 先转义正则特殊字符(包括反斜杠)\ ，再替换*为.*
       const escapeRegexSpecialChars = (str: string): string =>
-        str.replace(/[-/\\^$+?.()|[\]{}]/g, '\\$&'); // escape all regex metacharacters including backslash, but not * (handled next)
+        str.replace(/[-/\\^$+?.()|[\]{}]/g, "\\$&"); // escape all regex metacharacters including backslash, but not * (handled next)
       const pattern = escapeRegexSpecialChars(allowed).replace(/\*/g, ".*");
       return new RegExp(`^${pattern}$`).test(requestOrigin);
     }
@@ -940,7 +1250,7 @@ function getCorsHeaders(env: Env, request?: Request): Record<string, string> {
       : allowedList[0] || "*",
     "Access-Control-Allow-Methods": "GET, POST, OPTIONS",
     "Access-Control-Allow-Headers":
-      "Content-Type, CF-Turnstile-Token, Authorization",
+      "Content-Type, CF-Turnstile-Token, Authorization, X-Admin-Token",
     "Access-Control-Max-Age": "86400",
     Vary: "Origin",
   };

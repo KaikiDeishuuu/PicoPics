@@ -6,6 +6,8 @@ export interface Env {
   UPLOAD_QUOTA: DurableObjectNamespace;
   IP_BLACKLIST: DurableObjectNamespace;
   AI: Ai; // Cloudflare AI binding
+  DB: D1Database; // D1 Database binding
+  USER_CACHE: KVNamespace; // KV缓存用于存储GitHub用户信息
   R2_PUBLIC_BASE?: string;
   MAX_UPLOAD_SIZE?: string;
   ALLOWED_ORIGINS?: string;
@@ -18,6 +20,8 @@ export interface Env {
   AUTH_ENABLED?: string;
   CONTENT_MODERATION_ENABLED?: string;
   GITHUB_CLIENT_ID?: string;
+  ADMIN_USERS?: string; // 管理员GitHub用户名列表，用逗号分隔
+  ADMIN_TOKEN?: string; // 管理员访问令牌
 }
 
 /**

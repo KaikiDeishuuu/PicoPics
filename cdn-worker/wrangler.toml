@@ -2,32 +2,37 @@ name = "cdn-worker"
 main = "src/index.ts"
 compatibility_date = "2025-10-20"
 
-# Replace with your account ID (get from: wrangler whoami)
-account_id = "fc590bfe34fc6df2312c469a5db04aa2"
+# Account ID will be set via environment variable or wrangler secret
+# account_id = "YOUR_CLOUDFLARE_ACCOUNT_ID"
 
-# R2 Bucket binding
-[[r2_buckets]]
-binding = "IMAGES"
-bucket_name = "lambdaimagebucket"
+# R2 Bucket binding - bucket_name will be set via environment variable
+# [[r2_buckets]]
+# binding = "IMAGES"
+# bucket_name = "YOUR_R2_BUCKET_NAME"
 
-# Environment variables
+# Environment variables - will be set via wrangler secret
 [vars]
 ALLOWED_ORIGINS = "*"  # CORS: comma-separated origins or "*"
-CACHE_MAX_AGE = "31536000"  # 1 year cache for images
+# CACHE_MAX_AGE - Set via: npx wrangler secret put CACHE_MAX_AGE --env production
 
 # Production environment
 [env.production]
 name = "cdn-worker-prod"
 
-# Bind to custom domain for CDN
-routes = [
-  { pattern = "pic.lambdax.me/*", zone_name = "lambdax.me" }
-]
+# Account ID - Set via: npx wrangler secret put CLOUDFLARE_ACCOUNT_ID --env production
+# account_id = "YOUR_CLOUDFLARE_ACCOUNT_ID"
 
+# Bind to custom domain for CDN - will be set via environment variable
+# routes = [
+#   { pattern = "YOUR_CDN_DOMAIN.com/*", zone_name = "yourdomain.com" }
+# ]
+
+# R2 Bucket binding - bucket_name will be set via environment variable
+# [[env.production.r2_buckets]]
+# binding = "IMAGES"
+# bucket_name = "YOUR_R2_BUCKET_NAME"
+
+# Environment variables - will be set via wrangler secret
 [env.production.vars]
 ALLOWED_ORIGINS = "*"
-CACHE_MAX_AGE = "31536000"
-
-[[env.production.r2_buckets]]
-binding = "IMAGES"
-bucket_name = "lambdaimagebucket"
+# CACHE_MAX_AGE - Set via: npx wrangler secret put CACHE_MAX_AGE --env production

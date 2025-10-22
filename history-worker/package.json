@@ -1,0 +1,27 @@
+{
+  "name": "history-worker",
+  "version": "1.0.0",
+  "description": "History API Worker - 处理用户图片历史记录查询",
+  "main": "src/index.ts",
+  "scripts": {
+    "dev": "wrangler dev",
+    "deploy": "wrangler deploy",
+    "test": "vitest",
+    "lint": "eslint src --ext .ts",
+    "format": "prettier --write src/**/*.{ts,js}"
+  },
+  "dependencies": {
+    "@cloudflare/workers-types": "^4.20240925.0"
+  },
+  "devDependencies": {
+    "@types/node": "^20.0.0",
+    "typescript": "^5.0.0",
+    "wrangler": "^4.0.0",
+    "vitest": "^1.0.0",
+    "eslint": "^8.0.0",
+    "prettier": "^3.0.0"
+  },
+  "keywords": ["cloudflare", "worker", "api", "history"],
+  "author": "KaikiDeishuuu",
+  "license": "MIT"
+}

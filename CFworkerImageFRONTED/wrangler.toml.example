@@ -15,21 +15,21 @@
     NODE_VERSION = "18"
     NEXT_TELEMETRY_DISABLED = "1"
 
-# 生产环境变量 - 所有变量都通过 wrangler pages secret 设置
+# 生产环境变量
 [env.production]
   NODE_ENV = "production"
-  # NEXT_PUBLIC_UPLOAD_API - Set via: npx wrangler pages secret put NEXT_PUBLIC_UPLOAD_API
-  # NEXT_PUBLIC_ADMIN_API - Set via: npx wrangler pages secret put NEXT_PUBLIC_ADMIN_API
-  # NEXT_PUBLIC_HISTORY_API - Set via: npx wrangler pages secret put NEXT_PUBLIC_HISTORY_API
-  # NEXT_PUBLIC_CDN_BASE - Set via: npx wrangler pages secret put NEXT_PUBLIC_CDN_BASE
+  NEXT_PUBLIC_UPLOAD_API = "https://YOUR_UPLOADER_WORKER_URL/upload"
+  NEXT_PUBLIC_ADMIN_API = "https://YOUR_R2_BROWSER_WORKER_URL"
+  NEXT_PUBLIC_HISTORY_API = "https://YOUR_HISTORY_WORKER_URL/api/history"
+  NEXT_PUBLIC_CDN_BASE = "https://YOUR_CDN_DOMAIN.com"
 
-# 预览环境变量 - 开发环境使用
+# 预览环境变量
 [env.preview]
   NODE_ENV = "development"
-  # NEXT_PUBLIC_UPLOAD_API - Set via: npx wrangler pages secret put NEXT_PUBLIC_UPLOAD_API
-  # NEXT_PUBLIC_ADMIN_API - Set via: npx wrangler pages secret put NEXT_PUBLIC_ADMIN_API
-  # NEXT_PUBLIC_HISTORY_API - Set via: npx wrangler pages secret put NEXT_PUBLIC_HISTORY_API
-  # NEXT_PUBLIC_CDN_BASE - Set via: npx wrangler pages secret put NEXT_PUBLIC_CDN_BASE
+  NEXT_PUBLIC_UPLOAD_API = "https://YOUR_UPLOADER_WORKER_URL/upload"
+  NEXT_PUBLIC_ADMIN_API = "https://YOUR_R2_BROWSER_WORKER_URL"
+  NEXT_PUBLIC_HISTORY_API = "https://YOUR_HISTORY_WORKER_URL/api/history"
+  NEXT_PUBLIC_CDN_BASE = "https://YOUR_CDN_DOMAIN.com"
 
 # 重定向规则
 [[redirects]]

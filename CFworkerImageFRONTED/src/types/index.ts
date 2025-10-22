@@ -38,3 +38,19 @@ export interface LinkFormats {
   bbcode: string;
   markdownWithLink: string;
 }
+
+/**
+ * 图片历史记录类型
+ */
+export interface ImageHistoryRecord {
+  id: number;
+  imageId: string;
+  userId: string;
+  r2ObjectKey: string;
+  filename: string;
+  uploadDate: string;
+  fileSize: number;
+  mimeType: string;
+  createdAt: string;
+  updatedAt: string;
+}
