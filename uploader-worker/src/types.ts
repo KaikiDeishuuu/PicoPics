@@ -1,3 +1,11 @@
+import type {
+  R2Bucket,
+  DurableObjectNamespace,
+  Ai,
+  D1Database,
+  KVNamespace,
+} from "@cloudflare/workers-types";
+
 /**
  * 环境变量类型定义
  */

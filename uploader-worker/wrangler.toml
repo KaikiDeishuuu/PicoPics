@@ -1,4 +1,4 @@
-name = "uploader-worker-prod"
+name = "uploader-worker-v2"
 main = "src/index.ts"
 compatibility_date = "2025-10-20"
 
@@ -20,10 +20,10 @@ compatibility_date = "2025-10-20"
 binding = "AI"
 
 # D1 Database binding - database_id will be set via environment variable
-# [[d1_databases]]
-# binding = "DB"
-# database_name = "YOUR_D1_DATABASE_NAME"
-# database_id = "YOUR_D1_DATABASE_ID"
+[[d1_databases]]
+binding = "DB"
+database_name = "v2-pico-pics-db1"
+database_id = "90ca5dd2-fc00-475b-99ac-99810d559356"
 
 # Environment variables - will be set via wrangler secret or environment variables
 [vars]
@@ -45,13 +45,13 @@ CONTENT_MODERATION_ENABLED = "true"  # Enable AI-powered content moderation
 [[durable_objects.bindings]]
 name = "UPLOAD_QUOTA"
 class_name = "UploadQuota"
-script_name = "uploader-worker-prod"
+script_name = "uploader-worker-v2-prod"
 
 # Durable Object for IP blacklist and abuse detection
 [[durable_objects.bindings]]
 name = "IP_BLACKLIST"
 class_name = "IPBlacklist"
-script_name = "uploader-worker-prod"
+script_name = "uploader-worker-v2-prod"
 
 [[migrations]]
 tag = "v1"
@@ -63,7 +63,7 @@ new_sqlite_classes = ["IPBlacklist"]
 
 # Production environment
 [env.production]
-name = "uploader-worker-prod"
+name = "uploader-worker-v2-prod"
 
 # Account ID - Set via: npx wrangler secret put CLOUDFLARE_ACCOUNT_ID --env production
 # account_id = "YOUR_CLOUDFLARE_ACCOUNT_ID"
@@ -83,10 +83,10 @@ name = "uploader-worker-prod"
 binding = "AI"
 
 # D1 Database binding - database_id will be set via environment variable
-# [[env.production.d1_databases]]
-# binding = "DB"
-# database_name = "YOUR_D1_DATABASE_NAME"
-# database_id = "YOUR_D1_DATABASE_ID"
+[[env.production.d1_databases]]
+binding = "DB"
+database_name = "v2-pico-pics-db1"
+database_id = "90ca5dd2-fc00-475b-99ac-99810d559356"
 
 # Environment variables - will be set via wrangler secret
 [env.production.vars]
@@ -101,12 +101,12 @@ DAILY_UPLOAD_LIMIT_PER_IP = "20"
 [[env.production.durable_objects.bindings]]
 name = "UPLOAD_QUOTA"
 class_name = "UploadQuota"
-script_name = "uploader-worker-prod"
+script_name = "uploader-worker-v2-prod"
 
 [[env.production.durable_objects.bindings]]
 name = "IP_BLACKLIST"
 class_name = "IPBlacklist"
-script_name = "uploader-worker-prod"
+script_name = "uploader-worker-v2-prod"
 
 [[env.production.migrations]]
 tag = "v1"

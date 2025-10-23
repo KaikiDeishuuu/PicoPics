@@ -13,10 +13,10 @@ import {
   DragEvent,
   ChangeEvent,
 } from "react";
-import { UploadStatus } from "@/types";
-import type { UploadSuccessResponse } from "@/types";
+import { UploadStatus } from "../types";
+import type { UploadSuccessResponse } from "../types";
 import clsx from "clsx";
-import { SimpleUploader } from "@/utils/simpleUploader";
+import { SimpleUploader } from "../utils/simpleUploader";
 
 interface UploadZoneProps {
   onUploadSuccess: (data: UploadSuccessResponse) => void;

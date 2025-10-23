@@ -1,4 +1,4 @@
-name = "cdn-worker"
+name = "cdn-worker-v2"
 main = "src/index.ts"
 compatibility_date = "2025-10-20"
 
@@ -17,7 +17,7 @@ ALLOWED_ORIGINS = "*"  # CORS: comma-separated origins or "*"
 
 # Production environment
 [env.production]
-name = "cdn-worker-prod"
+name = "cdn-worker-v2-prod"
 
 # Account ID - Set via: npx wrangler secret put CLOUDFLARE_ACCOUNT_ID --env production
 # account_id = "YOUR_CLOUDFLARE_ACCOUNT_ID"

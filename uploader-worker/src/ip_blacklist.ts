@@ -1,3 +1,8 @@
+import type {
+  DurableObjectState,
+  DurableObjectStorage,
+} from "@cloudflare/workers-types";
+
 /**
  * IP Blacklist Durable Object
  *

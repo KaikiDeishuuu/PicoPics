@@ -1,7 +1,3 @@
-/**
- * GitHub 登录按钮组件
- */
-
 "use client";
 
 import { useState } from "react";
@@ -12,7 +8,7 @@ import {
   getGitHubUser,
   saveAuth,
   type GitHubUser,
-} from "@/services/auth";
+} from "../services/auth";
 
 interface GitHubLoginProps {
   onSuccess: (user: GitHubUser, token: string) => void;

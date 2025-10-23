@@ -1,94 +1,24 @@
 /** @type {import('next').NextConfig} */
 const nextConfig = {
-  // React 严格模式
-  reactStrictMode: true,
-
-  // 使用 SWC 进行压缩（比 Terser 快 7 倍）
-  swcMinify: true,
-
-  // 生产环境优化
-  compress: true,
-  productionBrowserSourceMaps: false,
-
-  // Cloudflare Pages 输出配置
-  output: "export",
-
-  // 禁用 x-powered-by 头
-  poweredByHeader: false,
-
-  // 环境变量配置
-  env: {
-    NEXT_PUBLIC_UPLOAD_API:
-      process.env.NEXT_PUBLIC_UPLOAD_API ||
-      "https://your-worker.workers.dev/upload",
-    NEXT_PUBLIC_HISTORY_API:
-      process.env.NEXT_PUBLIC_HISTORY_API ||
-      "https://your-history-worker.workers.dev/api/history",
-    NEXT_PUBLIC_CDN_BASE:
-      process.env.NEXT_PUBLIC_CDN_BASE || "https://pic.lambdax.me",
+  experimental: {
+    appDir: true,
   },
-
-  // 图片优化配置
   images: {
-    unoptimized: true, // Cloudflare Pages 不支持 Next.js 图片优化
-    domains: [
-      "pic.lambdax.me",
-      "localhost",
-      "your-worker.workers.dev",
-      "your-history-worker.workers.dev",
-    ],
-    formats: ["image/avif", "image/webp"],
+    domains: ["avatars.githubusercontent.com"],
+    unoptimized: true, // 禁用Next.js图片优化，因为Cloudflare Pages不支持
   },
-
-  // 编译优化
-  compiler: {
-    // 移除 console.log（生产环境）
-    removeConsole:
-      process.env.NODE_ENV === "production"
-        ? {
-            exclude: ["error", "warn"],
-          }
-        : false,
+  output: "export", // 启用静态导出
+  trailingSlash: true, // 添加尾斜杠以确保正确的路由
+  distDir: "out", // 输出目录
+  // 跳过API路由的静态生成
+  skipTrailingSlashRedirect: true,
+  skipMiddlewareUrlNormalize: true,
+  // 禁用API路由检测
+  pageExtensions: ["tsx", "ts", "jsx", "js"],
+  // 强制静态生成，忽略API路由
+  generateBuildId: async () => {
+    return "build-" + Date.now();
   },
-
-  // Webpack 优化
-  webpack: (config, { isServer }) => {
-    // 代码分割优化
-    if (!isServer) {
-      config.optimization = {
-        ...config.optimization,
-        splitChunks: {
-          chunks: "all",
-          cacheGroups: {
-            default: false,
-            vendors: false,
-            // 第三方库单独打包
-            vendor: {
-              name: "vendor",
-              chunks: "all",
-              test: /node_modules/,
-              priority: 20,
-            },
-            // 公共代码
-            common: {
-              name: "common",
-              minChunks: 2,
-              chunks: "all",
-              priority: 10,
-              reuseExistingChunk: true,
-              enforce: true,
-            },
-          },
-        },
-      };
-    }
-
-    return config;
-  },
-
-  // Note: headers(), redirects() and rewrites() are not supported when using
-  // `output: 'export'` (static export). Configure security headers for Cloudflare
-  // Pages in `wrangler.toml` (we already set them there).
 };
 
 module.exports = nextConfig;

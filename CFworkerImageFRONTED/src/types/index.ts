@@ -1,26 +1,13 @@
-/**
- * 上传响应类型定义
- */
-export interface UploadSuccessResponse {
-  success: true;
-  url: string;
-  fileName: string;
-  size: number;
-  type: string;
-  uploadedAt: string;
+// GitHub 用户信息
+export interface GitHubUser {
+  id: number;
+  login: string;
+  avatar_url: string;
+  name: string | null;
+  email: string | null;
 }
 
-export interface UploadErrorResponse {
-  success: false;
-  error: string;
-  code?: string;
-}
-
-export type UploadResponse = UploadSuccessResponse | UploadErrorResponse;
-
-/**
- * 上传状态枚举
- */
+// 上传状态枚举
 export enum UploadStatus {
   IDLE = "idle",
   UPLOADING = "uploading",
@@ -28,29 +15,21 @@ export enum UploadStatus {
   ERROR = "error",
 }
 
-/**
- * 链接格式类型
- */
-export interface LinkFormats {
+// 上传成功响应
+export interface UploadSuccessResponse {
+  success: boolean;
   url: string;
-  html: string;
-  markdown: string;
-  bbcode: string;
-  markdownWithLink: string;
+  fileName: string;
+  size: number;
+  type: string;
+  uploadedAt: string;
 }
 
-/**
- * 图片历史记录类型
- */
-export interface ImageHistoryRecord {
-  id: number;
-  imageId: string;
-  userId: string;
-  r2ObjectKey: string;
-  filename: string;
-  uploadDate: string;
-  fileSize: number;
-  mimeType: string;
-  createdAt: string;
-  updatedAt: string;
+// 上传错误响应
+export interface UploadErrorResponse {
+  success: false;
+  error: string;
 }
+
+// 通用上传响应
+export type UploadResponse = UploadSuccessResponse | UploadErrorResponse;

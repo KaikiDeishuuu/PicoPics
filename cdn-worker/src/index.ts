@@ -1,3 +1,5 @@
+import type { R2Bucket } from "@cloudflare/workers-types";
+
 /**
  * CDN Worker - 专门处理图片分发
  *
@@ -91,7 +93,7 @@ async function handleImageRequest(
     }
 
     // 返回图片
-    return new Response(object.body, {
+    return new Response(object.body as any, {
       status: 200,
       headers,
     });

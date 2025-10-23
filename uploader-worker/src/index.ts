@@ -598,7 +598,7 @@ async function handleUpload(
     const r2ObjectKey = userInfo ? `${userInfo.id}/${fileName}` : fileName;
 
     // 5. 上传到 R2
-    await env.IMAGES.put(r2ObjectKey, file, {
+    await env.IMAGES.put(r2ObjectKey, file as any, {
       httpMetadata: {
         contentType: fileType,
       },

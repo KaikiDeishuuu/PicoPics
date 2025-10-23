@@ -1,0 +1,30 @@
+PicoPics V2 部署信息
+====================
+
+部署时间: 2025-10-22
+部署版本: V2 (全新实例)
+基础设施: Cloudflare Workers + Pages + R2
+
+服务 URLs:
+- 前端应用: https://v2.pico.lambdax.me
+- 上传服务: https://uploader-worker-v2-prod.haoweiw370.workers.dev
+- CDN服务: https://cdn-worker-v2-prod.haoweiw370.workers.dev
+- 历史查询: https://history-worker-v2-prod.haoweiw370.workers.dev
+- R2浏览器: https://r2-browser-worker-v2-prod.haoweiw370.workers.dev
+
+技术栈:
+- Next.js: 15.5.2
+- Wrangler: 4.44.0
+- Node.js兼容性: 已启用
+- R2存储桶: next-lambda-image-r2
+
+部署状态: ✅ 全部成功
+测试结果: ✅ 所有服务正常运行
+
+配置要点:
+- 所有worker使用独立的V2实例
+- 自定义域已配置并生效
+- CORS配置包含所有域名
+- 安全配置已启用
+- 分支部署修复: main分支正确部署到生产环境
+

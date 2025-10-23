@@ -1,13 +1,8 @@
-/**
- * 用户信息组件
- */
-
 "use client";
 
-import { useState, useEffect } from "react";
 import { motion } from "framer-motion";
 import Image from "next/image";
-import { clearAuth, getAuth, type GitHubUser } from "@/services/auth";
+import { clearAuth, type GitHubUser } from "../services/auth";
 
 interface UserInfoProps {
   user: GitHubUser;
@@ -15,18 +10,6 @@ interface UserInfoProps {
 }
 
 export default function UserInfo({ user, onLogout }: UserInfoProps) {
-  const [isAdminUser, setIsAdminUser] = useState(false);
-
-  useEffect(() => {
-    const auth = getAuth();
-    if (auth) {
-      // 简化admin检查，只检查用户名是否在预定义列表中
-      // 真正的权限验证在admin页面进行
-      const adminUsernames = ["KaikiDeishuuu"]; // 管理员用户名列表
-      setIsAdminUser(adminUsernames.includes(auth.user.login));
-    }
-  }, []);
-
   const handleLogout = () => {
     clearAuth();
     onLogout();
@@ -34,81 +17,62 @@ export default function UserInfo({ user, onLogout }: UserInfoProps) {
 
   return (
     <motion.div
-      className="glass-modern border-gradient relative rounded-2xl p-5 md:p-6 w-full"
-      initial={{ opacity: 0, y: 12 }}
+      className="rounded-2xl border border-white/10 bg-white/5 p-6 md:p-8 shadow-2xl w-full"
+      initial={{ opacity: 0, y: 16 }}
       animate={{ opacity: 1, y: 0 }}
-      transition={{ duration: 0.3, ease: "easeOut" }}
+      transition={{ duration: 0.35, ease: "easeOut" }}
     >
-      <div className="flex items-center justify-between">
-        <div className="flex items-center gap-4">
-          <div className="relative">
-            <span className="absolute inset-0 rounded-full bg-gradient-to-br from-orange-500 to-red-500 blur-lg opacity-40" />
-            <div className="relative z-10 h-12 w-12 rounded-full overflow-hidden border border-white/20">
+      <div className="space-y-6">
+        <div className="flex flex-col gap-2">
+          <span className="text-xs font-medium uppercase tracking-[0.35em] text-white/50">
+            User Profile
+          </span>
+          <div className="flex items-center justify-between">
+            <div className="flex items-center gap-4">
               <Image
                 src={user.avatar_url}
-                alt={user.name || user.login}
-                fill
-                sizes="48px"
-                className="object-cover"
+                alt={user.login}
+                width={48}
+                height={48}
+                className="h-12 w-12 rounded-xl border border-white/10"
               />
+              <div>
+                <h3 className="text-xl font-semibold text-white">
+                  {user.name || user.login}
+                </h3>
+                <p className="text-sm text-white/60">@{user.login}</p>
+              </div>
+            </div>
+            <div className="hidden sm:flex h-10 w-10 items-center justify-center rounded-xl border border-white/10 bg-white/10 text-white/80">
+              <svg className="h-5 w-5" viewBox="0 0 24 24" fill="currentColor">
+                <path d="M12 .297c-6.63 0-12 5.373-12 12 0 5.301 3.438 9.8 8.205 11.387.6.111.82-.261.82-.577 0-.285-.011-1.04-.017-2.04-3.338.726-4.042-1.61-4.042-1.61-.546-1.387-1.333-1.756-1.333-1.756-1.09-.745.083-.73.083-.73 1.205.084 1.84 1.238 1.84 1.238 1.07 1.835 2.807 1.305 3.492.998.107-.775.418-1.305.762-1.604-2.665-.303-5.467-1.335-5.467-5.93 0-1.31.469-2.381 1.236-3.22-.124-.304-.536-1.523.117-3.176 0 0 1.008-.322 3.3 1.23a11.51 11.51 0 013-.404c1.02.005 2.047.138 3.003.404 2.29-1.552 3.297-1.23 3.297-1.23.653 1.653.242 2.872.118 3.176.77.839 1.235 1.91 1.235 3.22 0 4.61-2.807 5.624-5.48 5.921.43.371.823 1.102.823 2.222 0 1.604-.015 2.896-.015 3.286 0 .319.218.694.825.576C20.565 22.092 24 17.592 24 12.297c0-6.627-5.373-12-12-12z" />
+              </svg>
             </div>
           </div>
-          <div>
-            <p className="text-base font-semibold text-white">
-              {user.name || user.login}
-            </p>
-            <p className="text-xs uppercase tracking-[0.25em] text-white/40">
-              @{user.login}
-            </p>
-          </div>
         </div>
-        <div className="flex flex-col sm:flex-row items-start sm:items-center gap-3 w-full sm:w-auto">
-          {isAdminUser && (
-            <a
-              href="/admin"
-              className="inline-flex items-center justify-center gap-2 rounded-lg border border-orange-400/40 bg-gradient-to-r from-orange-500/20 to-red-500/20 px-3 py-2 text-sm font-medium text-orange-200 transition-all hover:border-orange-400/60 hover:bg-orange-500/30 hover:text-orange-100 hover:shadow-lg hover:shadow-orange-500/20 w-full sm:w-auto"
-            >
-              <svg
-                className="w-4 h-4 flex-shrink-0"
-                fill="none"
-                stroke="currentColor"
-                viewBox="0 0 24 24"
-              >
-                <path
-                  strokeLinecap="round"
-                  strokeLinejoin="round"
-                  strokeWidth={2}
-                  d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z"
-                />
-                <path
-                  strokeLinecap="round"
-                  strokeLinejoin="round"
-                  strokeWidth={2}
-                  d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"
-                />
-              </svg>
-              <span className="hidden xs:inline">管理后台</span>
-            </a>
-          )}
+
+        <div className="flex gap-3">
           <button
             onClick={handleLogout}
-            className="inline-flex items-center justify-center gap-2 rounded-lg border border-white/10 bg-white/5 px-3 py-2 text-sm font-medium text-white/80 transition-all hover:border-red-400/40 hover:bg-red-500/20 hover:text-red-100 hover:shadow-lg hover:shadow-red-500/20 w-full sm:w-auto"
+            className="flex-1 rounded-xl border border-white/10 bg-black/40 px-6 py-3 text-sm font-medium text-white/80 transition hover:bg-white/10 focus:outline-none focus:ring-2 focus:ring-orange-400 focus:ring-offset-2 focus:ring-offset-black"
           >
-            <svg
-              className="w-4 h-4 flex-shrink-0"
-              fill="none"
-              stroke="currentColor"
-              viewBox="0 0 24 24"
-            >
-              <path
-                strokeLinecap="round"
-                strokeLinejoin="round"
-                strokeWidth={2}
-                d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1"
-              />
-            </svg>
-            <span className="hidden xs:inline">退出登录</span>
+            退出登录
           </button>
+          <a
+            href={`https://github.com/${user.login}`}
+            target="_blank"
+            rel="noopener noreferrer"
+            className="flex-1 rounded-xl bg-gradient-to-r from-orange-500 via-red-500 to-pink-500 px-6 py-3 text-sm font-medium text-white shadow-lg shadow-orange-500/30 transition focus:outline-none focus:ring-2 focus:ring-orange-400 focus:ring-offset-2 focus:ring-offset-black text-center"
+          >
+            查看 GitHub
+          </a>
+        </div>
+
+        <div className="rounded-xl border border-white/10 bg-black/40 p-4 text-sm text-white/60">
+          <p>
+            您现在可以上传图片到您的专属图床。所有图片都会与您的 GitHub
+            账户关联。
+          </p>
         </div>
       </div>
     </motion.div>

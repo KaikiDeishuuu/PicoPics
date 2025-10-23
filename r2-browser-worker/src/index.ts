@@ -64,7 +64,7 @@ router.get("/api/browse", async (request: Request, env: Env) => {
       cursor: cursor || undefined,
     });
 
-    const objectInfos = objects.objects.map((obj) => ({
+    const objectInfos = objects.objects.map((obj: any) => ({
       key: obj.key,
       size: obj.size,
       uploaded: obj.uploaded.toISOString(),
@@ -77,7 +77,7 @@ router.get("/api/browse", async (request: Request, env: Env) => {
       data: {
         objects: objectInfos,
         truncated: objects.truncated,
-        cursor: objects.cursor,
+        cursor: (objects as any).cursor,
       },
     };
 

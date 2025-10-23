@@ -16,7 +16,7 @@
   "devDependencies": {
     "@types/node": "^20.0.0",
     "typescript": "^5.0.0",
-    "wrangler": "^4.0.0",
+    "wrangler": "^4.44.0",
     "vitest": "^1.0.0",
     "eslint": "^8.0.0",
     "prettier": "^3.0.0"
