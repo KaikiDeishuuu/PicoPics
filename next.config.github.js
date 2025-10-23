@@ -1,7 +1,10 @@
 /** @type {import('next').NextConfig} */
 const nextConfig = {
-  // Vercel 部署模式
-  output: "standalone",
+  // GitHub Pages 静态导出模式
+  output: "export",
+  trailingSlash: true,
+  skipTrailingSlashRedirect: true,
+  distDir: "out",
 
   // 环境变量配置
   env: {
@@ -18,7 +21,7 @@ const nextConfig = {
 
   // 图片优化配置
   images: {
-    unoptimized: true, // Cloudflare Pages Functions 不支持 Next.js 图片优化
+    unoptimized: true, // GitHub Pages 不支持 Next.js 图片优化
     domains: [
       "pic.lambdax.me",
       "localhost",

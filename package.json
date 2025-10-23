@@ -13,7 +13,10 @@
     "cf:deploy": "wrangler deploy",
     "cf:build": "wrangler deploy --dry-run",
     "pages:build": "next-on-pages",
-    "pages:deploy": "npm run pages:build && wrangler pages deploy .next"
+    "pages:deploy": "npm run pages:build && wrangler pages deploy .next",
+    "vercel:deploy": "vercel --prod",
+    "github:build": "next build -c next.config.github.js",
+    "github:deploy": "npm run github:build && echo 'Build completed for GitHub Pages'"
   },
   "dependencies": {
     "@hookform/resolvers": "^3.3.4",
