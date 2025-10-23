@@ -6,9 +6,9 @@ compatibility_date = "2025-10-20"
 # account_id = "YOUR_CLOUDFLARE_ACCOUNT_ID"
 
 # R2 Bucket binding - bucket_name will be set via environment variable
-# [[r2_buckets]]
-# binding = "IMAGES"
-# bucket_name = "YOUR_R2_BUCKET_NAME"
+[[r2_buckets]]
+binding = "IMAGES"
+bucket_name = "lambdaimagebucket"
 
 # Environment variables - will be set via wrangler secret
 [vars]
@@ -23,14 +23,14 @@ name = "cdn-worker-prod"
 # account_id = "YOUR_CLOUDFLARE_ACCOUNT_ID"
 
 # Bind to custom domain for CDN - will be set via environment variable
-# routes = [
-#   { pattern = "YOUR_CDN_DOMAIN.com/*", zone_name = "yourdomain.com" }
-# ]
+routes = [
+  { pattern = "pic.lambdax.me/*", zone_name = "lambdax.me" }
+]
 
 # R2 Bucket binding - bucket_name will be set via environment variable
-# [[env.production.r2_buckets]]
-# binding = "IMAGES"
-# bucket_name = "YOUR_R2_BUCKET_NAME"
+[[env.production.r2_buckets]]
+binding = "IMAGES"
+bucket_name = "lambdaimagebucket"
 
 # Environment variables - will be set via wrangler secret
 [env.production.vars]

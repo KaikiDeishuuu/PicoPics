@@ -3,31 +3,31 @@ main = "src/index.ts"
 compatibility_date = "2025-10-20"
 
 # Account ID will be set via environment variable or wrangler secret
-# account_id = "YOUR_CLOUDFLARE_ACCOUNT_ID"
+account_id = "fc590bfe34fc6df2312c469a5db04aa2"
 
 # R2 Bucket binding - bucket_name will be set via environment variable
-# [[r2_buckets]]
-# binding = "IMAGES"
-# bucket_name = "YOUR_R2_BUCKET_NAME"
+[[r2_buckets]]
+binding = "IMAGES"
+bucket_name = "lambdaimagebucket"
 
 # KV namespace for caching GitHub user info - id will be set via environment variable
-# [[kv_namespaces]]
-# binding = "USER_CACHE"
-# id = "YOUR_KV_NAMESPACE_ID"
+[[kv_namespaces]]
+binding = "USER_CACHE"
+id = "948d584514b54a639f32491af1fdb90f"
 
 # Cloudflare AI binding
 [ai]
 binding = "AI"
 
 # D1 Database binding - database_id will be set via environment variable
-# [[d1_databases]]
-# binding = "DB"
-# database_name = "YOUR_D1_DATABASE_NAME"
-# database_id = "YOUR_D1_DATABASE_ID"
+[[d1_databases]]
+binding = "DB"
+database_name = "pico-pics-db"
+database_id = "9f276330-cc71-41e8-a271-e18ae473711c"
 
 # Environment variables - will be set via wrangler secret or environment variables
 [vars]
-# R2_PUBLIC_BASE - Set via: npx wrangler secret put R2_PUBLIC_BASE --env production
+R2_PUBLIC_BASE = "https://pic.lambdax.me"
 # MAX_UPLOAD_SIZE - Set via: npx wrangler secret put MAX_UPLOAD_SIZE --env production
 # ALLOWED_ORIGINS - Set via: npx wrangler secret put ALLOWED_ORIGINS --env production
 # DAILY_QUOTA_BYTES - Set via: npx wrangler secret put DAILY_QUOTA_BYTES --env production
@@ -66,30 +66,31 @@ new_sqlite_classes = ["IPBlacklist"]
 name = "uploader-worker-prod"
 
 # Account ID - Set via: npx wrangler secret put CLOUDFLARE_ACCOUNT_ID --env production
-# account_id = "YOUR_CLOUDFLARE_ACCOUNT_ID"
+account_id = "fc590bfe34fc6df2312c469a5db04aa2"
 
 # R2 Bucket binding - bucket_name will be set via environment variable
-# [[env.production.r2_buckets]]
-# binding = "IMAGES"
-# bucket_name = "YOUR_R2_BUCKET_NAME"
+[[env.production.r2_buckets]]
+binding = "IMAGES"
+bucket_name = "lambdaimagebucket"
 
 # KV namespace - id will be set via environment variable
-# [[env.production.kv_namespaces]]
-# binding = "USER_CACHE"
-# id = "YOUR_KV_NAMESPACE_ID"
+[[env.production.kv_namespaces]]
+binding = "USER_CACHE"
+id = "948d584514b54a639f32491af1fdb90f"
 
 # Cloudflare AI binding
 [env.production.ai]
 binding = "AI"
 
 # D1 Database binding - database_id will be set via environment variable
-# [[env.production.d1_databases]]
-# binding = "DB"
-# database_name = "YOUR_D1_DATABASE_NAME"
-# database_id = "YOUR_D1_DATABASE_ID"
+[[env.production.d1_databases]]
+binding = "DB"
+database_name = "pico-pics-db"
+database_id = "9f276330-cc71-41e8-a271-e18ae473711c"
 
 # Environment variables - will be set via wrangler secret
 [env.production.vars]
+R2_PUBLIC_BASE = "https://pic.lambdax.me"
 ABUSE_DETECTION_ENABLED = "true"
 TURNSTILE_ENABLED = "false"
 AUTH_ENABLED = "true"

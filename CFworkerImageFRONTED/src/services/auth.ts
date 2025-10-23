@@ -3,21 +3,17 @@
  * 通过 Worker 代理访问 GitHub API
  */
 
-// 从 UPLOAD_API 中提取基础 URL
+import { env } from "@/config/env";
+
+// 从 uploadApi 中提取基础 URL
 const getApiBaseUrl = () => {
-  const uploadApi = process.env.NEXT_PUBLIC_UPLOAD_API;
-
-  if (!uploadApi) {
-    return "https://uploader-worker-prod.haoweiw370.workers.dev";
-  }
-
   try {
     // 解析 URL
-    const url = new URL(uploadApi);
+    const url = new URL(env.uploadApi);
     // 返回 origin (协议 + 域名)
     return url.origin;
   } catch (e) {
-    console.error("Invalid NEXT_PUBLIC_UPLOAD_API:", uploadApi, e);
+    console.error("Invalid uploadApi:", env.uploadApi, e);
     return "https://uploader-worker-prod.haoweiw370.workers.dev";
   }
 };

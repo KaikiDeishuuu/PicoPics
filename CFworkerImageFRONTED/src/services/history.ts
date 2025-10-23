@@ -3,12 +3,9 @@
  */
 
 import type { ImageHistoryRecord } from "@/types";
+import { env } from "@/config/env";
 
-const rawHistoryApiUrl =
-  process.env.NEXT_PUBLIC_HISTORY_API ||
-  "https://history-worker-prod.haoweiw370.workers.dev/api/history";
-
-const HISTORY_API_URL = rawHistoryApiUrl;
+const HISTORY_API_URL = env.historyApi;
 
 /**
  * 获取用户的历史记录
@@ -22,7 +19,7 @@ export async function getUserHistory(accessToken: string): Promise<{
   error?: string;
 }> {
   try {
-    const response = await fetch(HISTORY_API_URL, {
+    const response = await fetch(`${HISTORY_API_URL}/api/history`, {
       method: "GET",
       headers: {
         Authorization: `Bearer ${accessToken}`,
@@ -75,6 +72,5 @@ export async function getUserHistory(accessToken: string): Promise<{
  * @returns 完整的图片 URL
  */
 export function getImageUrl(r2ObjectKey: string): string {
-  const cdnBase = process.env.NEXT_PUBLIC_CDN_BASE || "https://pic.lambdax.me";
-  return `${cdnBase}/${r2ObjectKey}`;
+  return `${env.cdnUrl}/${r2ObjectKey}`;
 }

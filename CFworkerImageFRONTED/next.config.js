@@ -17,16 +17,8 @@ const nextConfig = {
   poweredByHeader: false,
 
   // 环境变量配置
-  env: {
-    NEXT_PUBLIC_UPLOAD_API:
-      process.env.NEXT_PUBLIC_UPLOAD_API ||
-      "https://your-worker.workers.dev/upload",
-    NEXT_PUBLIC_HISTORY_API:
-      process.env.NEXT_PUBLIC_HISTORY_API ||
-      "https://your-history-worker.workers.dev/api/history",
-    NEXT_PUBLIC_CDN_BASE:
-      process.env.NEXT_PUBLIC_CDN_BASE || "https://pic.lambdax.me",
-  },
+  // 注意：使用 .env.local 文件配置环境变量
+  // Next.js 会自动读取 NEXT_PUBLIC_* 前缀的变量
 
   // 图片优化配置
   images: {
@@ -34,8 +26,8 @@ const nextConfig = {
     domains: [
       "pic.lambdax.me",
       "localhost",
-      "your-worker.workers.dev",
-      "your-history-worker.workers.dev",
+      "uploader-worker-prod.haoweiw370.workers.dev",
+      "history-worker-prod.haoweiw370.workers.dev",
     ],
     formats: ["image/avif", "image/webp"],
   },

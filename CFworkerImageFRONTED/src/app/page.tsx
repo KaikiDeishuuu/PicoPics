@@ -51,6 +51,8 @@ export default function Home() {
         if (auth) {
           setCurrentUser(auth.user);
           setAccessToken(auth.accessToken);
+          // 认证状态变化时刷新历史记录
+          setHistoryRefreshTrigger((prev) => prev + 1);
         } else {
           setCurrentUser(null);
           setAccessToken(null);
@@ -84,6 +86,8 @@ export default function Home() {
     setCurrentUser(user);
     setAccessToken(token);
     setErrorMessage("");
+    // 登录成功后刷新历史记录
+    setHistoryRefreshTrigger((prev) => prev + 1);
   };
 
   const handleLoginError = (error: string) => {
@@ -292,23 +296,21 @@ export default function Home() {
 
           {/* History Section */}
           <div className="w-full">
-            {currentUser && (
-              <HistoryDisplay
-                key={historyRefreshTrigger}
-                onImageClick={(record: ImageHistoryRecord) => {
-                  // 将历史记录转换为上传结果格式显示
-                  const uploadResult: UploadSuccessResponse = {
-                    success: true,
-                    url: `https://pic.lambdax.me/${record.r2ObjectKey}`,
-                    fileName: record.r2ObjectKey,
-                    size: record.fileSize,
-                    type: record.mimeType,
-                    uploadedAt: record.uploadDate,
-                  };
-                  setUploadResult(uploadResult);
-                }}
-              />
-            )}
+            <HistoryDisplay
+              key={historyRefreshTrigger}
+              onImageClick={(record: ImageHistoryRecord) => {
+                // 将历史记录转换为上传结果格式显示
+                const uploadResult: UploadSuccessResponse = {
+                  success: true,
+                  url: `https://pic.lambdax.me/${record.r2ObjectKey}`,
+                  fileName: record.r2ObjectKey,
+                  size: record.fileSize,
+                  type: record.mimeType,
+                  uploadedAt: record.uploadDate,
+                };
+                setUploadResult(uploadResult);
+              }}
+            />
           </div>
         </div>
 

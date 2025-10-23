@@ -5,6 +5,7 @@ import { useRouter } from "next/navigation";
 import { motion } from "framer-motion";
 import { getAuth, checkAdminStatus, type GitHubUser } from "@/services/auth";
 import R2Browser from "@/components/R2Browser";
+import AdminPanel from "@/components/AdminPanel";
 
 export default function AdminPage() {
   const [user, setUser] = useState<GitHubUser | null>(null);
@@ -293,7 +294,6 @@ export default function AdminPage() {
             <h3 className="text-xl font-semibold text-white mb-6">
               用户数据管理
             </h3>
-
             <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
               <div className="glass-modern-soft border border-white/10 rounded-xl p-4">
                 <div className="flex items-center gap-3 mb-3">
@@ -368,6 +368,9 @@ export default function AdminPage() {
                   配置系统参数、安全策略等
                 </p>
               </div>
+            </div>
+            <div className="mt-6">
+              <AdminPanel adminToken={storedAdminToken} />
             </div>
           </div>
         </div>

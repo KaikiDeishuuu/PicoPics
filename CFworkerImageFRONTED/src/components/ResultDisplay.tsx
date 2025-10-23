@@ -81,15 +81,16 @@ export default function ResultDisplay({ data }: ResultDisplayProps) {
         <h3 className="mb-4 text-xl font-semibold text-white">Image Preview</h3>
         <div className="flex justify-center rounded-2xl border border-white/10 bg-black/50 p-4">
           <div
-            className="relative max-w-full max-h-96 rounded overflow-hidden cursor-pointer"
+            className="relative w-full max-w-3xl cursor-pointer"
             onClick={() => window.open(data.url, "_blank")}
           >
             <Image
               src={data.url}
               alt="Uploaded"
-              fill
-              sizes="(max-width: 768px) 100vw, 50vw"
-              className="object-contain"
+              width={1200}
+              height={800}
+              className="rounded-lg w-full h-auto object-contain max-h-96"
+              unoptimized
             />
           </div>
         </div>

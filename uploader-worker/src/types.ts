@@ -49,3 +49,29 @@ export interface UploadErrorResponse {
  * 上传响应类型
  */
 export type UploadResponse = UploadSuccessResponse | UploadErrorResponse;
+
+/**
+ * 图片历史记录接口
+ */
+export interface ImageHistoryRecord {
+  id: number;
+  imageId: string;
+  userId: string;
+  r2ObjectKey: string;
+  filename: string;
+  uploadDate: string;
+  fileSize: number;
+  mimeType: string;
+  createdAt: string;
+  updatedAt: string;
+}
+
+/**
+ * 历史记录API响应接口
+ */
+export interface HistoryResponse {
+  success: boolean;
+  data?: ImageHistoryRecord[];
+  error?: string;
+  code?: string;
+}

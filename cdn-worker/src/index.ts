@@ -77,9 +77,12 @@ async function handleImageRequest(
     const headers: Record<string, string> = {
       "Content-Type": object.httpMetadata?.contentType || "image/jpeg",
       "Cache-Control": `public, max-age=${cacheMaxAge}, immutable`,
+      "CDN-Cache-Control": `public, max-age=${cacheMaxAge}`,
+      "Cloudflare-CDN-Cache-Control": `public, max-age=${cacheMaxAge}`,
       ETag: object.etag,
       "Last-Modified": object.uploaded.toUTCString(),
       "Content-Length": object.size.toString(),
+      "X-Content-Type-Options": "nosniff",
       "X-Worker": "cdn-worker",
       ...getCorsHeaders(env),
     };

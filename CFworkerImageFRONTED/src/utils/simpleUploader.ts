@@ -5,6 +5,7 @@
  */
 
 import imageCompression from "browser-image-compression";
+import { env } from "@/config/env";
 
 export interface SimpleUploaderOptions {
   turnstileToken?: string;
@@ -34,8 +35,8 @@ export class UploadError extends Error {
   }
 }
 
-const UPLOAD_API_URL =
-  process.env.NEXT_PUBLIC_UPLOAD_API || "http://localhost:8787/upload";
+// 使用统一的环境配置
+const UPLOAD_API_URL = env.uploadApi;
 const MAX_RETRIES = 3;
 const RETRY_DELAY = 1000; // 1 秒
 
@@ -83,9 +84,12 @@ export class SimpleUploader {
     if (!this.file.type.startsWith("image/")) {
       throw new UploadError("只允许上传图片文件", "INVALID_FILE_TYPE");
     }
-    const maxSize = 10 * 1024 * 1024; // 10MB
+    const maxSize = env.maxUploadSize;
     if (this.file.size > maxSize) {
-      throw new UploadError(`文件过大，最大允许 10MB`, "FILE_TOO_LARGE");
+      throw new UploadError(
+        `文件过大，最大允许 ${(maxSize / 1024 / 1024).toFixed(1)}MB`,
+        "FILE_TOO_LARGE"
+      );
     }
   }
 
@@ -174,10 +178,10 @@ export class SimpleUploader {
             `Bearer ${this.options.accessToken}`
           );
         }
-        // Content-Type will be inferred from the File object
+        // Don't set Content-Type - FormData will set it automatically with boundary
 
         // Timeout
-        xhr.timeout = 30000; // 30s
+        xhr.timeout = env.apiTimeout;
 
         xhr.upload.onprogress = (e) => {
           if (e.lengthComputable) {
@@ -223,7 +227,11 @@ export class SimpleUploader {
         xhr.ontimeout = () =>
           reject(new UploadError("Upload timeout", "TIMEOUT"));
 
-        xhr.send(file);
+        // Create FormData and append the file
+        const formData = new FormData();
+        formData.append("image", file);
+
+        xhr.send(formData);
       } catch (err) {
         reject(err instanceof Error ? err : new Error("Unknown upload error"));
       }

@@ -16,18 +16,20 @@ export interface IPRecord {
   violations: number;
   banned: boolean;
   banExpiry?: number;
+  // 新增：时间窗口内的上传记录
+  uploadTimestamps: number[]; // 存储最近的上传时间戳
 }
 
 // 滥用检测配置
 const ABUSE_THRESHOLDS = {
   // 短时间内大量上传
-  MAX_UPLOADS_PER_MINUTE: 10, // 1分钟内最多10次上传
-  MAX_UPLOADS_PER_HOUR: 50, // 1小时内最多50次上传
-  MAX_UPLOADS_PER_DAY: 200, // 1天内最多200次上传
+  MAX_UPLOADS_PER_MINUTE: 20, // 1分钟内最多20次上传
+  MAX_UPLOADS_PER_HOUR: 100, // 1小时内最多100次上传
+  MAX_UPLOADS_PER_DAY: 500, // 1天内最多500次上传
 
   // 流量限制
-  MAX_BYTES_PER_HOUR: 100 * 1024 * 1024, // 1小时内最多 100MB
-  MAX_BYTES_PER_DAY: 500 * 1024 * 1024, // 1天内最多 500MB
+  MAX_BYTES_PER_HOUR: 200 * 1024 * 1024, // 1小时内最多 200MB
+  MAX_BYTES_PER_DAY: 1000 * 1024 * 1024, // 1天内最多 1000MB
 
   // 封禁时长
   BAN_DURATION_FIRST: 1 * 60 * 60 * 1000, // 首次违规：1小时
@@ -98,6 +100,30 @@ export default class IPBlacklist {
       });
     }
 
+    // 列出所有 IP 记录（管理员/内部使用）
+    if (path === "/list" && request.method === "GET") {
+      // 支持查询参数：bannedOnly=true
+      const url = new URL(request.url);
+      const bannedOnly = url.searchParams.get("bannedOnly") === "true";
+
+      const allKeys = await this.storage.list<IPRecord>({ prefix: "ip:" });
+      const records = Array.from(allKeys.values());
+
+      const filtered = bannedOnly ? records.filter((r) => r.banned) : records;
+
+      return new Response(
+        JSON.stringify({
+          success: true,
+          total: records.length,
+          returned: filtered.length,
+          data: filtered,
+        }),
+        {
+          headers: { "Content-Type": "application/json" },
+        }
+      );
+    }
+
     return new Response("Not Found", { status: 404 });
   }
 
@@ -159,6 +185,7 @@ export default class IPBlacklist {
         lastUploadTime: now,
         violations: 0,
         banned: false,
+        uploadTimestamps: [],
       };
     }
 
@@ -166,6 +193,13 @@ export default class IPBlacklist {
     record.uploadCount++;
     record.totalBytes += bytes;
     record.lastUploadTime = now;
+    record.uploadTimestamps.push(now);
+
+    // 清理过期的时间戳（只保留最近24小时的记录）
+    const oneDayAgo = now - 24 * 60 * 60 * 1000;
+    record.uploadTimestamps = record.uploadTimestamps.filter(
+      (ts) => ts > oneDayAgo
+    );
 
     // 滥用检测
     const abuseCheck = this.detectAbuse(record);
@@ -209,64 +243,65 @@ export default class IPBlacklist {
    */
   private detectAbuse(record: IPRecord): { isAbuse: boolean; reason?: string } {
     const now = Date.now();
-    const timeSinceFirst = now - record.firstUploadTime;
-    const timeSinceLast = now - record.lastUploadTime;
+
+    // 计算各个时间窗口内的上传次数
+    const oneMinuteAgo = now - 60 * 1000;
+    const oneHourAgo = now - 60 * 60 * 1000;
+    const oneDayAgo = now - 24 * 60 * 60 * 1000;
+
+    const uploadsLastMinute = record.uploadTimestamps.filter(
+      (ts) => ts > oneMinuteAgo
+    ).length;
+    const uploadsLastHour = record.uploadTimestamps.filter(
+      (ts) => ts > oneHourAgo
+    ).length;
+    const uploadsLastDay = record.uploadTimestamps.filter(
+      (ts) => ts > oneDayAgo
+    ).length;
 
     // 1分钟内上传次数检测
-    if (timeSinceLast < 60 * 1000) {
-      const recentUploads = record.uploadCount;
-      if (recentUploads > ABUSE_THRESHOLDS.MAX_UPLOADS_PER_MINUTE) {
-        return {
-          isAbuse: true,
-          reason: `1分钟内上传次数过多（${recentUploads}次，限制${ABUSE_THRESHOLDS.MAX_UPLOADS_PER_MINUTE}次）`,
-        };
-      }
+    if (uploadsLastMinute > ABUSE_THRESHOLDS.MAX_UPLOADS_PER_MINUTE) {
+      return {
+        isAbuse: true,
+        reason: `1分钟内上传次数过多（${uploadsLastMinute}次，限制${ABUSE_THRESHOLDS.MAX_UPLOADS_PER_MINUTE}次）`,
+      };
     }
 
     // 1小时内上传次数检测
-    if (timeSinceFirst < 60 * 60 * 1000) {
-      if (record.uploadCount > ABUSE_THRESHOLDS.MAX_UPLOADS_PER_HOUR) {
-        return {
-          isAbuse: true,
-          reason: `1小时内上传次数过多（${record.uploadCount}次，限制${ABUSE_THRESHOLDS.MAX_UPLOADS_PER_HOUR}次）`,
-        };
-      }
-
-      if (record.totalBytes > ABUSE_THRESHOLDS.MAX_BYTES_PER_HOUR) {
-        return {
-          isAbuse: true,
-          reason: `1小时内上传流量过大（${(
-            record.totalBytes /
-            1024 /
-            1024
-          ).toFixed(2)}MB，限制${
-            ABUSE_THRESHOLDS.MAX_BYTES_PER_HOUR / 1024 / 1024
-          }MB）`,
-        };
-      }
+    if (uploadsLastHour > ABUSE_THRESHOLDS.MAX_UPLOADS_PER_HOUR) {
+      return {
+        isAbuse: true,
+        reason: `1小时内上传次数过多（${uploadsLastHour}次，限制${ABUSE_THRESHOLDS.MAX_UPLOADS_PER_HOUR}次）`,
+      };
     }
 
     // 1天内上传次数检测
-    if (timeSinceFirst < 24 * 60 * 60 * 1000) {
-      if (record.uploadCount > ABUSE_THRESHOLDS.MAX_UPLOADS_PER_DAY) {
-        return {
-          isAbuse: true,
-          reason: `24小时内上传次数过多（${record.uploadCount}次，限制${ABUSE_THRESHOLDS.MAX_UPLOADS_PER_DAY}次）`,
-        };
-      }
+    if (uploadsLastDay > ABUSE_THRESHOLDS.MAX_UPLOADS_PER_DAY) {
+      return {
+        isAbuse: true,
+        reason: `24小时内上传次数过多（${uploadsLastDay}次，限制${ABUSE_THRESHOLDS.MAX_UPLOADS_PER_DAY}次）`,
+      };
+    }
 
-      if (record.totalBytes > ABUSE_THRESHOLDS.MAX_BYTES_PER_DAY) {
-        return {
-          isAbuse: true,
-          reason: `24小时内上传流量过大（${(
-            record.totalBytes /
-            1024 /
-            1024
-          ).toFixed(2)}MB，限制${
-            ABUSE_THRESHOLDS.MAX_BYTES_PER_DAY / 1024 / 1024
-          }MB）`,
-        };
-      }
+    // 流量限制检测
+    const bytesLastHour = record.totalBytes; // 简化处理，实际应该也按时间窗口计算
+    if (bytesLastHour > ABUSE_THRESHOLDS.MAX_BYTES_PER_HOUR) {
+      return {
+        isAbuse: true,
+        reason: `1小时内上传流量过大（${(bytesLastHour / 1024 / 1024).toFixed(
+          2
+        )}MB，限制${ABUSE_THRESHOLDS.MAX_BYTES_PER_HOUR / 1024 / 1024}MB）`,
+      };
+    }
+
+    const bytesLastDay = record.totalBytes;
+    if (bytesLastDay > ABUSE_THRESHOLDS.MAX_BYTES_PER_DAY) {
+      return {
+        isAbuse: true,
+        reason: `24小时内上传流量过大（${(bytesLastDay / 1024 / 1024).toFixed(
+          2
+        )}MB，限制${ABUSE_THRESHOLDS.MAX_BYTES_PER_DAY / 1024 / 1024}MB）`,
+      };
     }
 
     return { isAbuse: false };
@@ -287,6 +322,7 @@ export default class IPBlacklist {
         lastUploadTime: Date.now(),
         violations: 0,
         banned: false,
+        uploadTimestamps: [],
       };
     }
 

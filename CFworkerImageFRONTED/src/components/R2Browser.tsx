@@ -2,6 +2,8 @@
 
 import { useState, useEffect, useCallback } from "react";
 import { getAuth } from "@/services/auth";
+import { env } from "@/config/env";
+import { useFileDeleted, useAdminStatsRefresh } from "@/hooks/useGlobalState";
 
 interface R2Object {
   key: string;
@@ -15,6 +17,14 @@ interface R2Object {
     sha384?: string;
     sha512?: string;
   };
+}
+
+interface UserGroup {
+  userId: string;
+  username: string;
+  objects: R2Object[];
+  totalSize: number;
+  fileCount: number;
 }
 
 interface R2BrowserResponse {
@@ -31,13 +41,77 @@ interface R2BrowserProps {
   adminToken?: string;
 }
 
+// 从 R2 对象键中提取用户 ID
+function extractUserIdFromKey(key: string): string | null {
+  const match = key.match(/^(\d+)\//);
+  return match ? match[1] : null;
+}
+
+// 按用户分组对象
+function groupObjectsByUser(objects: R2Object[]): UserGroup[] {
+  const groups: Record<string, UserGroup> = {};
+
+  objects.forEach((obj) => {
+    const userId = extractUserIdFromKey(obj.key);
+    if (!userId) return; // 跳过没有用户 ID 的对象
+
+    if (!groups[userId]) {
+      groups[userId] = {
+        userId,
+        username: `User ${userId}`, // 暂时使用默认名称，后续可以从数据库获取
+        objects: [],
+        totalSize: 0,
+        fileCount: 0,
+      };
+    }
+
+    groups[userId].objects.push(obj);
+    groups[userId].totalSize += obj.size;
+    groups[userId].fileCount++;
+  });
+
+  return Object.values(groups).sort((a, b) => b.totalSize - a.totalSize);
+}
+
+// 合并用户分组
+function mergeUserGroups(
+  existing: UserGroup[],
+  newGroups: UserGroup[]
+): UserGroup[] {
+  const merged: Record<string, UserGroup> = {};
+
+  // 添加现有分组
+  existing.forEach((group) => {
+    merged[group.userId] = { ...group };
+  });
+
+  // 合并新分组
+  newGroups.forEach((group) => {
+    if (merged[group.userId]) {
+      merged[group.userId].objects.push(...group.objects);
+      merged[group.userId].totalSize += group.totalSize;
+      merged[group.userId].fileCount += group.fileCount;
+    } else {
+      merged[group.userId] = { ...group };
+    }
+  });
+
+  return Object.values(merged).sort((a, b) => b.totalSize - a.totalSize);
+}
+
 export default function R2Browser({ adminToken }: R2BrowserProps) {
   const [objects, setObjects] = useState<R2Object[]>([]);
+  const [userGroups, setUserGroups] = useState<UserGroup[]>([]);
+  const [selectedUser, setSelectedUser] = useState<string | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [cursor, setCursor] = useState<string | null>(null);
   const [hasMore, setHasMore] = useState(false);
   const [deleting, setDeleting] = useState<Set<string>>(new Set());
+
+  // 全局状态管理
+  const { notifyFileDeleted } = useFileDeleted();
+  const { refreshAdminStats } = useAdminStatsRefresh();
 
   const loadObjects = useCallback(
     async (loadCursor?: string | null) => {
@@ -51,7 +125,7 @@ export default function R2Browser({ adminToken }: R2BrowserProps) {
           return;
         }
 
-        const url = new URL(`${process.env.NEXT_PUBLIC_ADMIN_API}/api/browse`);
+        const url = new URL(`${env.adminApi}/api/browse`);
         if (loadCursor) {
           url.searchParams.set("cursor", loadCursor);
         }
@@ -75,10 +149,20 @@ export default function R2Browser({ adminToken }: R2BrowserProps) {
           throw new Error(data.error || "加载失败");
         }
 
+        const newObjects = data.data!.objects;
+
         if (loadCursor) {
-          setObjects((prev) => [...prev, ...data.data!.objects]);
+          setObjects((prev) => [...prev, ...newObjects]);
         } else {
-          setObjects(data.data!.objects);
+          setObjects(newObjects);
+        }
+
+        // 按用户分组
+        const groups = groupObjectsByUser(newObjects);
+        if (loadCursor) {
+          setUserGroups((prev) => mergeUserGroups(prev, groups));
+        } else {
+          setUserGroups(groups);
         }
 
         setCursor(data.data!.cursor || null);
@@ -102,7 +186,8 @@ export default function R2Browser({ adminToken }: R2BrowserProps) {
         throw new Error("未登录");
       }
 
-      const url = new URL(`${process.env.NEXT_PUBLIC_ADMIN_API}/api/delete`);
+      // 使用 uploader-worker 的删除 API，它会同时删除 R2 和数据库记录
+      const url = new URL(`${env.uploadApi.replace("/upload", "")}/api/delete`);
       url.searchParams.set("key", key);
 
       const response = await fetch(url.toString(), {
@@ -125,6 +210,26 @@ export default function R2Browser({ adminToken }: R2BrowserProps) {
 
       // 从列表中移除
       setObjects((prev) => prev.filter((obj) => obj.key !== key));
+
+      // 更新用户分组
+      setUserGroups((prev) => {
+        return prev
+          .map((group) => ({
+            ...group,
+            objects: group.objects.filter((obj) => obj.key !== key),
+            totalSize: group.objects
+              .filter((obj) => obj.key !== key)
+              .reduce((sum, obj) => sum + obj.size, 0),
+            fileCount: group.objects.filter((obj) => obj.key !== key).length,
+          }))
+          .filter((group) => group.fileCount > 0);
+      });
+
+      // 通知全局状态：文件已删除
+      notifyFileDeleted([key]);
+
+      // 刷新 Admin 统计数据
+      refreshAdminStats();
     } catch (err) {
       console.error("Delete object error:", err);
       setError(err instanceof Error ? err.message : "删除失败");
@@ -150,9 +255,7 @@ export default function R2Browser({ adminToken }: R2BrowserProps) {
   };
 
   const getImageUrl = (key: string): string => {
-    const baseUrl =
-      process.env.NEXT_PUBLIC_CDN_BASE || "https://pic.lambdax.me";
-    return `${baseUrl}/${key}`;
+    return `${env.cdnUrl}/${key}`;
   };
 
   useEffect(() => {
@@ -284,168 +387,242 @@ export default function R2Browser({ adminToken }: R2BrowserProps) {
         </div>
       </div>
 
-      {/* 文件列表 */}
-      <div className="space-y-3 max-h-96 overflow-y-auto">
-        {objects.map((obj) => (
-          <div
-            key={obj.key}
-            className="flex items-center justify-between p-4 rounded-xl border border-white/10 bg-white/5 hover:bg-white/10 hover:border-blue-400/30 transition-all duration-200 group"
-          >
-            <div className="flex-1 min-w-0">
-              <div className="flex items-center gap-4">
-                {/* 文件图标 */}
-                <div className="flex-shrink-0">
-                  {obj.key.match(
-                    /\.(jpg|jpeg|png|gif|webp|svg|avif|heic)$/i
-                  ) ? (
-                    <div className="w-10 h-10 rounded-lg bg-gradient-to-br from-blue-500/20 to-cyan-500/20 flex items-center justify-center border border-blue-400/20">
-                      <svg
-                        className="w-5 h-5 text-blue-400"
-                        fill="currentColor"
-                        viewBox="0 0 20 20"
-                      >
-                        <path
-                          fillRule="evenodd"
-                          d="M4 3a2 2 0 00-2 2v10a2 2 0 002 2h12a2 2 0 002-2V5a2 2 0 00-2-2H4zm12 12H4l4-8 3 6 2-4 3 6z"
-                          clipRule="evenodd"
-                        />
-                      </svg>
+      {/* 用户分组列表 */}
+      {!selectedUser ? (
+        <div className="space-y-4 max-h-96 overflow-y-auto">
+          {userGroups.map((group) => (
+            <div
+              key={group.userId}
+              className="p-4 rounded-xl border border-white/10 bg-white/5 hover:bg-white/10 hover:border-blue-400/30 transition-all duration-200 cursor-pointer"
+              onClick={() => setSelectedUser(group.userId)}
+            >
+              <div className="flex items-center justify-between">
+                <div className="flex items-center gap-4">
+                  {/* 用户头像 */}
+                  <div className="w-12 h-12 rounded-full bg-gradient-to-br from-blue-500/20 to-purple-500/20 flex items-center justify-center border border-blue-400/20">
+                    <span className="text-lg font-semibold text-blue-400">
+                      {group.userId.charAt(0)}
+                    </span>
+                  </div>
+
+                  {/* 用户信息 */}
+                  <div>
+                    <div className="text-white font-medium text-lg">
+                      {group.username}
                     </div>
-                  ) : (
-                    <div className="w-10 h-10 rounded-lg bg-gradient-to-br from-gray-500/20 to-slate-500/20 flex items-center justify-center border border-gray-400/20">
-                      <svg
-                        className="w-5 h-5 text-gray-400"
-                        fill="currentColor"
-                        viewBox="0 0 20 20"
-                      >
-                        <path
-                          fillRule="evenodd"
-                          d="M4 4a2 2 0 012-2h4.586A2 2 0 0112 2.586L15.414 6A2 2 0 0116 7.414V16a2 2 0 01-2 2H6a2 2 0 01-2-2V4zm2 6a1 1 0 011-1h6a1 1 0 110 2H7a1 1 0 01-1-1zm1 3a1 1 0 100 2h6a1 1 0 100-2H7z"
-                          clipRule="evenodd"
-                        />
-                      </svg>
+                    <div className="text-white/60 text-sm">
+                      ID: {group.userId}
                     </div>
-                  )}
+                  </div>
                 </div>
 
-                {/* 文件信息 */}
-                <div className="flex-1 min-w-0">
-                  <div className="flex items-center gap-3 mb-1">
-                    <div
-                      className="text-white font-medium truncate max-w-md"
-                      title={obj.key}
-                    >
-                      {obj.key}
-                    </div>
-                    {obj.key.match(/\.(jpg|jpeg|png|gif|webp)$/i) && (
-                      <span className="inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium bg-green-500/20 text-green-400 border border-green-400/20">
-                        图片
-                      </span>
-                    )}
+                {/* 统计信息 */}
+                <div className="text-right">
+                  <div className="text-white font-medium">
+                    {group.fileCount} 个文件
                   </div>
-                  <div className="flex items-center gap-4 text-sm text-white/50">
-                    <span className="flex items-center gap-1">
-                      <svg
-                        className="w-3 h-3"
-                        fill="currentColor"
-                        viewBox="0 0 20 20"
-                      >
-                        <path
-                          fillRule="evenodd"
-                          d="M3 17a1 1 0 011-1h12a1 1 0 110 2H4a1 1 0 01-1-1zm3.293-7.707a1 1 0 011.414 0L9 10.586V3a1 1 0 112 0v7.586l1.293-1.293a1 1 0 111.414 1.414l-3 3a1 1 0 01-1.414 0l-3-3a1 1 0 010-1.414z"
-                          clipRule="evenodd"
-                        />
-                      </svg>
-                      {formatSize(obj.size)}
-                    </span>
-                    <span className="flex items-center gap-1">
-                      <svg
-                        className="w-3 h-3"
-                        fill="currentColor"
-                        viewBox="0 0 20 20"
-                      >
-                        <path
-                          fillRule="evenodd"
-                          d="M6 2a1 1 0 00-1 1v1H4a2 2 0 00-2 2v10a2 2 0 002 2h12a2 2 0 002-2V6a2 2 0 00-2-2h-1V3a1 1 0 10-2 0v1H7V3a1 1 0 00-1-1zm0 5a1 1 0 000 2h8a1 1 0 100-2H6z"
-                          clipRule="evenodd"
-                        />
-                      </svg>
-                      {formatDate(obj.uploaded)}
-                    </span>
+                  <div className="text-white/60 text-sm">
+                    {formatSize(group.totalSize)}
                   </div>
                 </div>
               </div>
             </div>
-
-            {/* 操作按钮 */}
-            <div className="flex items-center gap-2 opacity-0 group-hover:opacity-100 transition-opacity duration-200">
-              {obj.key.match(/\.(jpg|jpeg|png|gif|webp)$/i) && (
-                <button
-                  onClick={() => window.open(getImageUrl(obj.key), "_blank")}
-                  className="p-2 rounded-lg bg-blue-500/20 hover:bg-blue-500/30 text-blue-400 hover:text-blue-300 transition-colors"
-                  title="查看图片"
-                >
-                  <svg
-                    className="w-4 h-4"
-                    fill="none"
-                    stroke="currentColor"
-                    viewBox="0 0 24 24"
-                  >
-                    <path
-                      strokeLinecap="round"
-                      strokeLinejoin="round"
-                      strokeWidth={2}
-                      d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"
-                    />
-                    <path
-                      strokeLinecap="round"
-                      strokeLinejoin="round"
-                      strokeWidth={2}
-                      d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z"
-                    />
-                  </svg>
-                </button>
-              )}
-              <button
-                onClick={() => deleteObject(obj.key)}
-                disabled={deleting.has(obj.key)}
-                className="p-2 rounded-lg bg-red-500/20 hover:bg-red-500/30 text-red-400 hover:text-red-300 transition-colors disabled:opacity-50"
-                title={deleting.has(obj.key) ? "删除中..." : "删除文件"}
+          ))}
+        </div>
+      ) : (
+        <div className="space-y-4">
+          {/* 返回按钮 */}
+          <div className="flex items-center gap-3 mb-4">
+            <button
+              onClick={() => setSelectedUser(null)}
+              className="flex items-center gap-2 px-3 py-2 rounded-lg border border-white/10 bg-white/5 hover:bg-white/10 text-white/80 hover:text-white transition-colors"
+            >
+              <svg
+                className="w-4 h-4"
+                fill="none"
+                stroke="currentColor"
+                viewBox="0 0 24 24"
               >
-                {deleting.has(obj.key) ? (
-                  <svg
-                    className="w-4 h-4 animate-spin"
-                    fill="none"
-                    stroke="currentColor"
-                    viewBox="0 0 24 24"
-                  >
-                    <path
-                      strokeLinecap="round"
-                      strokeLinejoin="round"
-                      strokeWidth={2}
-                      d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"
-                    />
-                  </svg>
-                ) : (
-                  <svg
-                    className="w-4 h-4"
-                    fill="none"
-                    stroke="currentColor"
-                    viewBox="0 0 24 24"
-                  >
-                    <path
-                      strokeLinecap="round"
-                      strokeLinejoin="round"
-                      strokeWidth={2}
-                      d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"
-                    />
-                  </svg>
-                )}
-              </button>
-            </div>
+                <path
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                  strokeWidth={2}
+                  d="M15 19l-7-7 7-7"
+                />
+              </svg>
+              返回用户列表
+            </button>
+            <div className="text-white/60">查看用户 {selectedUser} 的文件</div>
           </div>
-        ))}
-      </div>
+
+          {/* 选中用户的文件列表 */}
+          <div className="space-y-3 max-h-96 overflow-y-auto">
+            {userGroups
+              .find((group) => group.userId === selectedUser)
+              ?.objects.map((obj) => (
+                <div
+                  key={obj.key}
+                  className="flex items-center justify-between p-4 rounded-xl border border-white/10 bg-white/5 hover:bg-white/10 hover:border-blue-400/30 transition-all duration-200 group"
+                >
+                  <div className="flex-1 min-w-0">
+                    <div className="flex items-center gap-4">
+                      {/* 文件图标 */}
+                      <div className="flex-shrink-0">
+                        {obj.key.match(
+                          /\.(jpg|jpeg|png|gif|webp|svg|avif|heic)$/i
+                        ) ? (
+                          <div className="w-10 h-10 rounded-lg bg-gradient-to-br from-blue-500/20 to-cyan-500/20 flex items-center justify-center border border-blue-400/20">
+                            <svg
+                              className="w-5 h-5 text-blue-400"
+                              fill="currentColor"
+                              viewBox="0 0 20 20"
+                            >
+                              <path
+                                fillRule="evenodd"
+                                d="M4 3a2 2 0 00-2 2v10a2 2 0 002 2h12a2 2 0 002-2V5a2 2 0 00-2-2H4zm12 12H4l4-8 3 6 2-4 3 6z"
+                                clipRule="evenodd"
+                              />
+                            </svg>
+                          </div>
+                        ) : (
+                          <div className="w-10 h-10 rounded-lg bg-gradient-to-br from-gray-500/20 to-slate-500/20 flex items-center justify-center border border-gray-400/20">
+                            <svg
+                              className="w-5 h-5 text-gray-400"
+                              fill="currentColor"
+                              viewBox="0 0 20 20"
+                            >
+                              <path
+                                fillRule="evenodd"
+                                d="M4 4a2 2 0 012-2h4.586A2 2 0 0112 2.586L15.414 6A2 2 0 0116 7.414V16a2 2 0 01-2 2H6a2 2 0 01-2-2V4zm2 6a1 1 0 011-1h6a1 1 0 110 2H7a1 1 0 01-1-1zm1 3a1 1 0 100 2h6a1 1 0 100-2H7z"
+                                clipRule="evenodd"
+                              />
+                            </svg>
+                          </div>
+                        )}
+                      </div>
+
+                      {/* 文件信息 */}
+                      <div className="flex-1 min-w-0">
+                        <div className="flex items-center gap-3 mb-1">
+                          <div
+                            className="text-white font-medium truncate max-w-md"
+                            title={obj.key}
+                          >
+                            {obj.key}
+                          </div>
+                          {obj.key.match(/\.(jpg|jpeg|png|gif|webp)$/i) && (
+                            <span className="inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium bg-green-500/20 text-green-400 border border-green-400/20">
+                              图片
+                            </span>
+                          )}
+                        </div>
+                        <div className="flex items-center gap-4 text-sm text-white/50">
+                          <span className="flex items-center gap-1">
+                            <svg
+                              className="w-3 h-3"
+                              fill="currentColor"
+                              viewBox="0 0 20 20"
+                            >
+                              <path
+                                fillRule="evenodd"
+                                d="M3 17a1 1 0 011-1h12a1 1 0 110 2H4a1 1 0 01-1-1zm3.293-7.707a1 1 0 011.414 0L9 10.586V3a1 1 0 112 0v7.586l1.293-1.293a1 1 0 111.414 1.414l-3 3a1 1 0 01-1.414 0l-3-3a1 1 0 010-1.414z"
+                                clipRule="evenodd"
+                              />
+                            </svg>
+                            {formatSize(obj.size)}
+                          </span>
+                          <span className="flex items-center gap-1">
+                            <svg
+                              className="w-3 h-3"
+                              fill="currentColor"
+                              viewBox="0 0 20 20"
+                            >
+                              <path
+                                fillRule="evenodd"
+                                d="M6 2a1 1 0 00-1 1v1H4a2 2 0 00-2 2v10a2 2 0 002 2h12a2 2 0 002-2V6a2 2 0 00-2-2h-1V3a1 1 0 10-2 0v1H7V3a1 1 0 00-1-1zm0 5a1 1 0 000 2h8a1 1 0 100-2H6z"
+                                clipRule="evenodd"
+                              />
+                            </svg>
+                            {formatDate(obj.uploaded)}
+                          </span>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+
+                  {/* 操作按钮 */}
+                  <div className="flex items-center gap-2 opacity-0 group-hover:opacity-100 transition-opacity duration-200">
+                    {obj.key.match(/\.(jpg|jpeg|png|gif|webp)$/i) && (
+                      <button
+                        onClick={() =>
+                          window.open(getImageUrl(obj.key), "_blank")
+                        }
+                        className="p-2 rounded-lg bg-blue-500/20 hover:bg-blue-500/30 text-blue-400 hover:text-blue-300 transition-colors"
+                        title="查看图片"
+                      >
+                        <svg
+                          className="w-4 h-4"
+                          fill="none"
+                          stroke="currentColor"
+                          viewBox="0 0 24 24"
+                        >
+                          <path
+                            strokeLinecap="round"
+                            strokeLinejoin="round"
+                            strokeWidth={2}
+                            d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"
+                          />
+                          <path
+                            strokeLinecap="round"
+                            strokeLinejoin="round"
+                            strokeWidth={2}
+                            d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z"
+                          />
+                        </svg>
+                      </button>
+                    )}
+                    <button
+                      onClick={() => deleteObject(obj.key)}
+                      disabled={deleting.has(obj.key)}
+                      className="p-2 rounded-lg bg-red-500/20 hover:bg-red-500/30 text-red-400 hover:text-red-300 transition-colors disabled:opacity-50"
+                      title={deleting.has(obj.key) ? "删除中..." : "删除文件"}
+                    >
+                      {deleting.has(obj.key) ? (
+                        <svg
+                          className="w-4 h-4 animate-spin"
+                          fill="none"
+                          stroke="currentColor"
+                          viewBox="0 0 24 24"
+                        >
+                          <path
+                            strokeLinecap="round"
+                            strokeLinejoin="round"
+                            strokeWidth={2}
+                            d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"
+                          />
+                        </svg>
+                      ) : (
+                        <svg
+                          className="w-4 h-4"
+                          fill="none"
+                          stroke="currentColor"
+                          viewBox="0 0 24 24"
+                        >
+                          <path
+                            strokeLinecap="round"
+                            strokeLinejoin="round"
+                            strokeWidth={2}
+                            d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"
+                          />
+                        </svg>
+                      )}
+                    </button>
+                  </div>
+                </div>
+              ))}
+          </div>
+        </div>
+      )}
 
       {/* 加载更多 */}
       {hasMore && (

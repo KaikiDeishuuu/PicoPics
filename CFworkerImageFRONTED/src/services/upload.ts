@@ -3,13 +3,9 @@
  */
 
 import type { UploadResponse } from "@/types";
+import { env } from "@/config/env";
 
-const rawUploadUrl =
-  process.env.NEXT_PUBLIC_UPLOAD_API || "http://localhost:8787/upload";
-
-const UPLOAD_API_URL = rawUploadUrl.endsWith("/upload")
-  ? rawUploadUrl
-  : `${rawUploadUrl.replace(/\/$/, "")}/upload`;
+const UPLOAD_API_URL = env.uploadApi;
 
 /**
  * 上传图片到后端 Worker
