@@ -1,6 +1,6 @@
 import got from "got";
 import { z } from "zod";
-import { ErrorResponse, errors } from "./errors";
+import { createError, type ErrorResponse } from "./errors";
 
 // Base fetcher configuration for server-side only
 const createFetcher = () => {
@@ -53,53 +53,41 @@ export async function fetcher<T extends z.ZodType>(
     return data;
   } catch (error: unknown) {
     if (error instanceof z.ZodError) {
-      throw errors.validation("响应数据格式错误", error.errors);
+      throw createError.validationError("响应数据格式错误");
     }
 
     // Handle different error types
     const err = error as Record<string, unknown>;
     if (err?.name === "HTTPError") {
-      const statusCode =
-        ((err?.response as Record<string, unknown>)?.statusCode as number) ||
-        500;
-      const responseBody = (err?.response as Record<string, unknown>)
-        ?.body as Record<string, unknown>;
+      const statusCode = ((err?.response as Record<string, unknown>)?.statusCode as number) || 500;
+      const responseBody = (err?.response as Record<string, unknown>)?.body as Record<
+        string,
+        unknown
+      >;
 
       if (statusCode === 413) {
-        throw errors.fileTooLarge(10);
+        throw createError.fileTooLarge(10);
       }
 
       if (statusCode === 415) {
-        throw errors.invalidFileType([
-          "image/jpeg",
-          "image/png",
-          "image/gif",
-          "image/webp",
-        ]);
+        throw createError.invalidFileType(["image/jpeg", "image/png", "image/gif", "image/webp"]);
       }
 
       if (statusCode === 429) {
-        throw errors.rateLimitExceeded();
+        throw createError.quotaExceeded();
       }
 
       if (statusCode === 401) {
-        throw errors.unauthorized();
+        throw createError.unauthorized();
       }
 
-      if (
-        responseBody &&
-        typeof responseBody === "object" &&
-        responseBody.success === false
-      ) {
+      if (responseBody && typeof responseBody === "object" && responseBody.success === false) {
         const message =
-          typeof responseBody.message === "string"
-            ? responseBody.message
-            : "请求失败";
+          typeof responseBody.message === "string" ? responseBody.message : "请求失败";
         throw new Error(message);
       }
 
-      const message =
-        typeof err.message === "string" ? err.message : "Unknown error";
+      const message = typeof err.message === "string" ? err.message : "Unknown error";
       throw new Error(`HTTP ${statusCode}: ${message}`);
     }
 
@@ -117,11 +105,8 @@ export async function fetcher<T extends z.ZodType>(
 
 // Specialized fetchers for different HTTP methods
 export const api = {
-  get: <T extends z.ZodType>(
-    url: string,
-    schema?: T,
-    options: Record<string, unknown> = {}
-  ) => fetcher(url, { method: "GET", ...options }, schema),
+  get: <T extends z.ZodType>(url: string, schema?: T, options: Record<string, unknown> = {}) =>
+    fetcher(url, { method: "GET", ...options }, schema),
 
   post: <T extends z.ZodType>(
     url: string,
@@ -155,11 +140,8 @@ export const api = {
       schema
     ),
 
-  delete: <T extends z.ZodType>(
-    url: string,
-    schema?: T,
-    options: Record<string, unknown> = {}
-  ) => fetcher(url, { method: "DELETE", ...options }, schema),
+  delete: <T extends z.ZodType>(url: string, schema?: T, options: Record<string, unknown> = {}) =>
+    fetcher(url, { method: "DELETE", ...options }, schema),
 
   upload: <T extends z.ZodType>(
     url: string,

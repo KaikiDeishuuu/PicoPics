@@ -1,10 +1,11 @@
+import type { R2Bucket } from "@cloudflare/workers-types";
 import { Hono } from "hono";
 import { cors } from "hono/cors";
 import { logger } from "hono/logger";
-import type { R2Bucket } from "@cloudflare/workers-types";
 
 interface Env {
   IMAGES: R2Bucket;
+  IMAGES_BUCKET_ID: string;
   ALLOWED_ORIGINS: string;
 }
 
@@ -41,10 +42,17 @@ function getCorsHeaders(env: Env, request: Request): Record<string, string> {
   return {};
 }
 
-// 图片服务路由
+// 图片服务路由 - 支持动态缩略图生成
 app.get("/:key", async (c) => {
   const key = c.req.param("key");
   const env = c.env;
+
+  // 解析查询参数
+  const url = new URL(c.req.url);
+  const width = url.searchParams.get("w");
+  const height = url.searchParams.get("h");
+  const quality = url.searchParams.get("q") || "80";
+  const format = url.searchParams.get("f") || "auto";
 
   try {
     // 从 R2 获取对象
@@ -52,6 +60,20 @@ app.get("/:key", async (c) => {
 
     if (!object) {
       return c.notFound();
+    }
+
+    // 如果请求缩略图，使用 Cloudflare Image Resizing
+    if (width || height) {
+      const resizeUrl = new URL(
+        `https://imagedelivery.net/${env.IMAGES_BUCKET_ID}/${key}`
+      );
+      if (width) resizeUrl.searchParams.set("width", width);
+      if (height) resizeUrl.searchParams.set("height", height);
+      resizeUrl.searchParams.set("quality", quality);
+      resizeUrl.searchParams.set("format", format);
+
+      // 重定向到 Cloudflare Image Resizing
+      return c.redirect(resizeUrl.toString(), 302);
     }
 
     // 设置缓存头
@@ -82,6 +104,11 @@ app.get("/:key", async (c) => {
 // 健康检查
 app.get("/health", (c) => {
   return c.json({ status: "ok", worker: "cdn-worker-v2" });
+});
+
+// 根路径重定向到健康检查
+app.get("/", (c) => {
+  return c.redirect("/health");
 });
 
 export default app;

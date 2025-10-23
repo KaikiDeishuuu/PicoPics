@@ -17,9 +17,7 @@ const envSchema = z.object({
 
   // Upload limits
   MAX_FILE_SIZE: z.string().transform(Number).default("10485760"), // 10MB
-  ALLOWED_FILE_TYPES: z
-    .string()
-    .default("image/jpeg,image/png,image/gif,image/webp"),
+  ALLOWED_FILE_TYPES: z.string().default("image/jpeg,image/png,image/gif,image/webp"),
 
   // Rate limiting
   DAILY_UPLOAD_LIMIT: z.string().transform(Number).default("50"),
@@ -45,12 +43,8 @@ export function getEnv(): Env {
     return parsed;
   } catch (error) {
     if (error instanceof z.ZodError) {
-      const errorMessages = error.errors.map(
-        (err) => `${err.path.join(".")}: ${err.message}`
-      );
-      throw new Error(
-        `Environment validation failed:\n${errorMessages.join("\n")}`
-      );
+      const errorMessages = error.errors.map((err) => `${err.path.join(".")}: ${err.message}`);
+      throw new Error(`Environment validation failed:\n${errorMessages.join("\n")}`);
     }
     throw error;
   }

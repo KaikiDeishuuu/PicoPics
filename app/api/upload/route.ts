@@ -5,10 +5,13 @@ export const dynamic = "force-dynamic";
 
 export async function POST(request: NextRequest) {
   try {
-    // For Cloudflare Pages Functions, we redirect to the actual upload worker
-    const uploadUrl =
+    // Get the upload URL from environment
+    const uploadApi =
       process.env.NEXT_PUBLIC_UPLOAD_API ||
-      "https://uploader-worker-v2-prod.haoweiw370.workers.dev/upload";
+      "https://uploader-worker-v2-prod.haoweiw370.workers.dev";
+    const uploadUrl = uploadApi + "/upload";
+
+    console.log("Proxying upload request to:", uploadUrl);
 
     // Get the form data from the request
     const formData = await request.formData();
@@ -25,16 +28,37 @@ export async function POST(request: NextRequest) {
         ...(request.headers.get("cf-turnstile-token") && {
           "CF-Turnstile-Token": request.headers.get("cf-turnstile-token")!,
         }),
+        // Add CORS headers
+        "Access-Control-Allow-Origin": "*",
+        "Access-Control-Allow-Methods": "POST, OPTIONS",
+        "Access-Control-Allow-Headers": "Content-Type, Authorization",
       },
     });
 
+    console.log("Upload worker response status:", response.status);
+
+    if (!response.ok) {
+      const errorText = await response.text();
+      console.error("Upload worker error:", errorText);
+      return NextResponse.json(
+        { error: `Upload worker error: ${response.status}`, success: false },
+        { status: response.status }
+      );
+    }
+
     const data = await response.json();
+    console.log("Upload successful:", data);
 
     return NextResponse.json(data, { status: response.status });
   } catch (error) {
     console.error("Upload API error:", error);
     return NextResponse.json(
-      { error: "Upload failed", success: false },
+      {
+        error: `Upload failed: ${
+          error instanceof Error ? error.message : "Unknown error"
+        }`,
+        success: false,
+      },
       { status: 500 }
     );
   }

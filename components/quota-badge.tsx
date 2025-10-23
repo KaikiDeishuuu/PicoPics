@@ -1,8 +1,8 @@
 "use client";
 
-import * as React from "react";
 import { motion } from "framer-motion";
-import { HardDrive, AlertTriangle } from "lucide-react";
+import { AlertTriangle, HardDrive } from "lucide-react";
+import * as React from "react";
 import { cn } from "../lib/utils";
 
 interface QuotaBadgeProps {

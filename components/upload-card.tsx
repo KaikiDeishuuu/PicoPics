@@ -1,11 +1,11 @@
 "use client";
 
-import * as React from "react";
 import { motion } from "framer-motion";
-import { FileImage, CheckCircle, XCircle, X, Upload } from "lucide-react";
+import { CheckCircle, FileImage, Upload, X, XCircle } from "lucide-react";
+import * as React from "react";
+import { cn } from "../lib/utils";
 import { Button } from "./ui/button";
 import { Progress } from "./ui/progress";
-import { cn } from "../lib/utils";
 
 interface UploadCardProps {
   file: File;
@@ -15,19 +15,13 @@ interface UploadCardProps {
   onRemove: () => void;
 }
 
-export function UploadCard({
-  file,
-  progress,
-  status,
-  error,
-  onRemove,
-}: UploadCardProps) {
+export function UploadCard({ file, progress, status, error, onRemove }: UploadCardProps) {
   const formatFileSize = (bytes: number) => {
     if (bytes === 0) return "0 Bytes";
     const k = 1024;
     const sizes = ["Bytes", "KB", "MB", "GB"];
     const i = Math.floor(Math.log(bytes) / Math.log(k));
-    return parseFloat((bytes / Math.pow(k, i)).toFixed(2)) + " " + sizes[i];
+    return parseFloat((bytes / k ** i).toFixed(2)) + " " + sizes[i];
   };
 
   const getStatusIcon = () => {
@@ -78,15 +72,11 @@ export function UploadCard({
       className="bg-white rounded-lg border border-gray-200 p-4 shadow-sm"
     >
       <div className="flex items-center space-x-3">
-        <div className="flex-shrink-0">
-          {getStatusIcon()}
-        </div>
-        
+        <div className="flex-shrink-0">{getStatusIcon()}</div>
+
         <div className="flex-1 min-w-0">
           <div className="flex items-center justify-between">
-            <h4 className="text-sm font-medium text-gray-900 truncate">
-              {file.name}
-            </h4>
+            <h4 className="text-sm font-medium text-gray-900 truncate">{file.name}</h4>
             <Button
               variant="ghost"
               size="sm"
@@ -96,30 +86,22 @@ export function UploadCard({
               <X className="h-4 w-4" />
             </Button>
           </div>
-          
+
           <div className="mt-1 flex items-center space-x-2">
-            <span className="text-xs text-gray-500">
-              {formatFileSize(file.size)}
-            </span>
+            <span className="text-xs text-gray-500">{formatFileSize(file.size)}</span>
             <span className="text-xs text-gray-300">•</span>
-            <span className={cn("text-xs font-medium", getStatusColor())}>
-              {getStatusText()}
-            </span>
+            <span className={cn("text-xs font-medium", getStatusColor())}>{getStatusText()}</span>
           </div>
-          
+
           {status === "uploading" && (
             <div className="mt-2">
               <Progress value={progress} className="h-1" />
-              <div className="mt-1 text-xs text-gray-500 text-right">
-                {Math.round(progress)}%
-              </div>
+              <div className="mt-1 text-xs text-gray-500 text-right">{Math.round(progress)}%</div>
             </div>
           )}
-          
+
           {status === "error" && error && (
-            <div className="mt-2 text-xs text-red-600 bg-red-50 p-2 rounded">
-              {error}
-            </div>
+            <div className="mt-2 text-xs text-red-600 bg-red-50 p-2 rounded">{error}</div>
           )}
         </div>
       </div>

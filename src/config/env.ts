@@ -6,7 +6,7 @@ const envSchema = z.object({
   NEXT_PUBLIC_UPLOAD_API: z
     .string()
     .url()
-    .default("https://uploader-worker-v2-prod.haoweiw370.workers.dev/upload"),
+    .default("https://uploader-worker-v2-prod.haoweiw370.workers.dev"),
   NEXT_PUBLIC_HISTORY_API: z
     .string()
     .url()
@@ -57,7 +57,7 @@ function loadEnvConfig() {
     uploadApi: normalizeUrl(
       getEnv(
         "NEXT_PUBLIC_UPLOAD_API",
-        "https://uploader-worker-v2-prod.haoweiw370.workers.dev/upload"
+        "https://uploader-worker-v2-prod.haoweiw370.workers.dev"
       ),
       "/upload"
     ),

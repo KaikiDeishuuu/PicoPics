@@ -1,102 +1,106 @@
-export enum ErrorCode {
-  // Validation errors
-  VALIDATION_ERROR = "VALIDATION_ERROR",
-  FILE_TOO_LARGE = "FILE_TOO_LARGE",
-  INVALID_FILE_TYPE = "INVALID_FILE_TYPE",
-
-  // Upload errors
-  UPLOAD_FAILED = "UPLOAD_FAILED",
-  STORAGE_ERROR = "STORAGE_ERROR",
-
-  // Rate limiting
-  RATE_LIMIT_EXCEEDED = "RATE_LIMIT_EXCEEDED",
-  QUOTA_EXCEEDED = "QUOTA_EXCEEDED",
-
-  // Authentication
-  UNAUTHORIZED = "UNAUTHORIZED",
-  INVALID_TOKEN = "INVALID_TOKEN",
-
-  // Server errors
-  INTERNAL_ERROR = "INTERNAL_ERROR",
-  SERVICE_UNAVAILABLE = "SERVICE_UNAVAILABLE",
-}
-
+// 标准化错误定义
 export class AppError extends Error {
-  public readonly code: ErrorCode;
-  public readonly statusCode: number;
-  public readonly details?: unknown;
-
   constructor(
-    code: ErrorCode,
+    public code: string,
     message: string,
-    statusCode: number = 500,
-    details?: unknown
+    public statusCode: number = 500,
+    public details?: unknown
   ) {
     super(message);
-    this.code = code;
-    this.statusCode = statusCode;
-    this.details = details;
     this.name = "AppError";
   }
 }
 
-// Error factory functions
-export const errors = {
-  validation: (message: string, details?: unknown) =>
-    new AppError(ErrorCode.VALIDATION_ERROR, message, 400, details),
+// 错误代码常量
+export const ERROR_CODES = {
+  // 认证错误
+  UNAUTHORIZED: "UNAUTHORIZED",
+  INVALID_TOKEN: "INVALID_TOKEN",
+  TOKEN_EXPIRED: "TOKEN_EXPIRED",
+
+  // 上传错误
+  FILE_TOO_LARGE: "FILE_TOO_LARGE",
+  INVALID_FILE_TYPE: "INVALID_FILE_TYPE",
+  UPLOAD_FAILED: "UPLOAD_FAILED",
+  QUOTA_EXCEEDED: "QUOTA_EXCEEDED",
+
+  // 数据库错误
+  DATABASE_ERROR: "DATABASE_ERROR",
+  RECORD_NOT_FOUND: "RECORD_NOT_FOUND",
+
+  // 网络错误
+  NETWORK_ERROR: "NETWORK_ERROR",
+  TIMEOUT: "TIMEOUT",
+
+  // 系统错误
+  INTERNAL_ERROR: "INTERNAL_ERROR",
+  VALIDATION_ERROR: "VALIDATION_ERROR",
+} as const;
+
+// 错误工厂函数
+export const createError = {
+  unauthorized: (message = "需要认证") => new AppError(ERROR_CODES.UNAUTHORIZED, message, 401),
+
+  invalidToken: (message = "无效的访问令牌") =>
+    new AppError(ERROR_CODES.INVALID_TOKEN, message, 403),
 
   fileTooLarge: (maxSize: number) =>
-    new AppError(
-      ErrorCode.FILE_TOO_LARGE,
-      `文件大小超过限制 ${maxSize}MB`,
-      413
-    ),
+    new AppError(ERROR_CODES.FILE_TOO_LARGE, `文件大小超过限制 (${maxSize} bytes)`, 400),
 
   invalidFileType: (allowedTypes: string[]) =>
     new AppError(
-      ErrorCode.INVALID_FILE_TYPE,
-      `不支持的文件类型，仅支持: ${allowedTypes.join(", ")}`,
-      415
+      ERROR_CODES.INVALID_FILE_TYPE,
+      `不支持的文件类型。允许的类型: ${allowedTypes.join(", ")}`,
+      400
     ),
 
-  uploadFailed: (details?: unknown) =>
-    new AppError(ErrorCode.UPLOAD_FAILED, "文件上传失败", 500, details),
+  uploadFailed: (message = "上传失败") => new AppError(ERROR_CODES.UPLOAD_FAILED, message, 500),
 
-  rateLimitExceeded: (resetTime?: Date) =>
-    new AppError(
-      ErrorCode.RATE_LIMIT_EXCEEDED,
-      "请求过于频繁，请稍后再试",
-      429,
-      { resetTime }
-    ),
+  quotaExceeded: (message = "上传配额已用完") =>
+    new AppError(ERROR_CODES.QUOTA_EXCEEDED, message, 429),
 
-  quotaExceeded: (resetTime?: Date) =>
-    new AppError(ErrorCode.QUOTA_EXCEEDED, "已达到每日上传配额", 429, {
-      resetTime,
-    }),
+  databaseError: (message = "数据库操作失败") =>
+    new AppError(ERROR_CODES.DATABASE_ERROR, message, 500),
 
-  unauthorized: (message = "未授权访问") =>
-    new AppError(ErrorCode.UNAUTHORIZED, message, 401),
+  recordNotFound: (message = "记录不存在") =>
+    new AppError(ERROR_CODES.RECORD_NOT_FOUND, message, 404),
 
-  internal: (message = "服务器内部错误", details?: unknown) =>
-    new AppError(ErrorCode.INTERNAL_ERROR, message, 500, details),
+  networkError: (message = "网络连接失败") => new AppError(ERROR_CODES.NETWORK_ERROR, message, 0),
+
+  timeout: (message = "请求超时") => new AppError(ERROR_CODES.TIMEOUT, message, 408),
+
+  internalError: (message = "内部服务器错误") =>
+    new AppError(ERROR_CODES.INTERNAL_ERROR, message, 500),
+
+  validationError: (message = "数据验证失败") =>
+    new AppError(ERROR_CODES.VALIDATION_ERROR, message, 400),
 };
 
-// Error response type
-export interface ErrorResponse {
+// 错误处理工具
+export const handleError = (error: unknown): AppError => {
+  if (error instanceof AppError) {
+    return error;
+  }
+
+  if (error instanceof Error) {
+    return new AppError(ERROR_CODES.INTERNAL_ERROR, error.message, 500);
+  }
+
+  return new AppError(ERROR_CODES.INTERNAL_ERROR, "未知错误", 500);
+};
+
+// 错误响应类型
+export type ErrorResponse = {
   success: false;
-  code: ErrorCode;
+  code: string;
   message: string;
   details?: unknown;
-  timestamp: string;
-}
+};
 
-export function createErrorResponse(error: AppError): ErrorResponse {
-  return {
-    success: false,
-    code: error.code,
-    message: error.message,
-    details: error.details,
-    timestamp: new Date().toISOString(),
-  };
-}
+// 错误响应格式化
+export const formatErrorResponse = (error: AppError): ErrorResponse => ({
+  success: false,
+  code: error.code,
+  message: error.message,
+  details: error.details,
+});

@@ -1,16 +1,61 @@
+// 临时禁用 PWA 以避免构建问题
+// const withPWA = require("next-pwa")({
+//   dest: "public",
+//   register: true,
+//   skipWaiting: true,
+//   disable: process.env.NODE_ENV === "development",
+//   runtimeCaching: [
+//     {
+//       urlPattern: /^https:\/\/.*\.(?:png|jpg|jpeg|gif|webp|svg)$/,
+//       handler: "CacheFirst",
+//       options: {
+//         cacheName: "images",
+//         expiration: {
+//           maxEntries: 100,
+//           maxAgeSeconds: 30 * 24 * 60 * 60, // 30 days
+//         },
+//       },
+//     },
+//     {
+//       urlPattern: /^https:\/\/.*\.workers\.dev/,
+//       handler: "NetworkFirst",
+//       options: {
+//         cacheName: "api",
+//         expiration: {
+//           maxEntries: 50,
+//           maxAgeSeconds: 5 * 60, // 5 minutes
+//         },
+//       },
+//     },
+//   ],
+// });
+
 /** @type {import('next').NextConfig} */
 const nextConfig = {
-  // Vercel 部署模式
-  output: "standalone",
+  // 使用 standalone 模式，支持动态渲染（仅生产环境）
+  output: process.env.NODE_ENV === "production" ? "standalone" : undefined,
+
+  // 强制动态渲染
+  trailingSlash: false,
+
+  // 启用实验性功能
+  experimental: {
+    serverActions: {
+      allowedOrigins: ["localhost:3000", "*.vercel.app", "*.pages.dev"],
+    },
+  },
+
+  // 严格模式
+  reactStrictMode: true,
 
   // 环境变量配置
   env: {
     NEXT_PUBLIC_UPLOAD_API:
       process.env.NEXT_PUBLIC_UPLOAD_API ||
-      "https://uploader-worker-v2-prod.haoweiw370.workers.dev/upload",
+      "https://uploader-worker-v2-prod.haoweiw370.workers.dev",
     NEXT_PUBLIC_HISTORY_API:
       process.env.NEXT_PUBLIC_HISTORY_API ||
-      "https://history-worker-v2-prod.haoweiw370.workers.dev/api/history",
+      "https://history-worker-v2-prod.haoweiw370.workers.dev",
     NEXT_PUBLIC_CDN_BASE:
       process.env.NEXT_PUBLIC_CDN_BASE ||
       "https://cdn-worker-v2-prod.haoweiw370.workers.dev",
@@ -78,4 +123,5 @@ const nextConfig = {
   },
 };
 
+// 临时禁用 PWA
 module.exports = nextConfig;

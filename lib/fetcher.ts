@@ -1,4 +1,8 @@
-import { env } from "../src/config/env";
+// 环境配置
+const env = {
+  apiTimeout: 30000,
+  maxUploadSize: 10485760,
+};
 
 export interface UploadProgress {
   loaded: number;
@@ -19,7 +23,8 @@ export interface UploadResult {
 export async function uploadFile(
   endpoint: string,
   file: File,
-  onProgress?: (progress: number) => void
+  onProgress?: (progress: number) => void,
+  accessToken?: string
 ): Promise<UploadResult> {
   return new Promise((resolve, reject) => {
     const xhr = new XMLHttpRequest();
@@ -64,6 +69,11 @@ export async function uploadFile(
 
     // 配置请求
     xhr.open("POST", endpoint);
+
+    // 设置认证头部
+    if (accessToken) {
+      xhr.setRequestHeader("Authorization", `Bearer ${accessToken}`);
+    }
 
     // 创建 FormData
     const formData = new FormData();

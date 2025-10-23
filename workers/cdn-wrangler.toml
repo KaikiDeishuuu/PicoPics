@@ -8,3 +8,4 @@ bucket_name = "next-lambda-image-r2"
 
 [vars]
 ALLOWED_ORIGINS = "*"
+IMAGES_BUCKET_ID = "next-lambda-image-r2"

@@ -1,5 +1,5 @@
-import type { AdminStats, UserInfo, SystemSettings } from "../types";
 import { env } from "../config/env";
+import type { AdminStats, SystemSettings, UserInfo } from "../types";
 
 // 获取 uploader API 的 origin（移除 /upload 后缀）
 const getApiBaseUrl = () => {

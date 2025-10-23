@@ -188,7 +188,7 @@ log_info "部署前端应用..."
 cd "$PROJECT_ROOT"
 
 log_info "构建前端应用..."
-if ! npm run pages:build; then
+if ! npm run build:vercel; then
     log_error "前端应用构建失败"
     exit 1
 fi

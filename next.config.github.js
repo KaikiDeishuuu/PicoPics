@@ -10,10 +10,10 @@ const nextConfig = {
   env: {
     NEXT_PUBLIC_UPLOAD_API:
       process.env.NEXT_PUBLIC_UPLOAD_API ||
-      "https://uploader-worker-v2-prod.haoweiw370.workers.dev/upload",
+      "https://uploader-worker-v2-prod.haoweiw370.workers.dev",
     NEXT_PUBLIC_HISTORY_API:
       process.env.NEXT_PUBLIC_HISTORY_API ||
-      "https://history-worker-v2-prod.haoweiw370.workers.dev/api/history",
+      "https://history-worker-v2-prod.haoweiw370.workers.dev",
     NEXT_PUBLIC_CDN_BASE:
       process.env.NEXT_PUBLIC_CDN_BASE ||
       "https://cdn-worker-v2-prod.haoweiw370.workers.dev",

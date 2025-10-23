@@ -1,9 +1,9 @@
 "use client";
 
-import React from "react";
-import Image from "next/image";
 import { motion } from "framer-motion";
 import { CheckCircle, Copy, ExternalLink } from "lucide-react";
+import Image from "next/image";
+import React from "react";
 import { Button } from "../../components/ui/button";
 import { cn } from "../../lib/utils";
 
@@ -40,17 +40,14 @@ export function ResultDisplay({ data, className }: ResultDisplayProps) {
     const k = 1024;
     const sizes = ["Bytes", "KB", "MB", "GB"];
     const i = Math.floor(Math.log(bytes) / Math.log(k));
-    return parseFloat((bytes / Math.pow(k, i)).toFixed(2)) + " " + sizes[i];
+    return parseFloat((bytes / k ** i).toFixed(2)) + " " + sizes[i];
   };
 
   return (
     <motion.div
       initial={{ opacity: 0, y: 20 }}
       animate={{ opacity: 1, y: 0 }}
-      className={cn(
-        "bg-white rounded-lg border border-green-200 p-6 shadow-sm",
-        className
-      )}
+      className={cn("bg-white rounded-lg border border-green-200 p-6 shadow-sm", className)}
     >
       <div className="flex items-center space-x-2 mb-4">
         <CheckCircle className="h-5 w-5 text-green-500" />
@@ -85,17 +82,13 @@ export function ResultDisplay({ data, className }: ResultDisplayProps) {
         </div>
         <div className="flex justify-between text-sm">
           <span className="text-gray-500">上传时间:</span>
-          <span className="font-medium">
-            {new Date(data.uploadedAt).toLocaleString()}
-          </span>
+          <span className="font-medium">{new Date(data.uploadedAt).toLocaleString()}</span>
         </div>
       </div>
 
       {/* URL 输入框 */}
       <div className="mb-4">
-        <label className="block text-sm font-medium text-gray-700 mb-2">
-          图片链接:
-        </label>
+        <label className="block text-sm font-medium text-gray-700 mb-2">图片链接:</label>
         <div className="flex space-x-2">
           <input
             type="text"
@@ -130,17 +123,10 @@ export function ResultDisplay({ data, className }: ResultDisplayProps) {
 
       {/* 操作按钮 */}
       <div className="flex space-x-2">
-        <Button
-          variant="outline"
-          onClick={() => window.location.reload()}
-          className="flex-1"
-        >
+        <Button variant="outline" onClick={() => window.location.reload()} className="flex-1">
           继续上传
         </Button>
-        <Button
-          onClick={() => (window.location.href = "/gallery")}
-          className="flex-1"
-        >
+        <Button onClick={() => (window.location.href = "/gallery")} className="flex-1">
           查看图库
         </Button>
       </div>

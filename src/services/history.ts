@@ -1,5 +1,5 @@
-import type { ImageHistoryRecord } from "../types";
 import { env } from "../config/env";
+import type { ImageHistoryRecord } from "../types";
 
 const HISTORY_API_URL = env.historyApi;
 

@@ -1,7 +1,7 @@
+import type { D1Database } from "@cloudflare/workers-types";
 import { Hono } from "hono";
 import { cors } from "hono/cors";
 import { logger } from "hono/logger";
-import type { D1Database } from "@cloudflare/workers-types";
 
 interface Env {
   DB: D1Database;
@@ -96,20 +96,49 @@ app.get("/api/history", async (c) => {
   }
 
   try {
-    const records = await env.DB.prepare(
-      `SELECT * FROM user_images WHERE user_id = ? ORDER BY created_at DESC`
-    )
-      .bind(authResult.user.id.toString())
-      .all();
+    // 先检查表结构
+    const tableInfo = await env.DB.prepare(
+      "PRAGMA table_info(user_images)"
+    ).all();
+    console.log("Table structure:", tableInfo.results);
+
+    // 尝试不同的列名
+    let records;
+    try {
+      records = await env.DB.prepare(
+        `SELECT * FROM user_images WHERE user_id = ? ORDER BY upload_date DESC`
+      )
+        .bind(authResult.user.id.toString())
+        .all();
+    } catch (uploadDateError) {
+      console.error("upload_date query failed:", uploadDateError);
+      // 如果 upload_date 不存在，尝试 created_at
+      try {
+        records = await env.DB.prepare(
+          `SELECT * FROM user_images WHERE user_id = ? ORDER BY created_at DESC`
+        )
+          .bind(authResult.user.id.toString())
+          .all();
+      } catch (createdAtError) {
+        console.error("created_at query failed:", createdAtError);
+        // 如果都不存在，使用默认排序
+        records = await env.DB.prepare(
+          `SELECT * FROM user_images WHERE user_id = ?`
+        )
+          .bind(authResult.user.id.toString())
+          .all();
+      }
+    }
 
     const historyRecords: ImageHistoryRecord[] =
       records.results?.map((record: any) => ({
-        id: record.id,
-        fileName: record.file_name,
+        id: record.image_id || record.id,
+        fileName: record.filename,
         url: `https://cdn-worker-v2-prod.haoweiw370.workers.dev/${record.r2_object_key}`,
         size: record.file_size,
-        type: record.file_type,
-        uploadedAt: record.created_at,
+        type: record.mime_type,
+        uploadedAt:
+          record.upload_date || record.created_at || new Date().toISOString(),
         r2ObjectKey: record.r2_object_key,
       })) || [];
 

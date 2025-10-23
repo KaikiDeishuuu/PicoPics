@@ -1,7 +1,6 @@
 # Dependencies
 node_modules/
 .npm
-package-lock.json
 
 # Build outputs
 dist/
@@ -13,10 +12,12 @@ build/
 .env
 .env.local
 .env*.local
-wrangler.toml.backup
+.env.production
+.env.development
 
 # Cloudflare Workers configuration (contains sensitive account info)
 wrangler.toml
+workers/*/wrangler.toml
 
 # TypeScript
 *.tsbuildinfo
@@ -50,5 +51,15 @@ yarn-error.log*
 # Test coverage
 coverage/
 
-# Deprecated/Unused (optional)
-CFworkerImageENGINE/
+# Vercel
+.vercel
+
+# Test files
+test-*.jpg
+test-*.png
+test-*.txt
+test-*.html
+
+# Backup files
+*.backup
+*-backup

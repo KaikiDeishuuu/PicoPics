@@ -1,124 +1,84 @@
 import { z } from "zod";
 
-// File validation schemas
-export const fileSchema = z.object({
-  name: z.string().min(1, "文件名不能为空"),
-  size: z.number().positive("文件大小必须大于0"),
-  type: z.string().min(1, "文件类型不能为空"),
-  lastModified: z.number().optional(),
-});
-
-export const uploadRequestSchema = z.object({
-  file: z.instanceof(File).refine((file) => file.size > 0, "文件不能为空"),
-  metadata: z
-    .object({
-      alt: z.string().optional(),
-      caption: z.string().optional(),
-    })
-    .optional(),
-});
-
-export const uploadResponseSchema = z.object({
-  success: z.literal(true),
-  data: z.object({
-    id: z.string(),
-    url: z.string().url(),
-    thumbnailUrl: z.string().url().optional(),
-    filename: z.string(),
-    size: z.number(),
-    type: z.string(),
-    uploadedAt: z.string().datetime(),
-  }),
-});
-
-// API response schemas
-export const errorResponseSchema = z.object({
-  success: z.literal(false),
-  code: z.string(),
-  message: z.string(),
-  details: z.any().optional(),
-  timestamp: z.string().datetime(),
-});
-
-export const successResponseSchema = <T extends z.ZodType>(dataSchema: T) =>
-  z.object({
-    success: z.literal(true),
-    data: dataSchema,
-  });
-
-// User schemas
-export const userSchema = z.object({
+// 上传相关 Schema
+export const UploadSchema = z.object({
   id: z.string(),
-  username: z.string(),
-  avatar: z.string().url().optional(),
-  email: z.string().email().optional(),
-});
-
-export const githubUserSchema = z.object({
-  id: z.number(),
-  login: z.string(),
-  avatar_url: z.string().url(),
-  name: z.string().nullable(),
-  email: z.string().email().nullable(),
-});
-
-// Quota schemas
-export const quotaSchema = z.object({
-  used: z.number(),
-  limit: z.number(),
-  resetTime: z.string().datetime(),
-});
-
-export const quotaResponseSchema = successResponseSchema(quotaSchema);
-
-// Upload history schemas
-export const uploadRecordSchema = z.object({
-  id: z.string(),
-  filename: z.string(),
   url: z.string().url(),
-  thumbnailUrl: z.string().url().optional(),
-  size: z.number(),
+  filename: z.string(),
+  size: z.number().positive(),
   type: z.string(),
   uploadedAt: z.string().datetime(),
-  userId: z.string().optional(),
+  r2ObjectKey: z.string(),
 });
 
-export const uploadHistoryResponseSchema = successResponseSchema(
-  z.object({
-    uploads: z.array(uploadRecordSchema),
-    total: z.number(),
-    page: z.number(),
-    limit: z.number(),
-  })
-);
-
-// Form schemas
-export const uploadFormSchema = z.object({
-  file: z
-    .instanceof(File)
-    .refine((file) => file.size > 0, "请选择文件")
-    .refine(
-      (file) => file.size <= 10 * 1024 * 1024, // 10MB
-      "文件大小不能超过10MB"
-    )
-    .refine(
-      (file) =>
-        ["image/jpeg", "image/png", "image/gif", "image/webp"].includes(
-          file.type
-        ),
-      "仅支持 JPEG、PNG、GIF、WebP 格式的图片"
-    ),
-  alt: z.string().max(500, "描述不能超过500个字符").optional(),
-  caption: z.string().max(200, "标题不能超过200个字符").optional(),
+export const UploadRequestSchema = z.object({
+  image: z.instanceof(File, { message: "请选择图片文件" }),
 });
 
-// Type exports
-export type FileInfo = z.infer<typeof fileSchema>;
-export type UploadRequest = z.infer<typeof uploadRequestSchema>;
-export type UploadResponse = z.infer<typeof uploadResponseSchema>;
-export type ErrorResponse = z.infer<typeof errorResponseSchema>;
-export type User = z.infer<typeof userSchema>;
-export type GitHubUser = z.infer<typeof githubUserSchema>;
-export type Quota = z.infer<typeof quotaSchema>;
-export type UploadRecord = z.infer<typeof uploadRecordSchema>;
-export type UploadForm = z.infer<typeof uploadFormSchema>;
+// 历史记录 Schema
+export const ImageHistorySchema = z.object({
+  id: z.number(),
+  fileName: z.string(),
+  url: z.string().url(),
+  size: z.number().positive(),
+  type: z.string(),
+  uploadedAt: z.string().datetime(),
+  r2ObjectKey: z.string(),
+});
+
+// 用户 Schema
+export const UserSchema = z.object({
+  id: z.number(),
+  login: z.string(),
+  name: z.string().optional(),
+  email: z.string().email().optional(),
+  avatar_url: z.string().url().optional(),
+});
+
+// API 响应 Schema
+export const ApiResponseSchema = z.object({
+  success: z.boolean(),
+  data: z.any().optional(),
+  error: z.string().optional(),
+  code: z.string().optional(),
+  message: z.string().optional(),
+});
+
+// 配额 Schema
+export const QuotaSchema = z.object({
+  dailyBytes: z.number().nonnegative(),
+  uploadCount: z.number().nonnegative(),
+  lastUpload: z.number().nonnegative(),
+});
+
+// 管理员统计 Schema
+export const AdminStatsSchema = z.object({
+  totalImages: z.number().nonnegative(),
+  totalUsers: z.number().nonnegative(),
+  totalSize: z.string(),
+  todayUploads: z.number().nonnegative(),
+});
+
+// 环境变量 Schema
+export const EnvSchema = z.object({
+  NEXT_PUBLIC_UPLOAD_API: z.string().url(),
+  NEXT_PUBLIC_HISTORY_API: z.string().url(),
+  NEXT_PUBLIC_ADMIN_API: z.string().url(),
+  NEXT_PUBLIC_CDN_URL: z.string().url(),
+  NEXT_PUBLIC_GITHUB_CLIENT_ID: z.string().optional(),
+  NEXT_PUBLIC_DEBUG: z.boolean().default(false),
+  NEXT_PUBLIC_API_TIMEOUT: z.number().positive().default(30000),
+  NEXT_PUBLIC_MAX_UPLOAD_SIZE: z.number().positive().default(10485760),
+});
+
+// 类型导出
+export type UploadResult = z.infer<typeof UploadSchema>;
+export type UploadRequest = z.infer<typeof UploadRequestSchema>;
+export type ImageHistoryRecord = z.infer<typeof ImageHistorySchema>;
+export type User = z.infer<typeof UserSchema>;
+export type ApiResponse<T = unknown> = z.infer<typeof ApiResponseSchema> & {
+  data?: T;
+};
+export type Quota = z.infer<typeof QuotaSchema>;
+export type AdminStats = z.infer<typeof AdminStatsSchema>;
+export type EnvConfig = z.infer<typeof EnvSchema>;

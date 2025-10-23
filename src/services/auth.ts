@@ -1,5 +1,5 @@
-import type { GitHubUser } from "../types";
 import { env } from "../config/env";
+import type { GitHubUser } from "../types";
 
 // 获取 API 基础 URL
 const getApiBaseUrl = () => {
