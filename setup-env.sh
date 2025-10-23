@@ -191,7 +191,7 @@ ALLOWED_ORIGINS = "*"
 EOF
 
 # 前端应用
-cat > CFworkerImageFRONTED/wrangler.toml << EOF
+cat > wrangler.toml << EOF
 [build]
 command = "npm run build"
 publish = "out"
@@ -295,7 +295,7 @@ echo -e "${GREEN}✅ CDN Worker 配置完成${NC}"
 
 # 配置前端应用
 echo -e "${BLUE}配置前端应用...${NC}"
-cd ../CFworkerImageFRONTED
+cd ..
 
 echo "https://uploader-worker-prod.$ACCOUNT_ID.workers.dev/upload" | npx wrangler pages secret put NEXT_PUBLIC_UPLOAD_API
 echo "https://r2-browser-worker-prod.$ACCOUNT_ID.workers.dev" | npx wrangler pages secret put NEXT_PUBLIC_ADMIN_API

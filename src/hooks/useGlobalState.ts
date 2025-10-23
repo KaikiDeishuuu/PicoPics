@@ -55,7 +55,9 @@ export function useHistoryRefresh() {
 export function useAdminStatsRefresh() {
   const { adminStatsRefreshTrigger } = useGlobalState();
   const refreshAdminStats = useCallback(() => {
-    updateGlobalState({ adminStatsRefreshTrigger: adminStatsRefreshTrigger + 1 });
+    updateGlobalState({
+      adminStatsRefreshTrigger: adminStatsRefreshTrigger + 1,
+    });
   }, [adminStatsRefreshTrigger]);
   return { refreshTrigger: adminStatsRefreshTrigger, refreshAdminStats };
 }

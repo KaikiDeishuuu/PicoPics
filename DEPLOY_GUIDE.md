@@ -190,7 +190,7 @@ npm run deploy:prod
 ## 步骤 5：部署前端
 
 ```bash
-cd ../CFworkerImageFRONTED
+cd .
 
 # 安装依赖
 npm install
@@ -229,7 +229,7 @@ wrangler pages deploy .next --project-name=image-uploader
 3. 配置构建设置：
    - **Build command**: `npm run build`
    - **Build output directory**: `.next`
-   - **Root directory**: `CFworkerImageFRONTED`
+   - **Root directory**: `.` (current directory)
 4. 添加环境变量：
    - `NEXT_PUBLIC_UPLOAD_API`: 你的上传 API 地址
    - `NEXT_PUBLIC_HISTORY_API`: 你的历史记录 API 地址
@@ -385,7 +385,7 @@ cd ../history-worker && npm install && npm run deploy:prod
 cd ../cdn-worker && npm install && npm run deploy:prod
 
 # 部署前端
-cd ../CFworkerImageFRONTED && npm install && npm run build && wrangler pages deploy .next
+cd . && npm install && npm run build && wrangler pages deploy .next
 
 # 查看日志
 wrangler tail --name uploader-worker-prod

@@ -138,7 +138,7 @@ export function ResultDisplay({ data, className }: ResultDisplayProps) {
           继续上传
         </Button>
         <Button
-          onClick={() => window.location.href = "/gallery"}
+          onClick={() => (window.location.href = "/gallery")}
           className="flex-1"
         >
           查看图库

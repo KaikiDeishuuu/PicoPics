@@ -44,7 +44,7 @@ cd uploader-worker && npm install && cd ..
 cd history-worker && npm install && cd ..
 cd r2-browser-worker && npm install && cd ..
 cd cdn-worker && npm install && cd ..
-cd CFworkerImageFRONTED && npm install && cd ..
+npm install
 ```
 
 ### 2. 运行自动配置脚本
@@ -218,7 +218,7 @@ CDN Worker 负责图片分发和缓存优化。
 
 ### 本地开发环境变量
 
-编辑 `CFworkerImageFRONTED/.env.local` 文件：
+编辑 `.env.local` 文件：
 
 ```env
 # Cloudflare 配置
@@ -290,7 +290,7 @@ cd uploader-worker
 npx wrangler secret list --env production
 
 # 查看 Pages 环境变量
-cd CFworkerImageFRONTED
+# 在项目根目录
 npx wrangler pages secret list
 ```
 
