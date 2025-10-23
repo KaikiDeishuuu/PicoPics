@@ -1,111 +1,99 @@
-import { z } from "zod";
-import { ErrorResponse, errors } from "./errors";
+import { env } from "../src/config/env";
 
-// File upload with progress tracking (client-side only)
+export interface UploadProgress {
+  loaded: number;
+  total: number;
+  percentage: number;
+}
+
+export interface UploadResult {
+  success: boolean;
+  url?: string;
+  fileName?: string;
+  size?: number;
+  type?: string;
+  uploadedAt?: string;
+  error?: string;
+}
+
 export async function uploadFile(
-  url: string,
+  endpoint: string,
   file: File,
   onProgress?: (progress: number) => void
-): Promise<unknown> {
+): Promise<UploadResult> {
   return new Promise((resolve, reject) => {
     const xhr = new XMLHttpRequest();
 
+    // 设置进度监听
     xhr.upload.addEventListener("progress", (event) => {
       if (event.lengthComputable && onProgress) {
-        const progress = (event.loaded / event.total) * 100;
-        onProgress(progress);
+        const percentage = Math.round((event.loaded / event.total) * 100);
+        onProgress(percentage);
       }
     });
 
+    // 设置响应处理
     xhr.addEventListener("load", () => {
       if (xhr.status >= 200 && xhr.status < 300) {
         try {
           const response = JSON.parse(xhr.responseText);
           resolve(response);
         } catch {
-          reject(new Error("Invalid JSON response"));
+          reject(new Error("Invalid response format"));
         }
       } else {
         try {
           const errorResponse = JSON.parse(xhr.responseText);
-          reject(new Error(errorResponse.message || "Upload failed"));
+          reject(new Error(errorResponse.error || `HTTP ${xhr.status}`));
         } catch {
-          reject(new Error(`Upload failed with status ${xhr.status}`));
+          reject(new Error(`HTTP ${xhr.status}: ${xhr.statusText}`));
         }
       }
     });
 
+    // 设置错误处理
     xhr.addEventListener("error", () => {
-      reject(new Error("Network error during upload"));
+      reject(new Error("Network error"));
     });
 
-    xhr.addEventListener("abort", () => {
-      reject(new Error("Upload aborted"));
+    // 设置超时
+    xhr.timeout = env.apiTimeout;
+    xhr.addEventListener("timeout", () => {
+      reject(new Error("Request timeout"));
     });
 
-    xhr.open("POST", url);
-    xhr.setRequestHeader("Accept", "application/json");
+    // 配置请求
+    xhr.open("POST", endpoint);
 
+    // 创建 FormData
     const formData = new FormData();
-    formData.append("file", file);
+    formData.append("image", file);
 
+    // 发送请求
     xhr.send(formData);
   });
 }
 
-// Client-side fetch wrapper
-export async function clientFetch<T extends z.ZodType>(
+export async function fetchWithTimeout(
   url: string,
   options: RequestInit = {},
-  responseSchema?: T
-): Promise<z.infer<T>> {
+  timeout: number = env.apiTimeout
+): Promise<Response> {
+  const controller = new AbortController();
+  const timeoutId = setTimeout(() => controller.abort(), timeout);
+
   try {
-    const response = await fetch(url, options);
-
-    if (!response.ok) {
-      if (response.status === 413) {
-        throw errors.fileTooLarge(10);
-      }
-
-      if (response.status === 415) {
-        throw errors.invalidFileType([
-          "image/jpeg",
-          "image/png",
-          "image/gif",
-          "image/webp",
-        ]);
-      }
-
-      if (response.status === 429) {
-        throw errors.rateLimitExceeded();
-      }
-
-      if (response.status === 401) {
-        throw errors.unauthorized();
-      }
-
-      throw new Error(`HTTP ${response.status}: ${response.statusText}`);
+    const response = await fetch(url, {
+      ...options,
+      signal: controller.signal,
+    });
+    clearTimeout(timeoutId);
+    return response;
+  } catch (err) {
+    clearTimeout(timeoutId);
+    if (err instanceof Error && err.name === "AbortError") {
+      throw new Error("Request timeout");
     }
-
-    const data = await response.json();
-
-    // Check for error response
-    if (data && typeof data === "object" && data.success === false) {
-      const errorResponse = data as ErrorResponse;
-      throw new Error(`API Error: ${errorResponse.message}`);
-    }
-
-    // Validate response if schema provided
-    if (responseSchema) {
-      return responseSchema.parse(data);
-    }
-
-    return data;
-  } catch (error) {
-    if (error instanceof z.ZodError) {
-      throw errors.validation("响应数据格式错误", error.errors);
-    }
-
-    throw error;
+    throw err;
   }
 }
