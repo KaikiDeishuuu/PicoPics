@@ -69,39 +69,39 @@ export function UploadCard({ file, progress, status, error, onRemove }: UploadCa
       initial={{ opacity: 0, y: 20 }}
       animate={{ opacity: 1, y: 0 }}
       exit={{ opacity: 0, y: -20 }}
-      className="bg-white rounded-lg border border-gray-200 p-4 shadow-sm"
+      className="bg-black/80 rounded-lg border border-white/20 p-4 shadow-sm"
     >
       <div className="flex items-center space-x-3">
         <div className="flex-shrink-0">{getStatusIcon()}</div>
 
         <div className="flex-1 min-w-0">
           <div className="flex items-center justify-between">
-            <h4 className="text-sm font-medium text-gray-900 truncate">{file.name}</h4>
+            <h4 className="text-sm font-medium text-white truncate">{file.name}</h4>
             <Button
               variant="ghost"
               size="sm"
               onClick={onRemove}
-              className="h-6 w-6 p-0 text-gray-400 hover:text-gray-600"
+              className="h-6 w-6 p-0 text-white/60 hover:text-white hover:bg-white/10"
             >
               <X className="h-4 w-4" />
             </Button>
           </div>
 
           <div className="mt-1 flex items-center space-x-2">
-            <span className="text-xs text-gray-500">{formatFileSize(file.size)}</span>
-            <span className="text-xs text-gray-300">•</span>
+            <span className="text-xs text-white/70">{formatFileSize(file.size)}</span>
+            <span className="text-xs text-white/40">•</span>
             <span className={cn("text-xs font-medium", getStatusColor())}>{getStatusText()}</span>
           </div>
 
           {status === "uploading" && (
             <div className="mt-2">
               <Progress value={progress} className="h-1" />
-              <div className="mt-1 text-xs text-gray-500 text-right">{Math.round(progress)}%</div>
+              <div className="mt-1 text-xs text-white/70 text-right">{Math.round(progress)}%</div>
             </div>
           )}
 
           {status === "error" && error && (
-            <div className="mt-2 text-xs text-red-600 bg-red-50 p-2 rounded">{error}</div>
+            <div className="mt-2 text-xs text-red-400 bg-red-900/30 p-2 rounded border border-red-400/30">{error}</div>
           )}
         </div>
       </div>

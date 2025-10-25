@@ -2,13 +2,21 @@
 
 import { useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
+import { motion } from "framer-motion";
+import { DynamicBackground } from "@/components/ui/dynamic-background";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Button } from "@/components/ui/button";
+import { LoadingSpinner } from "@/components/ui/loading";
+import { CheckCircle, XCircle, Loader2 } from "lucide-react";
 
 // 强制动态渲染，避免静态化
 export const dynamic = "force-dynamic";
 
 export default function AuthCallback() {
   const router = useRouter();
-  const [status, setStatus] = useState<"loading" | "success" | "error">("loading");
+  const [status, setStatus] = useState<"loading" | "success" | "error">(
+    "loading"
+  );
   const [error, setError] = useState<string | null>(null);
 
   useEffect(() => {
@@ -86,71 +94,105 @@ export default function AuthCallback() {
 
   if (status === "loading") {
     return (
-      <main className="min-h-screen bg-gradient-to-br from-blue-50 to-indigo-100 flex items-center justify-center">
-        <div className="text-center">
-          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600 mx-auto mb-4"></div>
-          <h1 className="text-2xl font-bold text-gray-900 mb-2">正在处理认证...</h1>
-          <p className="text-gray-600">请稍候，我们正在验证您的身份</p>
-        </div>
-      </main>
+      <DynamicBackground
+        variant="rainbow"
+        intensity="medium"
+        speed="slow"
+        className="min-h-screen"
+      >
+        <motion.div
+          initial={{ opacity: 0, y: 20 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.6 }}
+          className="min-h-screen flex items-center justify-center"
+        >
+          <Card className="card-modern max-w-md mx-4">
+            <CardHeader className="text-center">
+              <div className="flex justify-center mb-4">
+                <Loader2 className="h-12 w-12 text-white animate-spin" />
+              </div>
+              <CardTitle className="text-2xl text-white">
+                Processing Authentication
+              </CardTitle>
+            </CardHeader>
+            <CardContent className="text-center">
+              <p className="text-white/80">
+                Please wait while we verify your identity...
+              </p>
+            </CardContent>
+          </Card>
+        </motion.div>
+      </DynamicBackground>
     );
   }
 
   if (status === "error") {
     return (
-      <main className="min-h-screen bg-gradient-to-br from-blue-50 to-indigo-100 flex items-center justify-center">
-        <div className="text-center max-w-md mx-auto">
-          <div className="bg-red-50 border border-red-200 rounded-lg p-6">
-            <div className="flex">
-              <div className="flex-shrink-0">
-                <svg className="h-5 w-5 text-red-400" viewBox="0 0 20 20" fill="currentColor">
-                  <path
-                    fillRule="evenodd"
-                    d="M10 18a8 8 0 100-16 8 8 0 000 16zM8.707 7.293a1 1 0 00-1.414 1.414L8.586 10l-1.293 1.293a1 1 0 101.414 1.414L10 11.414l1.293 1.293a1 1 0 001.414-1.414L11.414 10l1.293-1.293a1 1 0 00-1.414-1.414L10 8.586 8.707 7.293z"
-                    clipRule="evenodd"
-                  />
-                </svg>
+      <DynamicBackground
+        variant="sunset"
+        intensity="medium"
+        speed="slow"
+        className="min-h-screen"
+      >
+        <motion.div
+          initial={{ opacity: 0, y: 20 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.6 }}
+          className="min-h-screen flex items-center justify-center"
+        >
+          <Card className="card-modern max-w-md mx-4">
+            <CardHeader className="text-center">
+              <div className="flex justify-center mb-4">
+                <XCircle className="h-12 w-12 text-red-400" />
               </div>
-              <div className="ml-3">
-                <h3 className="text-sm font-medium text-red-800">认证失败</h3>
-                <div className="mt-2 text-sm text-red-700">{error}</div>
-              </div>
-            </div>
-          </div>
-          <div className="mt-6">
-            <button
-              onClick={() => router.push("/")}
-              className="bg-blue-600 hover:bg-blue-700 text-white font-semibold py-2 px-4 rounded-lg transition-colors"
-            >
-              返回首页
-            </button>
-          </div>
-        </div>
-      </main>
+              <CardTitle className="text-2xl text-red-400">
+                Authentication Failed
+              </CardTitle>
+            </CardHeader>
+            <CardContent className="text-center space-y-4">
+              <p className="text-white/80">{error}</p>
+              <Button
+                onClick={() => router.push("/")}
+                className="w-full bg-black/80 text-white border-white/20 hover:bg-white/10"
+              >
+                Back to Home
+              </Button>
+            </CardContent>
+          </Card>
+        </motion.div>
+      </DynamicBackground>
     );
   }
 
   return (
-    <main className="min-h-screen bg-gradient-to-br from-blue-50 to-indigo-100 flex items-center justify-center">
-      <div className="text-center">
-        <div className="bg-green-50 border border-green-200 rounded-lg p-6 max-w-md mx-auto">
-          <div className="flex">
-            <div className="flex-shrink-0">
-              <svg className="h-5 w-5 text-green-400" viewBox="0 0 20 20" fill="currentColor">
-                <path
-                  fillRule="evenodd"
-                  d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z"
-                  clipRule="evenodd"
-                />
-              </svg>
+    <DynamicBackground
+      variant="ocean"
+      intensity="medium"
+      speed="slow"
+      className="min-h-screen"
+    >
+      <motion.div
+        initial={{ opacity: 0, y: 20 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={{ duration: 0.6 }}
+        className="min-h-screen flex items-center justify-center"
+      >
+        <Card className="card-modern max-w-md mx-4">
+          <CardHeader className="text-center">
+            <div className="flex justify-center mb-4">
+              <CheckCircle className="h-12 w-12 text-green-400" />
             </div>
-            <div className="ml-3">
-              <h3 className="text-sm font-medium text-green-800">认证成功</h3>
-              <div className="mt-2 text-sm text-green-700">您已成功登录，正在跳转到首页...</div>
-            </div>
-          </div>
-        </div>
-      </div>
-    </main>
+            <CardTitle className="text-2xl text-green-400">
+              Authentication Successful
+            </CardTitle>
+          </CardHeader>
+          <CardContent className="text-center">
+            <p className="text-white/80">
+              You have successfully logged in, redirecting to homepage...
+            </p>
+          </CardContent>
+        </Card>
+      </motion.div>
+    </DynamicBackground>
   );
 }

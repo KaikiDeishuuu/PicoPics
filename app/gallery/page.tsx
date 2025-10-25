@@ -1,89 +1,114 @@
 "use client";
 
-import Image from "next/image";
-import Link from "next/link";
-import { useEffect, useState } from "react";
+import { useState, useEffect } from "react";
+import { motion, AnimatePresence } from "framer-motion";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { useUserImages, useDeleteImage } from "@/lib/hooks/use-queries";
+import { ImageGallery } from "@/components/ui/gallery";
+import { DynamicBackground } from "@/components/ui/dynamic-background";
+import { Button } from "@/components/ui/button";
+import {
+  Card,
+  CardContent,
+  CardDescription,
+  CardHeader,
+  CardTitle,
+} from "@/components/ui/card";
+import { LoadingSpinner } from "@/components/ui/loading";
+import {
+  ModernLoading,
+  ImageGridSkeleton,
+} from "@/components/ui/modern-loading";
+import { ImageBadge, SimpleImageBadge } from "@/components/ui/image-badge";
+import {
+  NotificationContainer,
+  useNotifications,
+} from "@/components/ui/notification";
+import { Footer } from "@/components/ui/footer";
+import {
+  pageVariants,
+  pageTransition,
+  cardHoverVariants,
+  listItemVariants,
+  StaggerContainer,
+  AnimatedDiv,
+} from "@/components/ui/animations";
+import {
+  ArrowLeft,
+  Upload,
+  Image as ImageIcon,
+  Trash2,
+  Download,
+  Share2,
+  Search,
+  Filter,
+  Grid,
+  List,
+  RefreshCw,
+} from "lucide-react";
+import Link from "next/link";
+import { useRouter } from "next/navigation";
 
-// 强制动态渲染，避免静态化
+// 强制动态渲染
 export const dynamic = "force-dynamic";
+
+interface User {
+  id: number;
+  login: string;
+  name?: string;
+  email?: string;
+  avatar_url?: string;
+}
 
 interface ImageRecord {
   id: string;
-  fileName: string;
   url: string;
+  filename: string;
+  uploadDate: string;
   size: number;
-  type: string;
-  uploadedAt: string;
-  r2ObjectKey: string;
-}
-
-interface CopyFormat {
-  name: string;
-  format: (url: string, fileName: string) => string;
+  mimeType: string;
 }
 
 function GalleryContent() {
   const [isAuthenticated, setIsAuthenticated] = useState(false);
-  const [user, setUser] = useState<{
-    login: string;
-    [key: string]: unknown;
-  } | null>(null);
+  const [user, setUser] = useState<User | null>(null);
   const [accessToken, setAccessToken] = useState<string | null>(null);
-  const [selectedImage, setSelectedImage] = useState<ImageRecord | null>(null);
-  const [showCopyModal, setShowCopyModal] = useState(false);
-  const [cleaning, setCleaning] = useState(false);
+  const [searchTerm, setSearchTerm] = useState("");
+  const [viewMode, setViewMode] = useState<"grid" | "list">("grid");
+  const [sortBy, setSortBy] = useState<"date" | "name" | "size">("date");
+  const [filterBy, setFilterBy] = useState<"all" | "images" | "videos">("all");
+  const [selectedImages, setSelectedImages] = useState<string[]>([]);
+  const [isSelectMode, setIsSelectMode] = useState(false);
+  const router = useRouter();
+  const { notifications, addNotification, removeNotification } =
+    useNotifications();
 
   // React Query hooks
   const {
     data: imagesResponse,
     isLoading,
     error,
+    refetch,
   } = useUserImages(accessToken || undefined);
-  const images = Array.isArray(imagesResponse?.data) ? imagesResponse.data : [];
 
-  // 调试信息
-  console.log("Gallery images data:", {
-    imagesResponse,
-    images,
-    isLoading,
-    error,
-  });
+  // 处理API响应数据
+  const images =
+    imagesResponse?.success && Array.isArray(imagesResponse.data)
+      ? imagesResponse.data
+      : [];
   const deleteMutation = useDeleteImage(accessToken || undefined);
 
-  // 定义多种引用格式
-  const copyFormats: CopyFormat[] = [
-    {
-      name: "直接链接",
-      format: (url: string) => url,
-    },
-    {
-      name: "Markdown 图片",
-      format: (url: string, fileName: string) => `![${fileName}](${url})`,
-    },
-    {
-      name: "HTML 图片",
-      format: (url: string, fileName: string) =>
-        `<img src="${url}" alt="${fileName}" />`,
-    },
-    {
-      name: "BBCode 图片",
-      format: (url: string) => `[img]${url}[/img]`,
-    },
-    {
-      name: "Markdown 链接",
-      format: (url: string, fileName: string) => `[${fileName}](${url})`,
-    },
-    {
-      name: "HTML 链接",
-      format: (url: string, fileName: string) =>
-        `<a href="${url}">${fileName}</a>`,
-    },
-  ];
+  // 调试信息
+  console.log("Gallery Debug Info:");
+  console.log("imagesResponse:", imagesResponse);
+  console.log("images array:", images);
+  console.log("isLoading:", isLoading);
+  console.log("error:", error);
+  console.log("accessToken:", accessToken);
+  console.log("API Base URL:", process.env.NEXT_PUBLIC_HISTORY_API);
 
+  // 认证检查
   useEffect(() => {
-    // 检查认证状态
     if (typeof window === "undefined") return;
 
     const authData = localStorage.getItem("auth");
@@ -97,382 +122,461 @@ function GalleryContent() {
         }
       } catch (error) {
         console.error("Failed to parse auth data:", error);
+        localStorage.removeItem("auth");
       }
     }
   }, []);
 
-  const formatFileSize = (bytes: number) => {
-    if (bytes === 0) return "0 Bytes";
-    const k = 1024;
-    const sizes = ["Bytes", "KB", "MB", "GB"];
-    const i = Math.floor(Math.log(bytes) / Math.log(k));
-    return parseFloat((bytes / k ** i).toFixed(2)) + " " + sizes[i];
-  };
+  // 检查 URL 参数中的 refresh 标志
+  useEffect(() => {
+    if (typeof window === "undefined") return;
 
-  const formatDate = (dateString: string) => {
-    return new Date(dateString).toLocaleString("zh-CN");
-  };
-
-  // 删除图片
-  const handleDeleteImage = async (imageId: string, r2ObjectKey: string) => {
-    if (!confirm("确定要删除这张图片吗？此操作不可撤销。")) {
-      return;
+    const urlParams = new URLSearchParams(window.location.search);
+    if (urlParams.get("refresh")) {
+      // 刷新数据
+      refetch();
+      // 清理 URL 参数
+      window.history.replaceState({}, document.title, window.location.pathname);
     }
+  }, [refetch]);
 
-    try {
-      await deleteMutation.mutateAsync(r2ObjectKey);
-    } catch (err) {
-      console.error("Delete image error:", err);
-      alert(err instanceof Error ? err.message : "删除失败");
-    }
-  };
-
-  // 复制到剪贴板
-  const copyToClipboard = async (text: string) => {
-    try {
-      await navigator.clipboard.writeText(text);
-      // 可以添加一个 toast 通知
-      alert("已复制到剪贴板！");
-    } catch (err) {
-      console.error("Copy failed:", err);
-      alert("复制失败，请手动复制");
-    }
-  };
-
-  // 打开复制模态框
-  const openCopyModal = (image: ImageRecord) => {
-    setSelectedImage(image);
-    setShowCopyModal(true);
-  };
-
-  // 清空存储
-  const clearStorage = async () => {
-    if (
-      !confirm(
-        "⚠️ 警告：这将删除您的所有图片和记录！\n\n此操作不可撤销，确定要继续吗？"
-      )
-    ) {
-      return;
-    }
-
-    // 二次确认
-    if (
-      !confirm(
-        "最后确认：您确定要清空所有存储吗？\n\n这将删除：\n- 所有 R2 存储的图片文件\n- 所有数据库记录\n\n此操作无法撤销！"
-      )
-    ) {
-      return;
-    }
-
-    try {
-      setCleaning(true);
-
-      if (typeof window === "undefined") {
-        throw new Error("服务端渲染时无法清空存储");
+  // 过滤和排序图片
+  const filteredImages = images
+    .filter((image: any) => {
+      const matchesSearch = image.fileName
+        ? image.fileName.toLowerCase().includes(searchTerm.toLowerCase())
+        : true;
+      const matchesFilter =
+        filterBy === "all" ||
+        (filterBy === "images" && image.type?.startsWith("image/")) ||
+        (filterBy === "videos" && image.type?.startsWith("video/"));
+      return matchesSearch && matchesFilter;
+    })
+    .sort((a: any, b: any) => {
+      switch (sortBy) {
+        case "name":
+          return (a.fileName || "").localeCompare(b.fileName || "");
+        case "size":
+          return (b.size || 0) - (a.size || 0);
+        case "date":
+        default:
+          return (
+            new Date(b.uploadedAt || 0).getTime() -
+            new Date(a.uploadedAt || 0).getTime()
+          );
       }
+    });
 
-      const authData = localStorage.getItem("auth");
-      if (!authData) {
-        throw new Error("未找到认证信息");
-      }
+  // 调试filteredImages
+  console.log("filteredImages:", filteredImages);
 
-      const auth = JSON.parse(authData);
-      if (!auth.accessToken) {
-        throw new Error("未找到访问令牌");
-      }
-
-      // 调用清空存储 API
-      const response = await fetch(
-        "https://uploader-worker-v2-prod.haoweiw370.workers.dev/api/clear-storage",
+  // 测试API调用
+  useEffect(() => {
+    if (accessToken) {
+      console.log("Testing API call...");
+      fetch(
+        "https://history-worker-v2-prod.haoweiw370.workers.dev/api/history",
         {
-          method: "POST",
+          method: "GET",
           headers: {
-            Authorization: `Bearer ${auth.accessToken}`,
+            Authorization: `Bearer ${accessToken}`,
             "Content-Type": "application/json",
           },
         }
-      );
+      )
+        .then((response) => {
+          console.log("API Response Status:", response.status);
+          return response.json();
+        })
+        .then((data) => {
+          console.log("API Response Data:", data);
+        })
+        .catch((error) => {
+          console.error("API Call Error:", error);
+        });
+    }
+  }, [accessToken]);
 
-      if (!response.ok) {
-        const errorData = await response.json();
-        throw new Error(errorData.error || `HTTP ${response.status}`);
-      }
+  // 处理图片删除
+  const handleDeleteImage = async (imageId: string) => {
+    if (
+      !confirm(
+        "Are you sure you want to delete this image? This action cannot be undone."
+      )
+    ) {
+      return;
+    }
 
-      const result = await response.json();
-
-      if (result.success) {
-        alert(
-          `清空完成！删除了 ${
-            result.deleted?.r2Objects?.length || 0
-          } 个 R2 对象和 ${result.deleted?.dbRecords || 0} 条数据库记录`
-        );
-      } else {
-        throw new Error(result.error || "清空存储失败");
-      }
-    } catch (err) {
-      console.error("Clear storage error:", err);
-      alert(err instanceof Error ? err.message : "清空存储失败");
-    } finally {
-      setCleaning(false);
+    try {
+      await deleteMutation.mutateAsync(imageId);
+      addNotification({
+        type: "success",
+        title: "Delete Successful",
+        message: "Image has been successfully deleted",
+        duration: 3000,
+      });
+    } catch (error) {
+      addNotification({
+        type: "error",
+        title: "Delete Failed",
+        message: "Unable to delete image, please try again",
+        duration: 5000,
+      });
     }
   };
 
+  // 批量删除
+  const handleBatchDelete = async () => {
+    if (selectedImages.length === 0) return;
+
+    if (
+      !confirm(
+        `Are you sure you want to delete the selected ${selectedImages.length} images? This action cannot be undone.`
+      )
+    ) {
+      return;
+    }
+
+    try {
+      await Promise.all(
+        selectedImages.map((imageId) => deleteMutation.mutateAsync(imageId))
+      );
+      setSelectedImages([]);
+      setIsSelectMode(false);
+      addNotification({
+        type: "success",
+        title: "Batch Delete Successful",
+        message: `Deleted ${selectedImages.length} images`,
+        duration: 3000,
+      });
+    } catch (error) {
+      addNotification({
+        type: "error",
+        title: "Batch Delete Failed",
+        message: "Some images failed to delete, please try again",
+        duration: 5000,
+      });
+    }
+  };
+
+  // 刷新数据
+  const handleRefresh = () => {
+    refetch();
+    addNotification({
+      type: "info",
+      title: "Refreshing",
+      message: "Updating image list",
+      duration: 2000,
+    });
+  };
+
+  // 如果没有认证，重定向到首页
   if (!isAuthenticated) {
     return (
-      <main className="min-h-screen bg-gradient-to-br from-blue-50 to-indigo-100">
-        <div className="container mx-auto px-4 py-16">
-          <div className="text-center">
-            <h1 className="text-4xl font-bold text-gray-900 mb-8">图片画廊</h1>
-            <p className="text-xl text-gray-600 mb-8">请先登录以查看您的图片</p>
-            <Link
-              href="/"
-              className="inline-block bg-blue-600 hover:bg-blue-700 text-white font-semibold py-3 px-8 rounded-lg transition-colors"
-            >
-              返回首页
+      <motion.div
+        initial="initial"
+        animate="in"
+        exit="out"
+        variants={pageVariants}
+        transition={pageTransition}
+        className="min-h-screen bg-gradient-to-br from-blue-50 via-white to-indigo-50 flex items-center justify-center"
+      >
+        <Card className="w-full max-w-md mx-4">
+          <CardHeader className="text-center">
+            <CardTitle className="text-2xl">需要登录</CardTitle>
+            <CardDescription>请先登录以查看您的图片</CardDescription>
+          </CardHeader>
+          <CardContent className="space-y-4">
+            <Link href="/">
+              <Button className="w-full">
+                <ArrowLeft className="h-4 w-4 mr-2" />
+                返回首页
+              </Button>
             </Link>
-          </div>
-        </div>
-      </main>
-    );
-  }
-
-  if (isLoading) {
-    return (
-      <main className="min-h-screen bg-gradient-to-br from-blue-50 to-indigo-100">
-        <div className="container mx-auto px-4 py-16">
-          <div className="text-center">
-            <h1 className="text-4xl font-bold text-gray-900 mb-8">图片画廊</h1>
-            <div className="flex justify-center">
-              <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600"></div>
-            </div>
-            <p className="text-gray-600 mt-4">加载中...</p>
-          </div>
-        </div>
-      </main>
+          </CardContent>
+        </Card>
+      </motion.div>
     );
   }
 
   return (
-    <main className="min-h-screen bg-gradient-to-br from-blue-50 to-indigo-100">
-      <div className="container mx-auto px-4 py-16">
-        <div className="flex justify-between items-center mb-8">
-          <div>
-            <h1 className="text-4xl font-bold text-gray-900 mb-2">图片画廊</h1>
-            <p className="text-xl text-gray-600">浏览您上传的所有图片</p>
-          </div>
-          <div className="flex items-center space-x-4">
-            <span className="text-gray-700">欢迎, {user?.login}</span>
-            <button
-              onClick={clearStorage}
-              disabled={cleaning}
-              className="bg-red-600 hover:bg-red-700 disabled:bg-red-400 text-white font-semibold py-2 px-4 rounded-lg transition-colors"
-            >
-              {cleaning ? "清空中..." : "清空存储"}
-            </button>
-            <Link
-              href="/upload"
-              className="bg-blue-600 hover:bg-blue-700 text-white font-semibold py-2 px-4 rounded-lg transition-colors"
-            >
-              上传新图片
-            </Link>
-            <Link
-              href="/"
-              className="bg-gray-600 hover:bg-gray-700 text-white font-semibold py-2 px-4 rounded-lg transition-colors"
-            >
-              返回首页
-            </Link>
-          </div>
-        </div>
-
-        {error && (
-          <div className="bg-red-50 border border-red-200 rounded-lg p-4 mb-6">
-            <div className="flex">
-              <div className="flex-shrink-0">
-                <svg
-                  className="h-5 w-5 text-red-400"
-                  viewBox="0 0 20 20"
-                  fill="currentColor"
-                >
-                  <path
-                    fillRule="evenodd"
-                    d="M10 18a8 8 0 100-16 8 8 0 000 16zM8.707 7.293a1 1 0 00-1.414 1.414L8.586 10l-1.293 1.293a1 1 0 101.414 1.414L10 11.414l1.293 1.293a1 1 0 001.414-1.414L11.414 10l1.293-1.293a1 1 0 00-1.414-1.414L10 8.586 8.707 7.293z"
-                    clipRule="evenodd"
-                  />
-                </svg>
-              </div>
-              <div className="ml-3">
-                <h3 className="text-sm font-medium text-red-800">加载失败</h3>
-                <div className="mt-2 text-sm text-red-700">
-                  {error instanceof Error ? error.message : "获取图片列表失败"}
-                </div>
-              </div>
-            </div>
-          </div>
-        )}
-
-        {images.length === 0 ? (
-          <div className="bg-white rounded-lg shadow-sm p-8 text-center">
-            <div className="text-gray-500">
-              <svg
-                className="mx-auto h-12 w-12 text-gray-400 mb-4"
-                fill="none"
-                stroke="currentColor"
-                viewBox="0 0 24 24"
-              >
-                <path
-                  strokeLinecap="round"
-                  strokeLinejoin="round"
-                  strokeWidth={2}
-                  d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z"
-                />
-              </svg>
-              <h3 className="text-lg font-medium text-gray-900 mb-2">
-                暂无图片
-              </h3>
-              <p className="text-gray-600 mb-6">
-                您还没有上传任何图片，开始上传您的第一张图片吧！
-              </p>
-              <Link
-                href="/upload"
-                className="inline-block bg-blue-600 hover:bg-blue-700 text-white font-semibold py-2 px-6 rounded-lg transition-colors"
-              >
-                开始上传
-              </Link>
-            </div>
-          </div>
-        ) : (
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
-            {images.map((image: ImageRecord) => (
-              <div
-                key={image.id}
-                className="bg-white rounded-lg shadow-sm overflow-hidden"
-              >
-                <div className="aspect-square bg-gray-100 relative">
-                  <Image
-                    src={image.url}
-                    alt={image.fileName}
-                    fill
-                    className="object-cover"
-                    onError={(e) => {
-                      const target = e.target as HTMLImageElement;
-                      target.src =
-                        "data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iMjQiIGhlaWdodD0iMjQiIHZpZXdCb3g9IjAgMCAyNCAyNCIgZmlsbD0ibm9uZSIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj4KPHBhdGggZD0iTTEyIDJMMTMuMDkgOC4yNkwyMCA5TDEzLjA5IDE1Ljc0TDEyIDIyTDEwLjkxIDE1Ljc0TDQgOUwxMC45MSA4LjI2TDEyIDJaIiBzdHJva2U9IiM5Q0EzQUYiIHN0cm9rZS13aWR0aD0iMiIgc3Ryb2tlLWxpbmVjYXA9InJvdW5kIiBzdHJva2UtbGluZWpvaW49InJvdW5kIi8+Cjwvc3ZnPgo=";
-                    }}
-                  />
-                </div>
-                <div className="p-4">
-                  <h3 className="font-medium text-gray-900 truncate">
-                    {image.fileName}
-                  </h3>
-                  <p className="text-sm text-gray-500 mt-1">
-                    {formatFileSize(image.size)} •{" "}
-                    {formatDate(image.uploadedAt)}
-                  </p>
-                  <div className="mt-3 flex space-x-2">
-                    <a
-                      href={image.url}
-                      target="_blank"
-                      rel="noopener noreferrer"
-                      className="flex-1 bg-blue-600 hover:bg-blue-700 text-white text-center py-2 px-3 rounded text-sm font-medium transition-colors"
+    <DynamicBackground
+      variant="cosmic"
+      intensity="low"
+      speed="slow"
+      className="min-h-screen"
+    >
+      <motion.div
+        initial="initial"
+        animate="in"
+        exit="out"
+        variants={pageVariants}
+        transition={pageTransition}
+        className="min-h-screen"
+      >
+        <div className="container mx-auto px-4 py-4 md:py-8">
+          {/* 头部导航 */}
+          <motion.div
+            variants={cardHoverVariants}
+            initial="rest"
+            whileHover="hover"
+            className="mb-4 md:mb-8"
+          >
+            <Card className="card-modern">
+              <CardHeader>
+                <div className="flex flex-col md:flex-row items-start md:items-center justify-between gap-4">
+                  <div className="flex flex-col sm:flex-row items-start sm:items-center space-y-2 sm:space-y-0 sm:space-x-4">
+                    <Link href="/">
+                      <Button
+                        variant="outline"
+                        size="sm"
+                        className="bg-black/80 text-white border-white/20 hover:bg-white/10"
+                      >
+                        <ArrowLeft className="h-4 w-4 mr-2" />
+                        <span className="hidden sm:inline">Back to Home</span>
+                        <span className="sm:hidden">Back</span>
+                      </Button>
+                    </Link>
+                    <div>
+                      <CardTitle className="text-xl md:text-2xl text-white">
+                        My Gallery
+                      </CardTitle>
+                      <CardDescription className="text-sm md:text-base text-white/80">
+                        Welcome back, {user?.login}! You have {images.length}{" "}
+                        images
+                      </CardDescription>
+                    </div>
+                  </div>
+                  <div className="flex items-center space-x-2">
+                    <Button
+                      variant="outline"
+                      size="sm"
+                      onClick={handleRefresh}
+                      disabled={isLoading}
                     >
-                      查看
-                    </a>
-                    <button
-                      onClick={() => openCopyModal(image)}
-                      className="flex-1 bg-green-600 hover:bg-green-700 text-white text-center py-2 px-3 rounded text-sm font-medium transition-colors"
-                    >
-                      复制
-                    </button>
-                    <button
-                      onClick={() =>
-                        handleDeleteImage(image.id, image.r2ObjectKey)
-                      }
-                      disabled={deleteMutation.isPending}
-                      className="flex-1 bg-red-600 hover:bg-red-700 disabled:bg-red-400 text-white text-center py-2 px-3 rounded text-sm font-medium transition-colors"
-                    >
-                      {deleteMutation.isPending ? "删除中..." : "删除"}
-                    </button>
+                      <RefreshCw
+                        className={`h-4 w-4 mr-2 ${
+                          isLoading ? "animate-spin" : ""
+                        }`}
+                      />
+                      Refresh
+                    </Button>
+                    <Link href="/upload">
+                      <Button size="sm">
+                        <Upload className="h-4 w-4 mr-2" />
+                        Upload Images
+                      </Button>
+                    </Link>
                   </div>
                 </div>
-              </div>
-            ))}
-          </div>
-        )}
+              </CardHeader>
+            </Card>
+          </motion.div>
 
-        {/* 复制模态框 */}
-        {showCopyModal && selectedImage && (
-          <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
-            <div className="bg-white rounded-lg p-6 max-w-2xl w-full mx-4 max-h-[80vh] overflow-y-auto">
-              <div className="flex justify-between items-center mb-4">
-                <h3 className="text-lg font-semibold">复制引用</h3>
-                <button
-                  onClick={() => setShowCopyModal(false)}
-                  className="text-gray-500 hover:text-gray-700"
-                >
-                  <svg
-                    className="w-6 h-6"
-                    fill="none"
-                    stroke="currentColor"
-                    viewBox="0 0 24 24"
-                  >
-                    <path
-                      strokeLinecap="round"
-                      strokeLinejoin="round"
-                      strokeWidth={2}
-                      d="M6 18L18 6M6 6l12 12"
-                    />
-                  </svg>
-                </button>
-              </div>
+          {/* 搜索和筛选 */}
+          <motion.div
+            variants={cardHoverVariants}
+            initial="rest"
+            whileHover="hover"
+            className="mb-6"
+          >
+            <Card className="card-modern">
+              <CardContent className="pt-6">
+                <div className="flex flex-col md:flex-row gap-4">
+                  {/* 搜索框 */}
+                  <div className="flex-1">
+                    <div className="relative">
+                      <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-white/60" />
+                      <input
+                        type="text"
+                        placeholder="Search images..."
+                        value={searchTerm}
+                        onChange={(e) => setSearchTerm(e.target.value)}
+                        className="w-full pl-10 pr-4 py-2 border border-white/20 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent bg-black/50 text-white placeholder-white/60"
+                      />
+                    </div>
+                  </div>
 
-              <div className="mb-4">
-                <Image
-                  src={selectedImage.url}
-                  alt={selectedImage.fileName}
-                  width={400}
-                  height={192}
-                  className="w-full h-48 object-cover rounded-lg"
-                  unoptimized
-                />
-                <p className="text-sm text-gray-600 mt-2">
-                  {selectedImage.fileName}
-                </p>
-              </div>
+                  {/* 筛选器 */}
+                  <div className="flex gap-2">
+                    <select
+                      value={filterBy}
+                      onChange={(e) =>
+                        setFilterBy(
+                          e.target.value as "all" | "images" | "videos"
+                        )
+                      }
+                      className="px-3 py-2 border border-white/20 rounded-lg focus:ring-2 focus:ring-blue-500 bg-black/50 text-white"
+                    >
+                      <option value="all">All Files</option>
+                      <option value="images">Images Only</option>
+                      <option value="videos">Videos Only</option>
+                    </select>
 
-              <div className="space-y-3">
-                {copyFormats.map((format, index) => (
-                  <div key={index} className="border rounded-lg p-3">
-                    <div className="flex justify-between items-center mb-2">
-                      <span className="font-medium text-sm">{format.name}</span>
+                    <select
+                      value={sortBy}
+                      onChange={(e) =>
+                        setSortBy(e.target.value as "date" | "name" | "size")
+                      }
+                      className="px-3 py-2 border border-white/20 rounded-lg focus:ring-2 focus:ring-blue-500 bg-black/50 text-white"
+                    >
+                      <option value="date">By Date</option>
+                      <option value="name">By Name</option>
+                      <option value="size">By Size</option>
+                    </select>
+
+                    <div className="flex border border-white/20 rounded-lg overflow-hidden">
                       <button
-                        onClick={() =>
-                          copyToClipboard(
-                            format.format(
-                              selectedImage.url,
-                              selectedImage.fileName
-                            )
-                          )
-                        }
-                        className="bg-blue-600 hover:bg-blue-700 text-white px-3 py-1 rounded text-sm transition-colors"
+                        onClick={() => setViewMode("grid")}
+                        className={`px-3 py-2 transition-colors ${
+                          viewMode === "grid"
+                            ? "bg-blue-500 text-white"
+                            : "bg-black/40 text-white/70 hover:bg-black/60"
+                        }`}
                       >
-                        复制
+                        <Grid className="h-4 w-4" />
+                      </button>
+                      <button
+                        onClick={() => setViewMode("list")}
+                        className={`px-3 py-2 transition-colors ${
+                          viewMode === "list"
+                            ? "bg-blue-500 text-white"
+                            : "bg-black/40 text-white/70 hover:bg-black/60"
+                        }`}
+                      >
+                        <List className="h-4 w-4" />
                       </button>
                     </div>
-                    <div className="bg-gray-50 p-2 rounded text-sm font-mono break-all">
-                      {format.format(selectedImage.url, selectedImage.fileName)}
-                    </div>
                   </div>
-                ))}
+                </div>
+              </CardContent>
+            </Card>
+          </motion.div>
+
+          {/* 批量操作栏 */}
+          <AnimatePresence>
+            {isSelectMode && (
+              <motion.div
+                initial={{ opacity: 0, y: -20 }}
+                animate={{ opacity: 1, y: 0 }}
+                exit={{ opacity: 0, y: -20 }}
+                className="mb-6"
+              >
+                <Card className="card-modern border-blue-400">
+                  <CardContent className="pt-6">
+                    <div className="flex items-center justify-between">
+                      <div className="flex items-center space-x-4">
+                        <span className="text-sm font-medium text-white">
+                          已选择 {selectedImages.length} 张图片
+                        </span>
+                        <Button
+                          variant="destructive"
+                          size="sm"
+                          onClick={handleBatchDelete}
+                          disabled={selectedImages.length === 0}
+                        >
+                          <Trash2 className="h-4 w-4 mr-2" />
+                          批量删除
+                        </Button>
+                      </div>
+                      <Button
+                        variant="outline"
+                        size="sm"
+                        onClick={() => {
+                          setIsSelectMode(false);
+                          setSelectedImages([]);
+                        }}
+                      >
+                        取消选择
+                      </Button>
+                    </div>
+                  </CardContent>
+                </Card>
+              </motion.div>
+            )}
+          </AnimatePresence>
+
+          {/* 图片网格 */}
+          <StaggerContainer className="mb-8">
+            {isLoading ? (
+              <div className="space-y-6">
+                <ModernLoading
+                  message="Loading your images..."
+                  variant="skeleton"
+                  size="lg"
+                  className="text-center"
+                />
+                <ImageGridSkeleton count={8} />
               </div>
-            </div>
-          </div>
-        )}
-      </div>
-    </main>
+            ) : error || (imagesResponse && !imagesResponse.success) ? (
+              <Card className="card-modern">
+                <CardContent className="text-center py-12">
+                  <div className="mb-4">
+                    <ImageIcon className="h-12 w-12 mx-auto mb-4 text-red-400" />
+                    <h3 className="text-lg font-medium text-white">加载失败</h3>
+                    <p className="text-sm text-white/70 mt-2">
+                      {error?.message ||
+                        imagesResponse?.error ||
+                        "无法加载图片列表，请检查网络连接"}
+                    </p>
+                  </div>
+                  <Button onClick={handleRefresh} variant="outline">
+                    <RefreshCw className="h-4 w-4 mr-2" />
+                    重试
+                  </Button>
+                </CardContent>
+              </Card>
+            ) : filteredImages.length === 0 ? (
+              <Card className="card-modern">
+                <CardContent className="text-center py-12">
+                  <div className="text-gray-500">
+                    <ImageIcon className="h-12 w-12 mx-auto mb-4" />
+                    <h3 className="text-lg font-medium">暂无图片</h3>
+                    <p className="text-sm text-gray-500 mt-2">
+                      {searchTerm
+                        ? "没有找到匹配的图片"
+                        : "开始上传您的第一张图片吧"}
+                    </p>
+                  </div>
+                  <Link href="/upload">
+                    <Button className="mt-4">
+                      <Upload className="h-4 w-4 mr-2" />
+                      上传图片
+                    </Button>
+                  </Link>
+                </CardContent>
+              </Card>
+            ) : (
+              <ImageGallery
+                images={filteredImages.map((image: any) => ({
+                  id: image.id || "",
+                  src: image.url || "",
+                  alt: image.fileName || "Image",
+                  filename: image.fileName || "unknown",
+                  uploadDate: image.uploadedAt || new Date().toISOString(),
+                  size: image.size || 0,
+                }))}
+                onDelete={handleDeleteImage}
+                className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4"
+              />
+            )}
+          </StaggerContainer>
+        </div>
+
+        {/* Footer */}
+        <Footer />
+
+        {/* 通知容器 */}
+        <NotificationContainer
+          notifications={notifications}
+          onClose={removeNotification}
+          position="top-right"
+        />
+      </motion.div>
+    </DynamicBackground>
   );
 }
 
-// QueryClient 实例
 const queryClient = new QueryClient({
   defaultOptions: {
     queries: {

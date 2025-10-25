@@ -1,6 +1,8 @@
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { createApiClient, createHistoryApiClient } from "../api";
 import { queryKeys } from "../query-client";
+import { NotificationService, Notifications } from "../notifications";
+import { handleApiError } from "../api-error-handler";
 
 // Custom hook for API client
 export function useApiClient(accessToken?: string) {
@@ -32,9 +34,19 @@ export function useUploadImage(accessToken?: string) {
       file: File;
       onProgress?: (progress: number) => void;
     }) => apiClient.uploadFile(file, onProgress),
-    onSuccess: () => {
+    onSuccess: (data) => {
       // Invalidate and refetch user images
       queryClient.invalidateQueries({ queryKey: queryKeys.userImages });
+
+      // Show success notification
+      const filename =
+        data?.data?.filename || data?.data?.r2ObjectKey || "图片";
+      NotificationService.show(Notifications.upload.success(filename));
+    },
+    onError: (error: unknown) => {
+      // Handle error and show appropriate notification
+      const { notification } = handleApiError(error);
+      NotificationService.show(notification);
     },
   });
 }
@@ -49,6 +61,13 @@ export function useDeleteImage(accessToken?: string) {
     onSuccess: () => {
       // Invalidate and refetch user images
       queryClient.invalidateQueries({ queryKey: queryKeys.userImages });
+
+      // Show success notification
+      NotificationService.show(Notifications.image.deleteSuccess());
+    },
+    onError: () => {
+      // Show error notification
+      NotificationService.show(Notifications.image.deleteError());
     },
   });
 }

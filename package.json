@@ -15,7 +15,7 @@
     "test:ui": "vitest --ui",
     "test:coverage": "vitest --coverage",
     "type-check": "tsc --noEmit",
-    "deploy": "./deploy.sh",
+    "deploy": "./scripts/deploy.sh",
     "cf:dev": "wrangler dev",
     "cf:deploy": "wrangler deploy",
     "cf:build": "wrangler deploy --dry-run",
@@ -46,6 +46,7 @@
     "react-dom": "^18.2.0",
     "react-dropzone": "^14.3.8",
     "react-hook-form": "^7.49.3",
+    "react-masonry-css": "^1.0.16",
     "tailwind-merge": "^3.3.1",
     "zod": "^3.22.4"
   },
@@ -78,15 +79,19 @@
     "inflight": "^1.0.6",
     "rimraf": "^5.0.0",
     "glob": "^10.0.0",
-    "globby": "^12.0.0",
+    "globby": "^13.0.0",
     "pify": "^4.0.0",
-    "rollup-plugin-terser": "npm:@rollup/plugin-terser@^0.4.4"
+    "rollup-plugin-terser": "npm:@rollup/plugin-terser@^0.4.4",
+    "next-pwa": {
+      "globby": "^13.0.0"
+    }
   },
   "resolutions": {
     "inflight": "^1.0.6",
     "rimraf": "^5.0.0",
     "glob": "^10.0.0",
-    "globby": "^12.0.0",
-    "pify": "^4.0.0"
+    "globby": "^13.0.0",
+    "pify": "^4.0.0",
+    "next-pwa/globby": "^13.0.0"
   }
 }

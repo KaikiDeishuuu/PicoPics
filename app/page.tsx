@@ -1,7 +1,44 @@
 "use client";
 
+import React from "react";
 import Link from "next/link";
 import { useEffect, useState } from "react";
+import { motion, AnimatePresence } from "framer-motion";
+import {
+  Card,
+  CardContent,
+  CardDescription,
+  CardHeader,
+  CardTitle,
+} from "@/components/ui/card";
+import { Button } from "@/components/ui/button";
+import { LoadingSpinner } from "@/components/ui/loading";
+import { DynamicBackground } from "@/components/ui/dynamic-background";
+import { Footer } from "@/components/ui/footer";
+import {
+  pageVariants,
+  pageTransition,
+  cardHoverVariants,
+  listItemVariants,
+  StaggerContainer,
+  AnimatedDiv,
+  pulseVariants,
+} from "@/components/ui/animations";
+import {
+  Github,
+  Upload,
+  Image,
+  Shield,
+  Zap,
+  Globe,
+  Star,
+  Sparkles,
+  ArrowRight,
+  CheckCircle,
+  Users,
+  Clock,
+  Download,
+} from "lucide-react";
 
 // 强制动态渲染，避免静态化
 export const dynamic = "force-dynamic";
@@ -13,16 +50,41 @@ export default function Home() {
     [key: string]: unknown;
   } | null>(null);
 
-  // 添加运行时检查，确保动态渲染
+  // Add runtime check to ensure dynamic rendering
   const [mounted, setMounted] = useState(false);
   const [authChecked, setAuthChecked] = useState(false);
+  const [currentFeature, setCurrentFeature] = useState(0);
+
+  const features = [
+    {
+      icon: Zap,
+      title: "Ultimate Performance",
+      description:
+        "Cloudflare Workers edge computing, global millisecond response",
+      color: "from-yellow-400 to-orange-500",
+    },
+    {
+      icon: Shield,
+      title: "Enterprise Security",
+      description:
+        "GitHub OAuth authentication, JWT Token verification, IP blacklist protection",
+      color: "from-green-400 to-emerald-500",
+    },
+    {
+      icon: Globe,
+      title: "Global Deployment",
+      description:
+        "Vercel global CDN, Cloudflare edge network, zero operational costs",
+      color: "from-blue-400 to-cyan-500",
+    },
+  ];
 
   useEffect(() => {
     setMounted(true);
   }, []);
 
   useEffect(() => {
-    // 检查本地存储中的认证状态
+    // Check authentication status in local storage
     if (typeof window === "undefined" || authChecked) return;
 
     const checkAuth = () => {
@@ -38,7 +100,7 @@ export default function Home() {
           }
         } catch (error) {
           console.error("Failed to parse auth data:", error);
-          // 清除无效的认证数据
+          // Clear invalid authentication data
           localStorage.removeItem("auth");
         }
       }
@@ -53,12 +115,40 @@ export default function Home() {
     }
   }, [authChecked]);
 
+  // Auto-switch feature display
+  useEffect(() => {
+    const interval = setInterval(() => {
+      setCurrentFeature((prev) => (prev + 1) % features.length);
+    }, 3000);
+
+    return () => clearInterval(interval);
+  }, [features.length]);
+
   const handleGitHubLogin = () => {
-    // GitHub OAuth 登录逻辑
+    // GitHub OAuth login logic
     const clientId =
       process.env.NEXT_PUBLIC_GITHUB_CLIENT_ID || "Ov23lijBobxzGOfTVu9U";
     if (!clientId) {
-      alert("GitHub OAuth 未配置");
+      alert("GitHub OAuth not configured");
+      return;
+    }
+
+    const redirectUri = `${window.location.origin}/auth/callback`;
+    const scope = "user:email";
+    const state = Math.random().toString(36).substring(7);
+
+    const authUrl = `https://github.com/login/oauth/authorize?client_id=${clientId}&redirect_uri=${encodeURIComponent(
+      redirectUri
+    )}&scope=${scope}&state=${state}`;
+
+    window.location.href = authUrl;
+  };
+
+  const handleLogin = () => {
+    const clientId =
+      process.env.NEXT_PUBLIC_GITHUB_CLIENT_ID || "Ov23lijBobxzGOfTVu9U";
+    if (!clientId) {
+      alert("GitHub OAuth not configured");
       return;
     }
 
@@ -84,149 +174,347 @@ export default function Home() {
   // 确保客户端渲染
   if (!mounted) {
     return (
-      <main className="min-h-screen bg-gradient-to-br from-blue-50 to-indigo-100">
+      <DynamicBackground
+        variant="rainbow"
+        intensity="medium"
+        speed="slow"
+        className="min-h-screen"
+      >
         <div className="container mx-auto px-4 py-16">
           <div className="text-center">
-            <h1 className="text-6xl font-bold text-gray-900 mb-6">
-              PicoPicsV2
+            <div className="flex justify-center mb-6">
+              <LoadingSpinner size="lg" />
+            </div>
+            <h1 className="text-6xl font-bold bg-gradient-to-r from-yellow-600 to-orange-600 bg-clip-text text-transparent mb-6">
+              PicoPics V2
             </h1>
-            <p className="text-xl text-gray-600 mb-8">加载中...</p>
+            <p className="text-xl text-white drop-shadow-lg">正在加载...</p>
           </div>
         </div>
-      </main>
+      </DynamicBackground>
     );
   }
 
   return (
-    <main className="min-h-screen bg-gradient-to-br from-blue-50 to-indigo-100">
-      <div className="container mx-auto px-4 py-16">
-        {/* 导航栏 */}
-        <nav className="flex justify-between items-center mb-8">
-          <div className="flex items-center space-x-4">
-            <h1 className="text-2xl font-bold text-gray-900">PicoPicsV2</h1>
+    <DynamicBackground
+      variant="rainbow"
+      intensity="medium"
+      speed="slow"
+      className="min-h-screen"
+    >
+      <motion.div
+        initial="initial"
+        animate="in"
+        exit="out"
+        variants={pageVariants}
+        transition={pageTransition}
+        className="container mx-auto px-4 py-16"
+      >
+        {/* 导航栏 - 现代化设计 */}
+        <header className="flex items-center justify-between px-6 py-3 bg-black/60 backdrop-blur-md border border-white/10 rounded-xl mb-8">
+          {/* Logo 区域 */}
+          <div className="flex items-center gap-3">
+            <div className="rounded-lg border border-orange-400/20 bg-gradient-to-br from-orange-500 via-rose-500 to-purple-600 grid h-10 w-10 place-items-center shadow-lg shadow-orange-500/40">
+              <span className="text-white font-bold text-lg drop-shadow-md">
+                K
+              </span>
+            </div>
+            <span className="text-white font-semibold hidden sm:inline">
+              PicoPics
+            </span>
           </div>
-          <div className="flex items-center space-x-4">
-            {isAuthenticated ? (
-              <>
-                <span className="text-gray-700">欢迎, {user?.login}</span>
-                <Link
-                  href="/admin"
-                  className="bg-gray-600 hover:bg-gray-700 text-white px-4 py-2 rounded-lg transition-colors"
-                >
-                  管理面板
-                </Link>
-                <button
-                  onClick={handleLogout}
-                  className="bg-red-600 hover:bg-red-700 text-white px-4 py-2 rounded-lg transition-colors"
-                >
-                  退出登录
+
+          {/* 按钮区域 */}
+          {isAuthenticated ? (
+            <div className="flex items-center gap-2">
+              {/* GitHub 用户信息 */}
+              <div className="flex items-center gap-2 px-3 py-1.5 rounded-md bg-white/10 hover:bg-white/20 transition-colors">
+                <Github className="h-4 w-4 text-white" />
+                <span className="text-white/80 hover:text-white text-sm hidden md:inline">
+                  {user?.login}
+                </span>
+              </div>
+
+              {/* Admin 按钮 */}
+              <Link href="/admin">
+                <button className="text-white/80 hover:text-white px-3 py-1.5 rounded-md bg-white/10 hover:bg-white/20 transition-colors">
+                  <Shield className="h-4 w-4 md:mr-2 inline" />
+                  <span className="hidden md:inline">Admin</span>
                 </button>
-              </>
-            ) : (
+              </Link>
+
+              {/* Logout 按钮 */}
               <button
-                onClick={handleGitHubLogin}
-                className="bg-gray-900 hover:bg-gray-800 text-white px-4 py-2 rounded-lg transition-colors flex items-center space-x-2"
+                onClick={handleLogout}
+                className="text-white/80 hover:text-white px-3 py-1.5 rounded-md bg-red-600/80 hover:bg-red-600 transition-colors"
               >
-                <svg
-                  className="w-5 h-5"
-                  fill="currentColor"
-                  viewBox="0 0 20 20"
-                >
-                  <path
-                    fillRule="evenodd"
-                    d="M10 0C4.477 0 0 4.484 0 10.017c0 4.425 2.865 8.18 6.839 9.504.5.092.682-.217.682-.483 0-.237-.008-.868-.013-1.703-2.782.605-3.369-1.343-3.369-1.343-.454-1.158-1.11-1.466-1.11-1.466-.908-.62.069-.608.069-.608 1.003.07 1.531 1.032 1.531 1.032.892 1.53 2.341 1.088 2.91.832.092-.647.35-1.088.636-1.338-2.22-.253-4.555-1.113-4.555-4.951 0-1.093.39-1.988 1.029-2.688-.103-.253-.446-1.272.098-2.65 0 0 .84-.27 2.75 1.026A9.564 9.564 0 0110 4.844c.85.004 1.705.115 2.504.337 1.909-1.296 2.747-1.027 2.747-1.027.546 1.379.203 2.398.1 2.651.64.7 1.028 1.595 1.028 2.688 0 3.848-2.339 4.695-4.566 4.942.359.31.678.921.678 1.856 0 1.338-.012 2.419-.012 2.747 0 .268.18.58.688.482A10.019 10.019 0 0020 10.017C20 4.484 15.522 0 10 0z"
-                    clipRule="evenodd"
-                  />
-                </svg>
-                <span>GitHub 登录</span>
+                <span className="text-lg md:mr-2">×</span>
+                <span className="hidden md:inline">Quit</span>
               </button>
-            )}
-          </div>
-        </nav>
+            </div>
+          ) : (
+            <button
+              onClick={handleLogin}
+              className="text-white/80 hover:text-white px-4 py-2 rounded-md bg-white/10 hover:bg-white/20 transition-colors"
+            >
+              <Github className="h-4 w-4 inline mr-2" />
+              <span>Login with GitHub</span>
+            </button>
+          )}
+        </header>
 
-        <div className="text-center">
-          <h1 className="text-6xl font-bold text-gray-900 mb-6">PicoPicsV2</h1>
-          <p className="text-xl text-gray-600 mb-8 max-w-2xl mx-auto">
-            现代化图片上传和分享平台，支持流式上传、实时预览和智能压缩
-          </p>
-          <div className="space-x-4">
-            <Link
-              href="/upload"
-              className="inline-block bg-blue-600 hover:bg-blue-700 text-white font-semibold py-3 px-8 rounded-lg transition-colors"
+        {/* 主要内容 */}
+        <div className="text-center mb-8 md:mb-16 px-4">
+          <motion.h1
+            initial={{ opacity: 0, y: 50 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.8, ease: "easeOut" }}
+            className="text-4xl sm:text-6xl md:text-7xl lg:text-9xl font-bold bg-gradient-to-r from-yellow-400 via-orange-500 to-red-500 bg-clip-text text-transparent mb-4 md:mb-6"
+          >
+            PicoPics V2
+          </motion.h1>
+
+          <motion.p
+            initial={{ opacity: 0, y: 30 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.8, delay: 0.2, ease: "easeOut" }}
+            className="text-lg sm:text-xl md:text-2xl lg:text-3xl text-white drop-shadow-lg mb-3 md:mb-4"
+          >
+            Modern Image Hosting Platform
+          </motion.p>
+
+          <motion.p
+            initial={{ opacity: 0, y: 30 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.8, delay: 0.4, ease: "easeOut" }}
+            className="text-sm sm:text-base md:text-lg lg:text-xl text-white/90 drop-shadow-lg mb-8 md:mb-12 max-w-3xl mx-auto"
+          >
+            Next-generation image sharing solution built with Next.js 15 +
+            Cloudflare Workers, delivering exceptional performance and user
+            experience
+          </motion.p>
+
+          {isAuthenticated ? (
+            <motion.div
+              initial={{ opacity: 0, y: 30 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ duration: 0.8, delay: 0.6, ease: "easeOut" }}
+              className="flex flex-col sm:flex-row gap-4 justify-center"
             >
-              开始上传
-            </Link>
-            <Link
-              href="/gallery"
-              className="inline-block bg-white hover:bg-gray-50 text-gray-900 font-semibold py-3 px-8 rounded-lg border border-gray-300 transition-colors"
+              <Link href="/upload">
+                <Button
+                  size="lg"
+                  className="bg-gradient-to-r from-yellow-500 to-orange-500 hover:from-yellow-600 hover:to-orange-600 text-white shadow-lg"
+                >
+                  <Upload className="h-5 w-5 mr-2" />
+                  Upload Images
+                </Button>
+              </Link>
+              <Link href="/gallery">
+                <Button
+                  size="lg"
+                  variant="outline"
+                  className="w-full sm:w-auto bg-black/80 backdrop-blur-sm border-2 border-yellow-500 text-yellow-400 hover:bg-yellow-500/20"
+                >
+                  <Image className="h-5 w-5 mr-2" />
+                  My Gallery
+                </Button>
+              </Link>
+            </motion.div>
+          ) : (
+            <motion.div
+              initial={{ opacity: 0, y: 30 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ duration: 0.8, delay: 0.6, ease: "easeOut" }}
+              className="space-y-6"
             >
-              浏览图片
-            </Link>
-          </div>
+              <p className="text-xl text-white drop-shadow-lg">
+                Please login to use image upload feature
+              </p>
+              <Button
+                onClick={handleGitHubLogin}
+                size="lg"
+                className="bg-gray-900 hover:bg-gray-800 text-white shadow-lg"
+              >
+                <Github className="h-5 w-5 mr-2" />
+                Login with GitHub
+              </Button>
+            </motion.div>
+          )}
         </div>
 
-        <div className="mt-16 grid md:grid-cols-3 gap-8">
-          <div className="bg-white p-6 rounded-lg shadow-sm">
-            <div className="w-12 h-12 bg-blue-100 rounded-lg flex items-center justify-center mb-4">
-              <svg
-                className="w-6 h-6 text-blue-600"
-                fill="none"
-                stroke="currentColor"
-                viewBox="0 0 24 24"
-              >
-                <path
-                  strokeLinecap="round"
-                  strokeLinejoin="round"
-                  strokeWidth={2}
-                  d="M7 16a4 4 0 01-.88-7.903A5 5 0 1115.9 6L16 6a5 5 0 011 9.9M15 13l-3-3m0 0l-3 3m3-3v12"
-                />
-              </svg>
-            </div>
-            <h3 className="text-lg font-semibold mb-2">流式上传</h3>
-            <p className="text-gray-600">支持大文件流式上传，实时显示进度</p>
+        {/* 动态特性展示 */}
+        <motion.div
+          initial={{ opacity: 0, y: 50 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.8, delay: 0.8, ease: "easeOut" }}
+          className="mb-16"
+        >
+          <div className="text-center mb-8">
+            <h2 className="text-3xl font-bold text-white drop-shadow-lg mb-4">
+              Core Features
+            </h2>
+            <p className="text-white/90 drop-shadow-lg">
+              Experience the next-generation image hosting platform
+            </p>
           </div>
 
-          <div className="bg-white p-6 rounded-lg shadow-sm">
-            <div className="w-12 h-12 bg-green-100 rounded-lg flex items-center justify-center mb-4">
-              <svg
-                className="w-6 h-6 text-green-600"
-                fill="none"
-                stroke="currentColor"
-                viewBox="0 0 24 24"
+          <div className="relative h-64 rounded-2xl overflow-hidden">
+            <AnimatePresence mode="wait">
+              <motion.div
+                key={currentFeature}
+                initial={{ opacity: 0, x: 100 }}
+                animate={{ opacity: 1, x: 0 }}
+                exit={{ opacity: 0, x: -100 }}
+                transition={{ duration: 0.5 }}
+                className="absolute inset-0"
               >
-                <path
-                  strokeLinecap="round"
-                  strokeLinejoin="round"
-                  strokeWidth={2}
-                  d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"
-                />
-              </svg>
-            </div>
-            <h3 className="text-lg font-semibold mb-2">智能验证</h3>
-            <p className="text-gray-600">自动验证文件类型和大小，确保安全</p>
+                <Card className="h-full card-modern shadow-xl">
+                  <CardContent className="h-full flex items-center justify-center p-8">
+                    <div className="text-center">
+                      <motion.div
+                        variants={pulseVariants}
+                        animate="pulse"
+                        className={`inline-flex p-4 rounded-full bg-gradient-to-r ${features[currentFeature].color} mb-4`}
+                      >
+                        {React.createElement(features[currentFeature].icon, {
+                          className: "h-8 w-8 text-white",
+                        })}
+                      </motion.div>
+                      <h3 className="text-2xl font-bold text-white mb-2">
+                        {features[currentFeature].title}
+                      </h3>
+                      <p className="text-white/80 max-w-md">
+                        {features[currentFeature].description}
+                      </p>
+                    </div>
+                  </CardContent>
+                </Card>
+              </motion.div>
+            </AnimatePresence>
+          </div>
+        </motion.div>
+
+        {/* 特性网格 */}
+        <StaggerContainer className="mb-8 md:mb-16 px-4">
+          <div className="text-center mb-6 md:mb-8">
+            <h2 className="text-2xl md:text-3xl font-bold text-white mb-3 md:mb-4">
+              Why Choose PicoPics V2?
+            </h2>
+            <p className="text-sm md:text-base text-white/80">
+              Modern tech stack, exceptional user experience
+            </p>
           </div>
 
-          <div className="bg-white p-6 rounded-lg shadow-sm">
-            <div className="w-12 h-12 bg-purple-100 rounded-lg flex items-center justify-center mb-4">
-              <svg
-                className="w-6 h-6 text-purple-600"
-                fill="none"
-                stroke="currentColor"
-                viewBox="0 0 24 24"
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 md:gap-8">
+            {[
+              {
+                icon: Zap,
+                title: "Ultimate Performance",
+                description:
+                  "Cloudflare Workers edge computing, global millisecond response, intelligent image compression and caching",
+                color: "from-yellow-400 to-orange-500",
+              },
+              {
+                icon: Shield,
+                title: "Enterprise Security",
+                description:
+                  "GitHub OAuth authentication, JWT Token verification, IP blacklist protection, upload quota management",
+                color: "from-green-400 to-emerald-500",
+              },
+              {
+                icon: Globe,
+                title: "Global Deployment",
+                description:
+                  "Vercel global CDN, Cloudflare edge network, zero operational costs, auto-scaling",
+                color: "from-blue-400 to-cyan-500",
+              },
+              {
+                icon: Users,
+                title: "User Friendly",
+                description:
+                  "Intuitive interface design, drag-and-drop upload, real-time preview, batch operations, history records",
+                color: "from-purple-400 to-pink-500",
+              },
+              {
+                icon: Clock,
+                title: "Real-time Sync",
+                description:
+                  "Real-time data synchronization, multi-device access, cloud storage, automatic backup, version control",
+                color: "from-indigo-400 to-blue-500",
+              },
+              {
+                icon: Download,
+                title: "Easy Sharing",
+                description:
+                  "One-click sharing links, multiple format support, batch download, social sharing, embed code",
+                color: "from-teal-400 to-green-500",
+              },
+            ].map((feature, index) => (
+              <motion.div
+                key={index}
+                variants={listItemVariants}
+                custom={index}
               >
-                <path
-                  strokeLinecap="round"
-                  strokeLinejoin="round"
-                  strokeWidth={2}
-                  d="M13 10V3L4 14h7v7l9-11h-7z"
-                />
-              </svg>
-            </div>
-            <h3 className="text-lg font-semibold mb-2">高速分发</h3>
-            <p className="text-gray-600">基于Cloudflare全球CDN，快速访问</p>
+                <Card className="h-full card-modern hover:shadow-xl transition-all duration-300 hover:-translate-y-2">
+                  <CardHeader>
+                    <div className="flex items-center space-x-3">
+                      <div
+                        className={`p-3 rounded-lg bg-gradient-to-r ${feature.color}`}
+                      >
+                        <feature.icon className="h-6 w-6 text-white" />
+                      </div>
+                      <CardTitle className="text-xl text-white">
+                        {feature.title}
+                      </CardTitle>
+                    </div>
+                  </CardHeader>
+                  <CardContent>
+                    <CardDescription className="text-base text-white/80">
+                      {feature.description}
+                    </CardDescription>
+                  </CardContent>
+                </Card>
+              </motion.div>
+            ))}
           </div>
-        </div>
-      </div>
-    </main>
+        </StaggerContainer>
+
+        {/* 技术栈展示 */}
+        <motion.div
+          initial={{ opacity: 0, y: 50 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.8, delay: 1.2, ease: "easeOut" }}
+          className="text-center"
+        >
+          <h2 className="text-4xl font-bold text-white mb-8">Tech Stack</h2>
+          <div className="tech-stack-container">
+            {[
+              { name: "Next.js 15" },
+              { name: "React 18" },
+              { name: "TypeScript" },
+              { name: "Tailwind CSS" },
+              { name: "Cloudflare Workers" },
+              { name: "Vercel" },
+              { name: "Framer Motion" },
+              { name: "PWA" },
+            ].map((tech, index) => (
+              <motion.span
+                key={index}
+                initial={{ opacity: 0, scale: 0.8 }}
+                animate={{ opacity: 1, scale: 1 }}
+                transition={{ duration: 0.3, delay: 1.4 + index * 0.1 }}
+                className="tech-tag"
+              >
+                {tech.name}
+              </motion.span>
+            ))}
+          </div>
+        </motion.div>
+
+        {/* Footer */}
+        <Footer />
+      </motion.div>
+    </DynamicBackground>
   );
 }

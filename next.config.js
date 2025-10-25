@@ -1,34 +1,34 @@
-// 临时禁用 PWA 以避免构建问题
-// const withPWA = require("next-pwa")({
-//   dest: "public",
-//   register: true,
-//   skipWaiting: true,
-//   disable: process.env.NODE_ENV === "development",
-//   runtimeCaching: [
-//     {
-//       urlPattern: /^https:\/\/.*\.(?:png|jpg|jpeg|gif|webp|svg)$/,
-//       handler: "CacheFirst",
-//       options: {
-//         cacheName: "images",
-//         expiration: {
-//           maxEntries: 100,
-//           maxAgeSeconds: 30 * 24 * 60 * 60, // 30 days
-//         },
-//       },
-//     },
-//     {
-//       urlPattern: /^https:\/\/.*\.workers\.dev/,
-//       handler: "NetworkFirst",
-//       options: {
-//         cacheName: "api",
-//         expiration: {
-//           maxEntries: 50,
-//           maxAgeSeconds: 5 * 60, // 5 minutes
-//         },
-//       },
-//     },
-//   ],
-// });
+const withPWA = require("next-pwa")({
+  dest: "public",
+  register: true,
+  skipWaiting: true,
+  disable: process.env.NODE_ENV === "development",
+  buildExcludes: [/middleware-manifest\.json$/],
+  runtimeCaching: [
+    {
+      urlPattern: /^https:\/\/.*\.(?:png|jpg|jpeg|gif|webp|svg)$/,
+      handler: "CacheFirst",
+      options: {
+        cacheName: "images",
+        expiration: {
+          maxEntries: 100,
+          maxAgeSeconds: 30 * 24 * 60 * 60, // 30 days
+        },
+      },
+    },
+    {
+      urlPattern: /^https:\/\/.*\.workers\.dev/,
+      handler: "NetworkFirst",
+      options: {
+        cacheName: "api",
+        expiration: {
+          maxEntries: 50,
+          maxAgeSeconds: 5 * 60, // 5 minutes
+        },
+      },
+    },
+  ],
+});
 
 /** @type {import('next').NextConfig} */
 const nextConfig = {
@@ -123,5 +123,5 @@ const nextConfig = {
   },
 };
 
-// 临时禁用 PWA
+// 暂时禁用 PWA 来构建
 module.exports = nextConfig;

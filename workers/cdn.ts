@@ -42,6 +42,16 @@ function getCorsHeaders(env: Env, request: Request): Record<string, string> {
   return {};
 }
 
+// 健康检查
+app.get("/health", (c) => {
+  return c.json({ status: "ok", worker: "cdn-worker-v2" });
+});
+
+// 根路径重定向到健康检查
+app.get("/", (c) => {
+  return c.redirect("/health");
+});
+
 // 图片服务路由 - 支持动态缩略图生成
 app.get("/:key", async (c) => {
   const key = c.req.param("key");
@@ -99,16 +109,6 @@ app.get("/:key", async (c) => {
     console.error("CDN Worker error:", error);
     return c.text("Internal Server Error", 500);
   }
-});
-
-// 健康检查
-app.get("/health", (c) => {
-  return c.json({ status: "ok", worker: "cdn-worker-v2" });
-});
-
-// 根路径重定向到健康检查
-app.get("/", (c) => {
-  return c.redirect("/health");
 });
 
 export default app;

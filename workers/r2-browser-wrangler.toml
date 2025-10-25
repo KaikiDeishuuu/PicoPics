@@ -13,4 +13,4 @@ database_id = "90ca5dd2-fc00-475b-99ac-99810d559356"
 
 [vars]
 ALLOWED_ORIGINS = "*"
-ADMIN_TOKEN = "your_admin_token_here"
+ADMIN_TOKEN = "O9OHfrXjtHQWErsXL3in1whfUcOOpW"

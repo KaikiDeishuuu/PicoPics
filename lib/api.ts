@@ -88,13 +88,24 @@ export class ApiClient {
       headers.Authorization = `Bearer ${this.accessToken}`;
     }
 
+    console.log("API Request Debug:");
+    console.log("URL:", url);
+    console.log("Headers:", headers);
+    console.log("Options:", options);
+
     try {
       const response = await fetch(url, {
         ...options,
         headers,
       });
 
+      console.log("API Response Debug:");
+      console.log("Status:", response.status);
+      console.log("Status Text:", response.statusText);
+      console.log("Headers:", Object.fromEntries(response.headers.entries()));
+
       const data = await response.json();
+      console.log("Response Data:", data);
 
       if (!response.ok) {
         return {
@@ -109,6 +120,7 @@ export class ApiClient {
         data: data.data || data,
       };
     } catch (error) {
+      console.error("API Request Error:", error);
       return {
         success: false,
         error: error instanceof Error ? error.message : "Network error",
@@ -126,6 +138,14 @@ export class ApiClient {
       const formData = new FormData();
       formData.append("image", file);
 
+      // 在开发环境中使用本地API路由
+      const uploadUrl =
+        process.env.NODE_ENV === "development"
+          ? "/api/upload"
+          : `${this.baseUrl}/upload`;
+
+      console.log("Upload URL:", uploadUrl);
+
       // 设置超时时间
       xhr.timeout = 60000; // 60秒超时
 
@@ -137,15 +157,19 @@ export class ApiClient {
       });
 
       xhr.addEventListener("load", () => {
+        console.log("Upload response status:", xhr.status);
+        console.log("Upload response text:", xhr.responseText);
         if (xhr.status >= 200 && xhr.status < 300) {
           try {
             const response = JSON.parse(xhr.responseText);
+            console.log("Parsed upload response:", response);
             resolve({
               success: true,
               data: response.data || response,
             });
           } catch (error) {
             console.error("Upload response parse error:", error);
+            console.error("Response text:", xhr.responseText);
             resolve({
               success: false,
               error: "Invalid response format",
@@ -171,7 +195,8 @@ export class ApiClient {
         }
       });
 
-      xhr.addEventListener("error", () => {
+      xhr.addEventListener("error", (event) => {
+        console.error("Upload network error:", event);
         resolve({
           success: false,
           error: "Network error",
@@ -185,7 +210,7 @@ export class ApiClient {
         });
       });
 
-      xhr.open("POST", `${this.baseUrl}/upload`);
+      xhr.open("POST", uploadUrl);
       if (this.accessToken) {
         xhr.setRequestHeader("Authorization", `Bearer ${this.accessToken}`);
       }
@@ -227,10 +252,12 @@ export class ApiClient {
 
 // Factory function for creating API client
 export function createApiClient(accessToken?: string): ApiClient {
-  // 优先使用环境变量，如果没有则使用默认值
+  // 在开发环境中使用本地API路由，生产环境使用worker
   const uploadApi =
-    process.env.NEXT_PUBLIC_UPLOAD_API ||
-    "https://uploader-worker-v2-prod.haoweiw370.workers.dev";
+    process.env.NODE_ENV === "development"
+      ? "" // 使用相对路径，会调用本地的 /api/upload
+      : process.env.NEXT_PUBLIC_UPLOAD_API ||
+        "https://uploader-worker-v2-prod.haoweiw370.workers.dev";
   const baseUrl = uploadApi;
 
   console.log("API Base URL:", baseUrl);
