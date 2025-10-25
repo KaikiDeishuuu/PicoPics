@@ -2,11 +2,14 @@
 
 现代化图片托管平台 - 基于 Next.js 15 + Cloudflare Workers 的高性能图片分享解决方案
 
-[![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](LICENSE)
-[![Next.js](https://img.shields.io/badge/Next.js-15.5.2-black?logo=next.js&logoColor=white)](https://nextjs.org/)
-[![TypeScript](https://img.shields.io/badge/TypeScript-5.3.3-blue?logo=typescript&logoColor=white)](https://www.typescriptlang.org/)
-[![Cloudflare](https://img.shields.io/badge/Cloudflare-Workers-orange?logo=cloudflare&logoColor=white)](https://workers.cloudflare.com/)
-[![Live Demo](https://img.shields.io/badge/Live%20Demo-v2.pico.lambdax.me-green?logo=vercel&logoColor=white)](https://v2.pico.lambdax.me)
+[![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg?style=for-the-badge)](LICENSE)
+[![Built with Next.js](https://img.shields.io/badge/Built%20with-Next.js-000000?style=for-the-badge&logo=next.js&logoColor=white)](https://nextjs.org)
+[![TypeScript](https://img.shields.io/badge/TypeScript-5.3.3-3178C6?style=for-the-badge&logo=typescript&logoColor=white)](https://www.typescriptlang.org/)
+[![Styled with Tailwind CSS](https://img.shields.io/badge/Styled%20with-Tailwind%20CSS-38B2AC?style=for-the-badge&logo=tailwind-css&logoColor=white)](https://tailwindcss.com)
+[![Deployed on Vercel](https://img.shields.io/badge/Deployed%20on-Vercel-000000?style=for-the-badge&logo=vercel&logoColor=white)](https://vercel.com)
+[![Powered by Cloudflare](https://img.shields.io/badge/Powered%20by-Cloudflare-orange?style=for-the-badge&logo=cloudflare&logoColor=white)](https://workers.cloudflare.com/)
+[![Live Demo](https://img.shields.io/badge/Live%20Demo-v2.pico.lambdax.me-000000?style=for-the-badge&logo=vercel&logoColor=white)](https://v2.pico.lambdax.me)
+[![Telegram Bot](https://img.shields.io/badge/Telegram-Bot-26A5E4?style=for-the-badge&logo=telegram&logoColor=white)](https://t.me/OnonokiiBOT)
 
 ## 核心特性
 
