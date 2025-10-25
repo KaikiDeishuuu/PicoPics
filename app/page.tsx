@@ -192,7 +192,7 @@ export default function Home() {
         <header className="flex items-center justify-between px-6 py-3 bg-black/60 backdrop-blur-md border border-white/10 rounded-xl mb-8">
           {/* Logo 区域 */}
           <div className="flex items-center gap-3">
-            <div className="rounded-lg border border-orange-400/20 bg-gradient-to-br from-orange-500 via-rose-500 to-purple-600 grid h-10 w-10 place-items-center shadow-lg shadow-orange-500/40">
+            <div className="rounded-lg border border-blue-400/20 bg-gradient-to-br from-blue-500 via-cyan-500 to-purple-600 grid h-10 w-10 place-items-center shadow-lg shadow-blue-500/40">
               <span className="text-white font-bold text-lg drop-shadow-md">K</span>
             </div>
             <span className="text-white font-semibold hidden sm:inline">PicoPics</span>
@@ -243,7 +243,7 @@ export default function Home() {
             initial={{ opacity: 0, y: 50 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.8, ease: "easeOut" }}
-            className="text-4xl sm:text-6xl md:text-7xl lg:text-9xl font-bold bg-gradient-to-r from-yellow-400 via-orange-500 to-red-500 bg-clip-text text-transparent mb-4 md:mb-6"
+            className="text-4xl sm:text-6xl md:text-7xl lg:text-9xl font-bold bg-gradient-to-r from-blue-400 via-cyan-500 to-purple-500 bg-clip-text text-transparent mb-4 md:mb-6"
           >
             PicoPics V2
           </motion.h1>
@@ -277,7 +277,7 @@ export default function Home() {
               <Link href="/upload">
                 <Button
                   size="lg"
-                  className="bg-gradient-to-r from-yellow-500 to-orange-500 hover:from-yellow-600 hover:to-orange-600 text-white shadow-lg"
+                  className="bg-gradient-to-r from-blue-500 to-cyan-500 hover:from-blue-600 hover:to-cyan-600 text-white shadow-lg"
                 >
                   <Upload className="h-5 w-5 mr-2" />
                   Upload Images
@@ -287,7 +287,7 @@ export default function Home() {
                 <Button
                   size="lg"
                   variant="outline"
-                  className="w-full sm:w-auto bg-black/80 backdrop-blur-sm border-2 border-yellow-500 text-yellow-400 hover:bg-yellow-500/20"
+                  className="w-full sm:w-auto bg-black/80 backdrop-blur-sm border-2 border-blue-500 text-blue-400 hover:bg-blue-500/20"
                 >
                   <Image className="h-5 w-5 mr-2" />
                   My Gallery
