@@ -2,9 +2,11 @@
 
 现代化图片托管平台 - 基于 Next.js 15 + Cloudflare Workers 的高性能图片分享解决方案
 
-[![License](https://img.shields.io/badge/license-MIT-blue.svg)](LICENSE)
-[![Next.js](https://img.shields.io/badge/Next.js-15-black)](https://nextjs.org/)
-[![TypeScript](https://img.shields.io/badge/TypeScript-5.0-blue)](https://www.typescriptlang.org/)
+[![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](LICENSE)
+[![Next.js](https://img.shields.io/badge/Next.js-15.5.2-black?logo=next.js&logoColor=white)](https://nextjs.org/)
+[![TypeScript](https://img.shields.io/badge/TypeScript-5.3.3-blue?logo=typescript&logoColor=white)](https://www.typescriptlang.org/)
+[![Cloudflare](https://img.shields.io/badge/Cloudflare-Workers-orange?logo=cloudflare&logoColor=white)](https://workers.cloudflare.com/)
+[![Live Demo](https://img.shields.io/badge/Live%20Demo-v2.pico.lambdax.me-green?logo=vercel&logoColor=white)](https://v2.pico.lambdax.me)
 
 ## 核心特性
 
@@ -110,7 +112,3 @@ MIT License - 详见 [LICENSE](./LICENSE)
 ## 贡献
 
 欢迎提交 Issue 和 Pull Request！
-
----
-
-**PicoPics V2** - 让图片分享更简单、更快速、更安全
