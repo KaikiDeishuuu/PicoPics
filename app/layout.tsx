@@ -2,6 +2,7 @@ import type { Metadata } from "next";
 import { Inter } from "next/font/google";
 import "./globals.css";
 import { ThemeProvider } from "@/components/ThemeProvider";
+import { Analytics } from "@vercel/analytics/react";
 
 // 强制动态渲染，避免静态化
 export const dynamic = "force-dynamic";
@@ -9,8 +10,8 @@ export const dynamic = "force-dynamic";
 const inter = Inter({ subsets: ["latin"] });
 
 export const metadata: Metadata = {
-  title: "PicoPics - 图片上传工具",
-  description: "现代化的图片上传和管理工具，支持拖拽上传、实时预览、配额管理",
+  title: "PicoPicsV2-KAIKI'S IMAGE HOSTING",
+  description: "Modern image hosting platform based on Next.js 15 + Cloudflare Workers",
   manifest: "/manifest.json",
   icons: {
     icon: "/favicon.svg",
@@ -35,6 +36,7 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
         <ThemeProvider defaultTheme="system" storageKey="picopics-theme">
           {children}
         </ThemeProvider>
+        <Analytics />
       </body>
     </html>
   );

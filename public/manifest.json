@@ -4,8 +4,8 @@
   "description": "Next-generation image sharing solution built with Next.js 15 + Cloudflare Workers",
   "start_url": "/",
   "display": "standalone",
-  "background_color": "#fef3c7",
-  "theme_color": "#f59e0b",
+  "background_color": "#eff6ff",
+  "theme_color": "#3b82f6",
   "orientation": "portrait-primary",
   "icons": [
     {
