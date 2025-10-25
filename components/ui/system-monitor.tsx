@@ -1,23 +1,23 @@
 "use client";
 
-import { useState, useEffect } from "react";
 import { motion } from "framer-motion";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { Button } from "@/components/ui/button";
-import { Badge } from "@/components/ui/badge";
 import {
   Activity,
-  Server,
-  Database,
-  Globe,
   AlertTriangle,
   CheckCircle,
   Clock,
-  RefreshCw,
-  TrendingUp,
-  TrendingDown,
+  Database,
+  Globe,
   Minus,
+  RefreshCw,
+  Server,
+  TrendingDown,
+  TrendingUp,
 } from "lucide-react";
+import { useEffect, useState } from "react";
+import { Badge } from "@/components/ui/badge";
+import { Button } from "@/components/ui/button";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 
 interface SystemStats {
   cpu: number;
@@ -120,9 +120,7 @@ export function SystemMonitor({ accessToken, adminToken }: SystemMonitorProps) {
                 size="sm"
                 className="border-white/20 text-white hover:bg-white/10"
               >
-                <RefreshCw
-                  className={`h-4 w-4 mr-2 ${loading ? "animate-spin" : ""}`}
-                />
+                <RefreshCw className={`h-4 w-4 mr-2 ${loading ? "animate-spin" : ""}`} />
                 Refresh
               </Button>
             </div>
@@ -141,14 +139,9 @@ export function SystemMonitor({ accessToken, adminToken }: SystemMonitorProps) {
             <Card className="card-modern">
               <CardHeader className="pb-3">
                 <div className="flex items-center justify-between">
-                  <CardTitle className="text-sm text-white">
-                    CPU Usage
-                  </CardTitle>
+                  <CardTitle className="text-sm text-white">CPU Usage</CardTitle>
                   <div
-                    className={`flex items-center space-x-1 ${getStatusColor(
-                      stats.cpu,
-                      "cpu"
-                    )}`}
+                    className={`flex items-center space-x-1 ${getStatusColor(stats.cpu, "cpu")}`}
                   >
                     {getStatusIcon(stats.cpu, "cpu")}
                     <span className="text-sm font-medium">{stats.cpu}%</span>
@@ -168,9 +161,7 @@ export function SystemMonitor({ accessToken, adminToken }: SystemMonitorProps) {
             <Card className="card-modern">
               <CardHeader className="pb-3">
                 <div className="flex items-center justify-between">
-                  <CardTitle className="text-sm text-white">
-                    Memory Usage
-                  </CardTitle>
+                  <CardTitle className="text-sm text-white">Memory Usage</CardTitle>
                   <div
                     className={`flex items-center space-x-1 ${getStatusColor(
                       stats.memory,
@@ -195,14 +186,9 @@ export function SystemMonitor({ accessToken, adminToken }: SystemMonitorProps) {
             <Card className="card-modern">
               <CardHeader className="pb-3">
                 <div className="flex items-center justify-between">
-                  <CardTitle className="text-sm text-white">
-                    Disk Usage
-                  </CardTitle>
+                  <CardTitle className="text-sm text-white">Disk Usage</CardTitle>
                   <div
-                    className={`flex items-center space-x-1 ${getStatusColor(
-                      stats.disk,
-                      "disk"
-                    )}`}
+                    className={`flex items-center space-x-1 ${getStatusColor(stats.disk, "disk")}`}
                   >
                     {getStatusIcon(stats.disk, "disk")}
                     <span className="text-sm font-medium">{stats.disk}%</span>
@@ -266,8 +252,8 @@ export function SystemMonitor({ accessToken, adminToken }: SystemMonitorProps) {
                       stats.responseTime < 100
                         ? "default"
                         : stats.responseTime < 500
-                        ? "secondary"
-                        : "destructive"
+                          ? "secondary"
+                          : "destructive"
                     }
                     className="text-xs"
                   >
@@ -276,9 +262,7 @@ export function SystemMonitor({ accessToken, adminToken }: SystemMonitorProps) {
                 </div>
                 <div className="flex items-center justify-between">
                   <span className="text-white/80">Uptime</span>
-                  <span className="text-white font-mono text-sm">
-                    {stats.uptime}
-                  </span>
+                  <span className="text-white font-mono text-sm">{stats.uptime}</span>
                 </div>
               </CardContent>
             </Card>
@@ -318,10 +302,7 @@ export function SystemMonitor({ accessToken, adminToken }: SystemMonitorProps) {
                   <span>Success Rate</span>
                   <span>
                     {stats.requests.total > 0
-                      ? (
-                          (stats.requests.success / stats.requests.total) *
-                          100
-                        ).toFixed(1)
+                      ? ((stats.requests.success / stats.requests.total) * 100).toFixed(1)
                       : 0}
                     %
                   </span>
@@ -332,8 +313,7 @@ export function SystemMonitor({ accessToken, adminToken }: SystemMonitorProps) {
                     style={{
                       width: `${
                         stats.requests.total > 0
-                          ? (stats.requests.success / stats.requests.total) *
-                            100
+                          ? (stats.requests.success / stats.requests.total) * 100
                           : 0
                       }%`,
                     }}

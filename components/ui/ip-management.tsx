@@ -1,22 +1,22 @@
 "use client";
 
-import { useState, useEffect } from "react";
 import { motion } from "framer-motion";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
-import { Badge } from "@/components/ui/badge";
 import {
-  Shield,
-  Ban,
-  Unlock,
-  Search,
-  Plus,
-  Trash2,
   AlertTriangle,
+  Ban,
   CheckCircle,
   Clock,
+  Plus,
+  Search,
+  Shield,
+  Trash2,
+  Unlock,
 } from "lucide-react";
+import { useEffect, useState } from "react";
+import { Badge } from "@/components/ui/badge";
+import { Button } from "@/components/ui/button";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Input } from "@/components/ui/input";
 
 interface IPRecord {
   ip: string;
@@ -148,9 +148,7 @@ export function IPManagement({ accessToken, adminToken }: IPManagementProps) {
           <div className="flex items-center justify-between">
             <div className="flex items-center space-x-2">
               <Shield className="h-6 w-6 text-blue-400" />
-              <CardTitle className="text-white">
-                IP Blacklist Management
-              </CardTitle>
+              <CardTitle className="text-white">IP Blacklist Management</CardTitle>
             </div>
             <Button
               onClick={() => setShowAddForm(!showAddForm)}
@@ -180,9 +178,7 @@ export function IPManagement({ accessToken, adminToken }: IPManagementProps) {
               variant="outline"
               className="border-white/20 text-white hover:bg-white/10 h-10 flex-shrink-0"
             >
-              <Clock
-                className={`h-4 w-4 mr-2 ${loading ? "animate-spin" : ""}`}
-              />
+              <Clock className={`h-4 w-4 mr-2 ${loading ? "animate-spin" : ""}`} />
               <span className="hidden sm:inline">Refresh</span>
               <span className="sm:hidden">Ref</span>
             </Button>
@@ -204,9 +200,7 @@ export function IPManagement({ accessToken, adminToken }: IPManagementProps) {
             <CardContent className="space-y-4">
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                 <div>
-                  <label className="block text-sm font-medium text-white mb-2">
-                    IP Address
-                  </label>
+                  <label className="block text-sm font-medium text-white mb-2">IP Address</label>
                   <Input
                     placeholder="192.168.1.1 or 192.168.1.0/24"
                     value={newIP}
@@ -215,9 +209,7 @@ export function IPManagement({ accessToken, adminToken }: IPManagementProps) {
                   />
                 </div>
                 <div>
-                  <label className="block text-sm font-medium text-white mb-2">
-                    Reason
-                  </label>
+                  <label className="block text-sm font-medium text-white mb-2">Reason</label>
                   <Input
                     placeholder="Reason for banning this IP"
                     value={newReason}
@@ -227,10 +219,7 @@ export function IPManagement({ accessToken, adminToken }: IPManagementProps) {
                 </div>
               </div>
               <div className="flex space-x-2">
-                <Button
-                  onClick={addToBlacklist}
-                  className="bg-red-600 hover:bg-red-700 text-white"
-                >
+                <Button onClick={addToBlacklist} className="bg-red-600 hover:bg-red-700 text-white">
                   <Ban className="h-4 w-4 mr-2" />
                   Ban IP
                 </Button>
@@ -251,9 +240,7 @@ export function IPManagement({ accessToken, adminToken }: IPManagementProps) {
       <Card className="card-modern">
         <CardHeader>
           <div className="flex items-center justify-between">
-            <CardTitle className="text-white">
-              Blacklisted IPs ({filteredIPs.length})
-            </CardTitle>
+            <CardTitle className="text-white">Blacklisted IPs ({filteredIPs.length})</CardTitle>
             <Badge variant="outline" className="border-red-500/50 text-red-400">
               {ipList.filter((ip) => ip.status === "active").length} Active
             </Badge>
@@ -285,11 +272,7 @@ export function IPManagement({ accessToken, adminToken }: IPManagementProps) {
                         {record.ip}
                       </code>
                       <Badge
-                        variant={
-                          record.status === "active"
-                            ? "destructive"
-                            : "secondary"
-                        }
+                        variant={record.status === "active" ? "destructive" : "secondary"}
                         className="text-xs"
                       >
                         {record.status === "active" ? (
@@ -305,12 +288,9 @@ export function IPManagement({ accessToken, adminToken }: IPManagementProps) {
                         )}
                       </Badge>
                     </div>
-                    <p className="text-white/70 text-sm mt-1">
-                      {record.reason}
-                    </p>
+                    <p className="text-white/70 text-sm mt-1">{record.reason}</p>
                     <p className="text-white/50 text-xs mt-1">
-                      Added by {record.addedBy} on{" "}
-                      {new Date(record.addedAt).toLocaleString()}
+                      Added by {record.addedBy} on {new Date(record.addedAt).toLocaleString()}
                     </p>
                   </div>
                   <div className="flex items-center space-x-2">

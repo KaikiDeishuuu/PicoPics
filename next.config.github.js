@@ -15,8 +15,7 @@ const nextConfig = {
       process.env.NEXT_PUBLIC_HISTORY_API ||
       "https://history-worker-v2-prod.haoweiw370.workers.dev",
     NEXT_PUBLIC_CDN_BASE:
-      process.env.NEXT_PUBLIC_CDN_BASE ||
-      "https://cdn-worker-v2-prod.haoweiw370.workers.dev",
+      process.env.NEXT_PUBLIC_CDN_BASE || "https://cdn-worker-v2-prod.haoweiw370.workers.dev",
   },
 
   // 图片优化配置

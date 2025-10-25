@@ -237,30 +237,30 @@ export class NotificationService {
   private static toastHandler: ((notification: Notification) => void) | null = null;
 
   static setToastHandler(handler: (notification: Notification) => void) {
-    this.toastHandler = handler;
+    NotificationService.toastHandler = handler;
   }
 
   static show(notification: Notification) {
-    if (this.toastHandler) {
-      this.toastHandler(notification);
+    if (NotificationService.toastHandler) {
+      NotificationService.toastHandler(notification);
     } else {
       console.warn("Notification service not initialized");
     }
   }
 
   static success(title: string, description?: string) {
-    this.show({ type: "success", title, description });
+    NotificationService.show({ type: "success", title, description });
   }
 
   static error(title: string, description?: string) {
-    this.show({ type: "error", title, description });
+    NotificationService.show({ type: "error", title, description });
   }
 
   static warning(title: string, description?: string) {
-    this.show({ type: "warning", title, description });
+    NotificationService.show({ type: "warning", title, description });
   }
 
   static info(title: string, description?: string) {
-    this.show({ type: "info", title, description });
+    NotificationService.show({ type: "info", title, description });
   }
 }

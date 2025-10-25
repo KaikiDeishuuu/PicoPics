@@ -1,6 +1,6 @@
 "use client";
 
-import { motion, AnimatePresence } from "framer-motion";
+import { AnimatePresence, motion } from "framer-motion";
 import { cn } from "@/lib/utils";
 
 // 页面过渡动画
@@ -364,7 +364,3 @@ export function Parallax({ children, offset = 50, className }: ParallaxProps) {
     </motion.div>
   );
 }
-
-
-
-

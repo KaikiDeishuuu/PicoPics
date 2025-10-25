@@ -1,56 +1,47 @@
 "use client";
 
-import { useState, useEffect } from "react";
-import { motion, AnimatePresence } from "framer-motion";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
+import { AnimatePresence, motion } from "framer-motion";
 import {
-  Card,
-  CardContent,
-  CardDescription,
-  CardHeader,
-  CardTitle,
-} from "@/components/ui/card";
+  Activity,
+  AlertTriangle,
+  ArrowLeft,
+  BarChart3,
+  CheckCircle,
+  Clock,
+  Database,
+  Download,
+  Globe,
+  HardDrive,
+  Image,
+  PieChart,
+  RefreshCw,
+  Settings,
+  Shield,
+  Trash2,
+  TrendingUp,
+  Users,
+  Zap,
+} from "lucide-react";
+import Link from "next/link";
+import { useEffect, useState } from "react";
+import {
+  AnimatedDiv,
+  cardHoverVariants,
+  listItemVariants,
+  pageTransition,
+  pageVariants,
+  pulseVariants,
+  StaggerContainer,
+} from "@/components/ui/animations";
 import { Button } from "@/components/ui/button";
-import { LoadingSpinner } from "@/components/ui/loading";
-import {
-  NotificationContainer,
-  useNotifications,
-} from "@/components/ui/notification";
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { DynamicBackground } from "@/components/ui/dynamic-background";
 import { Footer } from "@/components/ui/footer";
 import { IPManagement } from "@/components/ui/ip-management";
+import { LoadingSpinner } from "@/components/ui/loading";
+import { NotificationContainer, useNotifications } from "@/components/ui/notification";
 import { SystemMonitor } from "@/components/ui/system-monitor";
-import {
-  pageVariants,
-  pageTransition,
-  cardHoverVariants,
-  listItemVariants,
-  StaggerContainer,
-  AnimatedDiv,
-  pulseVariants,
-} from "@/components/ui/animations";
-import {
-  ArrowLeft,
-  Users,
-  Image,
-  Database,
-  Activity,
-  TrendingUp,
-  Shield,
-  Settings,
-  BarChart3,
-  PieChart,
-  Download,
-  RefreshCw,
-  AlertTriangle,
-  CheckCircle,
-  Clock,
-  HardDrive,
-  Globe,
-  Zap,
-  Trash2,
-} from "lucide-react";
-import Link from "next/link";
 
 // 强制动态渲染
 export const dynamic = "force-dynamic";
@@ -90,16 +81,10 @@ function AdminContent() {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [activeTab, setActiveTab] = useState<
-    | "overview"
-    | "users"
-    | "analytics"
-    | "ip-management"
-    | "system-monitor"
-    | "data-management"
+    "overview" | "users" | "analytics" | "ip-management" | "system-monitor" | "data-management"
   >("overview");
   const [images, setImages] = useState<any[]>([]);
-  const { notifications, addNotification, removeNotification } =
-    useNotifications();
+  const { notifications, addNotification, removeNotification } = useNotifications();
 
   // 认证检查
   useEffect(() => {
@@ -337,17 +322,14 @@ function AdminContent() {
         process.env.NEXT_PUBLIC_UPLOAD_API ||
         "https://uploader-worker-v2-prod.haoweiw370.workers.dev";
 
-      const response = await fetch(
-        `${adminApi}/api/admin/images/${encodeURIComponent(key)}`,
-        {
-          method: "DELETE",
-          headers: {
-            Authorization: `Bearer ${accessToken}`,
-            "X-Admin-Token": token,
-            "Content-Type": "application/json",
-          },
-        }
-      );
+      const response = await fetch(`${adminApi}/api/admin/images/${encodeURIComponent(key)}`, {
+        method: "DELETE",
+        headers: {
+          Authorization: `Bearer ${accessToken}`,
+          "X-Admin-Token": token,
+          "Content-Type": "application/json",
+        },
+      });
 
       if (response.ok) {
         addNotification({
@@ -395,12 +377,7 @@ function AdminContent() {
   // 如果没有认证，重定向到首页
   if (!isAuthenticated) {
     return (
-      <DynamicBackground
-        variant="sunset"
-        intensity="medium"
-        speed="slow"
-        className="min-h-screen"
-      >
+      <DynamicBackground variant="sunset" intensity="medium" speed="slow" className="min-h-screen">
         <motion.div
           initial="initial"
           animate="in"
@@ -431,12 +408,7 @@ function AdminContent() {
   // 如果没有管理员权限
   if (!isAdmin) {
     return (
-      <DynamicBackground
-        variant="sunset"
-        intensity="medium"
-        speed="slow"
-        className="min-h-screen"
-      >
+      <DynamicBackground variant="sunset" intensity="medium" speed="slow" className="min-h-screen">
         <motion.div
           initial="initial"
           animate="in"
@@ -450,18 +422,14 @@ function AdminContent() {
               <div className="flex justify-center mb-4">
                 <Shield className="h-12 w-12 text-blue-400" />
               </div>
-              <CardTitle className="text-2xl text-white">
-                Admin Authentication
-              </CardTitle>
+              <CardTitle className="text-2xl text-white">Admin Authentication</CardTitle>
               <CardDescription className="text-white/80">
                 Please enter admin token to access admin panel
               </CardDescription>
             </CardHeader>
             <CardContent className="space-y-4">
               <div className="space-y-2">
-                <label className="text-sm font-medium text-white">
-                  Admin Token
-                </label>
+                <label className="text-sm font-medium text-white">Admin Token</label>
                 <input
                   type="password"
                   value={tokenInput}
@@ -475,9 +443,7 @@ function AdminContent() {
                   }}
                 />
               </div>
-              {error && (
-                <div className="text-red-400 text-sm text-center">{error}</div>
-              )}
+              {error && <div className="text-red-400 text-sm text-center">{error}</div>}
               <Button
                 onClick={handleTokenSubmit}
                 className="w-full bg-blue-600 hover:bg-blue-700 text-white"
@@ -509,12 +475,7 @@ function AdminContent() {
   }
 
   return (
-    <DynamicBackground
-      variant="sunset"
-      intensity="medium"
-      speed="slow"
-      className="min-h-screen"
-    >
+    <DynamicBackground variant="sunset" intensity="medium" speed="slow" className="min-h-screen">
       <motion.div
         initial="initial"
         animate="in"
@@ -554,12 +515,7 @@ function AdminContent() {
         </Card>
 
         {/* 标签页导航 */}
-        <motion.div
-          variants={cardHoverVariants}
-          initial="rest"
-          whileHover="hover"
-          className="mb-8"
-        >
+        <motion.div variants={cardHoverVariants} initial="rest" whileHover="hover" className="mb-8">
           <Card className="card-modern">
             <CardContent className="p-4">
               <div className="flex overflow-x-auto space-x-1 scrollbar-hide">
@@ -645,28 +601,16 @@ function AdminContent() {
                       change: "+15%",
                     },
                   ].map((stat, index) => (
-                    <motion.div
-                      key={index}
-                      variants={listItemVariants}
-                      custom={index}
-                    >
+                    <motion.div key={index} variants={listItemVariants} custom={index}>
                       <Card className="card-modern hover:shadow-xl transition-all duration-300 hover:-translate-y-1">
                         <CardContent className="p-6">
                           <div className="flex items-center justify-between">
                             <div>
-                              <p className="text-sm font-medium text-white/70">
-                                {stat.title}
-                              </p>
-                              <p className="text-2xl font-bold text-white">
-                                {stat.value}
-                              </p>
-                              <p className="text-xs text-green-400">
-                                {stat.change}
-                              </p>
+                              <p className="text-sm font-medium text-white/70">{stat.title}</p>
+                              <p className="text-2xl font-bold text-white">{stat.value}</p>
+                              <p className="text-xs text-green-400">{stat.change}</p>
                             </div>
-                            <div
-                              className={`p-3 rounded-lg bg-gradient-to-r ${stat.color}`}
-                            >
+                            <div className={`p-3 rounded-lg bg-gradient-to-r ${stat.color}`}>
                               <stat.icon className="h-6 w-6 text-white" />
                             </div>
                           </div>
@@ -702,14 +646,10 @@ function AdminContent() {
                           key={index}
                           className="flex items-center justify-between p-3 bg-black/40 rounded-lg border border-white/10"
                         >
-                          <span className="font-medium text-white">
-                            {service.name}
-                          </span>
+                          <span className="font-medium text-white">{service.name}</span>
                           <div className="flex items-center space-x-2">
                             <CheckCircle className="h-4 w-4 text-green-400" />
-                            <span className="text-sm text-green-400">
-                              {service.status}
-                            </span>
+                            <span className="text-sm text-green-400">{service.status}</span>
                           </div>
                         </div>
                       ))}
@@ -740,9 +680,7 @@ function AdminContent() {
                       <Users className="h-5 w-5 text-blue-400" />
                       <span>用户管理</span>
                     </CardTitle>
-                    <CardDescription className="text-white/70">
-                      管理系统用户和权限
-                    </CardDescription>
+                    <CardDescription className="text-white/70">管理系统用户和权限</CardDescription>
                   </CardHeader>
                   <CardContent>
                     {loading ? (
@@ -752,12 +690,8 @@ function AdminContent() {
                     ) : users.length === 0 ? (
                       <div className="flex flex-col items-center justify-center py-16 text-center">
                         <Users className="h-12 w-12 text-white/30 mb-4" />
-                        <h3 className="text-lg font-medium text-white/80 mb-2">
-                          暂无用户数据
-                        </h3>
-                        <p className="text-sm text-white/60">
-                          当前数据库中没有用户记录
-                        </p>
+                        <h3 className="text-lg font-medium text-white/80 mb-2">暂无用户数据</h3>
+                        <p className="text-sm text-white/60">当前数据库中没有用户记录</p>
                         <button
                           onClick={() => fetchUsers()}
                           className="mt-4 px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white rounded-md transition-colors"
@@ -770,21 +704,11 @@ function AdminContent() {
                         <table className="w-full">
                           <thead>
                             <tr className="border-b border-white/20">
-                              <th className="text-left py-3 px-4 text-white/80">
-                                用户ID
-                              </th>
-                              <th className="text-left py-3 px-4 text-white/80">
-                                用户名
-                              </th>
-                              <th className="text-left py-3 px-4 text-white/80">
-                                邮箱
-                              </th>
-                              <th className="text-left py-3 px-4 text-white/80">
-                                上传数
-                              </th>
-                              <th className="text-left py-3 px-4 text-white/80">
-                                最后活跃
-                              </th>
+                              <th className="text-left py-3 px-4 text-white/80">用户ID</th>
+                              <th className="text-left py-3 px-4 text-white/80">用户名</th>
+                              <th className="text-left py-3 px-4 text-white/80">邮箱</th>
+                              <th className="text-left py-3 px-4 text-white/80">上传数</th>
+                              <th className="text-left py-3 px-4 text-white/80">最后活跃</th>
                             </tr>
                           </thead>
                           <tbody>
@@ -795,25 +719,17 @@ function AdminContent() {
                                 custom={index}
                                 className="border-b border-white/10 hover:bg-white/10 transition-colors"
                               >
-                                <td className="py-3 px-4 text-white">
-                                  {user.id}
-                                </td>
+                                <td className="py-3 px-4 text-white">{user.id}</td>
                                 <td className="py-3 px-4 font-medium text-white">
                                   {user.username}
                                 </td>
-                                <td className="py-3 px-4 text-white/80">
-                                  {user.email}
-                                </td>
-                                <td className="py-3 px-4 text-white/80">
-                                  {user.uploads}
-                                </td>
+                                <td className="py-3 px-4 text-white/80">{user.email}</td>
+                                <td className="py-3 px-4 text-white/80">{user.uploads}</td>
                                 <td className="py-3 px-4">
                                   <div className="flex items-center space-x-2">
                                     <Clock className="h-4 w-4 text-white/60" />
                                     <span className="text-sm text-white/70">
-                                      {new Date(
-                                        user.lastActive
-                                      ).toLocaleDateString()}
+                                      {new Date(user.lastActive).toLocaleDateString()}
                                     </span>
                                   </div>
                                 </td>
@@ -856,12 +772,8 @@ function AdminContent() {
                   <CardContent>
                     <div className="text-center py-12">
                       <PieChart className="h-16 w-16 text-white/40 mx-auto mb-4" />
-                      <h3 className="text-lg font-medium text-white mb-2">
-                        数据分析功能
-                      </h3>
-                      <p className="text-white/70">
-                        详细的数据分析功能正在开发中，敬请期待！
-                      </p>
+                      <h3 className="text-lg font-medium text-white mb-2">数据分析功能</h3>
+                      <p className="text-white/70">详细的数据分析功能正在开发中，敬请期待！</p>
                     </div>
                   </CardContent>
                 </Card>
@@ -877,10 +789,7 @@ function AdminContent() {
               exit={{ opacity: 0, y: -20 }}
               transition={{ duration: 0.3 }}
             >
-              <IPManagement
-                accessToken={accessToken || ""}
-                adminToken={adminToken || ""}
-              />
+              <IPManagement accessToken={accessToken || ""} adminToken={adminToken || ""} />
             </motion.div>
           )}
 
@@ -892,10 +801,7 @@ function AdminContent() {
               exit={{ opacity: 0, y: -20 }}
               transition={{ duration: 0.3 }}
             >
-              <SystemMonitor
-                accessToken={accessToken || ""}
-                adminToken={adminToken || ""}
-              />
+              <SystemMonitor accessToken={accessToken || ""} adminToken={adminToken || ""} />
             </motion.div>
           )}
 
@@ -931,12 +837,8 @@ function AdminContent() {
                     ) : images.length === 0 ? (
                       <div className="flex flex-col items-center justify-center py-16 text-center">
                         <Database className="h-12 w-12 text-white/30 mb-4" />
-                        <h3 className="text-lg font-medium text-white/80 mb-2">
-                          暂无图片数据
-                        </h3>
-                        <p className="text-sm text-white/60 mb-4">
-                          当前数据库中没有图片记录
-                        </p>
+                        <h3 className="text-lg font-medium text-white/80 mb-2">暂无图片数据</h3>
+                        <p className="text-sm text-white/60 mb-4">当前数据库中没有图片记录</p>
                         <button
                           onClick={() => fetchImages()}
                           className="px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white rounded-md transition-colors"
@@ -962,16 +864,10 @@ function AdminContent() {
                                     className="w-24 h-24 object-cover rounded-md"
                                   />
                                   <div className="flex-1">
-                                    <h3 className="text-white font-medium">
-                                      {image.filename}
-                                    </h3>
+                                    <h3 className="text-white font-medium">{image.filename}</h3>
+                                    <p className="text-sm text-white/60">用户: {image.username}</p>
                                     <p className="text-sm text-white/60">
-                                      用户: {image.username}
-                                    </p>
-                                    <p className="text-sm text-white/60">
-                                      {new Date(
-                                        image.uploadDate
-                                      ).toLocaleString("zh-CN")}
+                                      {new Date(image.uploadDate).toLocaleString("zh-CN")}
                                     </p>
                                     <p className="text-xs text-white/50">
                                       {image.fileSize} bytes · {image.mimeType}

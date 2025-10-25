@@ -1,9 +1,9 @@
+/* 导入移动端优化样式 */
+@import "./mobile-optimization.css";
+
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
-
-/* 导入移动端优化样式 */
-@import "./mobile-optimization.css";
 
 @layer base {
   :root {

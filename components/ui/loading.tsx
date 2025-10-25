@@ -5,10 +5,7 @@ interface LoadingSpinnerProps {
   className?: string;
 }
 
-export function LoadingSpinner({
-  size = "md",
-  className,
-}: LoadingSpinnerProps) {
+export function LoadingSpinner({ size = "md", className }: LoadingSpinnerProps) {
   const sizeClasses = {
     sm: "h-4 w-4",
     md: "h-6 w-6",
@@ -49,13 +46,8 @@ export function Skeleton({ className, lines = 1 }: SkeletonProps) {
   return (
     <div className={cn("animate-pulse", className)}>
       {Array.from({ length: lines }).map((_, i) => (
-        <div
-          key={i}
-          className="h-4 bg-gray-200 rounded dark:bg-gray-700 mb-2 last:mb-0"
-        />
+        <div key={i} className="h-4 bg-gray-200 rounded dark:bg-gray-700 mb-2 last:mb-0" />
       ))}
     </div>
   );
 }
-
-

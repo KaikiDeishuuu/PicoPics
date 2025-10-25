@@ -1,44 +1,37 @@
 "use client";
 
-import React from "react";
-import Link from "next/link";
-import { useEffect, useState } from "react";
-import { motion, AnimatePresence } from "framer-motion";
+import { AnimatePresence, motion } from "framer-motion";
 import {
-  Card,
-  CardContent,
-  CardDescription,
-  CardHeader,
-  CardTitle,
-} from "@/components/ui/card";
-import { Button } from "@/components/ui/button";
-import { LoadingSpinner } from "@/components/ui/loading";
-import { DynamicBackground } from "@/components/ui/dynamic-background";
-import { Footer } from "@/components/ui/footer";
-import {
-  pageVariants,
-  pageTransition,
-  cardHoverVariants,
-  listItemVariants,
-  StaggerContainer,
-  AnimatedDiv,
-  pulseVariants,
-} from "@/components/ui/animations";
-import {
-  Github,
-  Upload,
-  Image,
-  Shield,
-  Zap,
-  Globe,
-  Star,
-  Sparkles,
   ArrowRight,
   CheckCircle,
-  Users,
   Clock,
   Download,
+  Github,
+  Globe,
+  Image,
+  Shield,
+  Sparkles,
+  Star,
+  Upload,
+  Users,
+  Zap,
 } from "lucide-react";
+import Link from "next/link";
+import React, { useEffect, useState } from "react";
+import {
+  AnimatedDiv,
+  cardHoverVariants,
+  listItemVariants,
+  pageTransition,
+  pageVariants,
+  pulseVariants,
+  StaggerContainer,
+} from "@/components/ui/animations";
+import { Button } from "@/components/ui/button";
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
+import { DynamicBackground } from "@/components/ui/dynamic-background";
+import { Footer } from "@/components/ui/footer";
+import { LoadingSpinner } from "@/components/ui/loading";
 
 // 强制动态渲染，避免静态化
 export const dynamic = "force-dynamic";
@@ -59,22 +52,19 @@ export default function Home() {
     {
       icon: Zap,
       title: "Ultimate Performance",
-      description:
-        "Cloudflare Workers edge computing, global millisecond response",
+      description: "Cloudflare Workers edge computing, global millisecond response",
       color: "from-yellow-400 to-orange-500",
     },
     {
       icon: Shield,
       title: "Enterprise Security",
-      description:
-        "GitHub OAuth authentication, JWT Token verification, IP blacklist protection",
+      description: "GitHub OAuth authentication, JWT Token verification, IP blacklist protection",
       color: "from-green-400 to-emerald-500",
     },
     {
       icon: Globe,
       title: "Global Deployment",
-      description:
-        "Vercel global CDN, Cloudflare edge network, zero operational costs",
+      description: "Vercel global CDN, Cloudflare edge network, zero operational costs",
       color: "from-blue-400 to-cyan-500",
     },
   ];
@@ -126,8 +116,7 @@ export default function Home() {
 
   const handleGitHubLogin = () => {
     // GitHub OAuth login logic
-    const clientId =
-      process.env.NEXT_PUBLIC_GITHUB_CLIENT_ID || "Ov23lijBobxzGOfTVu9U";
+    const clientId = process.env.NEXT_PUBLIC_GITHUB_CLIENT_ID || "Ov23lijBobxzGOfTVu9U";
     if (!clientId) {
       alert("GitHub OAuth not configured");
       return;
@@ -145,8 +134,7 @@ export default function Home() {
   };
 
   const handleLogin = () => {
-    const clientId =
-      process.env.NEXT_PUBLIC_GITHUB_CLIENT_ID || "Ov23lijBobxzGOfTVu9U";
+    const clientId = process.env.NEXT_PUBLIC_GITHUB_CLIENT_ID || "Ov23lijBobxzGOfTVu9U";
     if (!clientId) {
       alert("GitHub OAuth not configured");
       return;
@@ -174,12 +162,7 @@ export default function Home() {
   // 确保客户端渲染
   if (!mounted) {
     return (
-      <DynamicBackground
-        variant="rainbow"
-        intensity="medium"
-        speed="slow"
-        className="min-h-screen"
-      >
+      <DynamicBackground variant="rainbow" intensity="medium" speed="slow" className="min-h-screen">
         <div className="container mx-auto px-4 py-16">
           <div className="text-center">
             <div className="flex justify-center mb-6">
@@ -196,12 +179,7 @@ export default function Home() {
   }
 
   return (
-    <DynamicBackground
-      variant="rainbow"
-      intensity="medium"
-      speed="slow"
-      className="min-h-screen"
-    >
+    <DynamicBackground variant="rainbow" intensity="medium" speed="slow" className="min-h-screen">
       <motion.div
         initial="initial"
         animate="in"
@@ -215,13 +193,9 @@ export default function Home() {
           {/* Logo 区域 */}
           <div className="flex items-center gap-3">
             <div className="rounded-lg border border-orange-400/20 bg-gradient-to-br from-orange-500 via-rose-500 to-purple-600 grid h-10 w-10 place-items-center shadow-lg shadow-orange-500/40">
-              <span className="text-white font-bold text-lg drop-shadow-md">
-                K
-              </span>
+              <span className="text-white font-bold text-lg drop-shadow-md">K</span>
             </div>
-            <span className="text-white font-semibold hidden sm:inline">
-              PicoPics
-            </span>
+            <span className="text-white font-semibold hidden sm:inline">PicoPics</span>
           </div>
 
           {/* 按钮区域 */}
@@ -289,9 +263,8 @@ export default function Home() {
             transition={{ duration: 0.8, delay: 0.4, ease: "easeOut" }}
             className="text-sm sm:text-base md:text-lg lg:text-xl text-white/90 drop-shadow-lg mb-8 md:mb-12 max-w-3xl mx-auto"
           >
-            Next-generation image sharing solution built with Next.js 15 +
-            Cloudflare Workers, delivering exceptional performance and user
-            experience
+            Next-generation image sharing solution built with Next.js 15 + Cloudflare Workers,
+            delivering exceptional performance and user experience
           </motion.p>
 
           {isAuthenticated ? (
@@ -351,9 +324,7 @@ export default function Home() {
           className="mb-16"
         >
           <div className="text-center mb-8">
-            <h2 className="text-3xl font-bold text-white drop-shadow-lg mb-4">
-              Core Features
-            </h2>
+            <h2 className="text-3xl font-bold text-white drop-shadow-lg mb-4">Core Features</h2>
             <p className="text-white/90 drop-shadow-lg">
               Experience the next-generation image hosting platform
             </p>
@@ -451,22 +422,14 @@ export default function Home() {
                 color: "from-teal-400 to-green-500",
               },
             ].map((feature, index) => (
-              <motion.div
-                key={index}
-                variants={listItemVariants}
-                custom={index}
-              >
+              <motion.div key={index} variants={listItemVariants} custom={index}>
                 <Card className="h-full card-modern hover:shadow-xl transition-all duration-300 hover:-translate-y-2">
                   <CardHeader>
                     <div className="flex items-center space-x-3">
-                      <div
-                        className={`p-3 rounded-lg bg-gradient-to-r ${feature.color}`}
-                      >
+                      <div className={`p-3 rounded-lg bg-gradient-to-r ${feature.color}`}>
                         <feature.icon className="h-6 w-6 text-white" />
                       </div>
-                      <CardTitle className="text-xl text-white">
-                        {feature.title}
-                      </CardTitle>
+                      <CardTitle className="text-xl text-white">{feature.title}</CardTitle>
                     </div>
                   </CardHeader>
                   <CardContent>

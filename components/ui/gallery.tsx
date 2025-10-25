@@ -1,24 +1,24 @@
 "use client";
 
-import { useState } from "react";
-import { cn } from "@/lib/utils";
-import { OptimizedImage } from "./image";
-import { Modal } from "./modal";
-import { Button } from "./button";
-import { ImageBadge } from "./image-badge";
 import {
-  Eye,
+  Code,
   Copy,
   Download,
+  Eye,
+  FileText,
+  Link as LinkIcon,
+  MessageSquare,
   Share2,
   Trash2,
-  Link as LinkIcon,
-  Code,
-  FileText,
-  MessageSquare,
 } from "lucide-react";
-import { useToast } from "@/components/Toast";
+import { useState } from "react";
 import Masonry from "react-masonry-css";
+import { useToast } from "@/components/Toast";
+import { cn } from "@/lib/utils";
+import { Button } from "./button";
+import { OptimizedImage } from "./image";
+import { ImageBadge } from "./image-badge";
+import { Modal } from "./modal";
 
 interface GalleryImage {
   id: string;
@@ -47,16 +47,13 @@ export function ImageGallery({
   loading = false,
 }: ImageGalleryProps) {
   const [selectedImage, setSelectedImage] = useState<GalleryImage | null>(null);
-  const [imageSizes, setImageSizes] = useState<
-    Record<string, { width: number; height: number }>
-  >({});
+  const [imageSizes, setImageSizes] = useState<Record<string, { width: number; height: number }>>(
+    {}
+  );
   const [isModalOpen, setIsModalOpen] = useState(false);
   const { toast } = useToast();
 
-  const handleImageLoad = (
-    id: string,
-    e: React.SyntheticEvent<HTMLImageElement>
-  ) => {
+  const handleImageLoad = (id: string, e: React.SyntheticEvent<HTMLImageElement>) => {
     const img = e.currentTarget;
     setImageSizes((prev) => ({
       ...prev,
@@ -64,11 +61,7 @@ export function ImageGallery({
     }));
   };
 
-  const handleCopy = async (
-    image: GalleryImage,
-    format: string,
-    label: string
-  ) => {
+  const handleCopy = async (image: GalleryImage, format: string, label: string) => {
     const filename = image.filename || `image-${image.id}`;
     let text = "";
 
@@ -122,9 +115,7 @@ export function ImageGallery({
         <Eye className="w-8 h-8 opacity-60" />
         <div>
           <h3 className="text-lg font-medium">暂无图片</h3>
-          <p className="text-sm text-muted-foreground">
-            开始上传你的第一张图片吧
-          </p>
+          <p className="text-sm text-muted-foreground">开始上传你的第一张图片吧</p>
         </div>
       </div>
     );
@@ -146,11 +137,7 @@ export function ImageGallery({
         columnClassName="my-masonry-grid_column"
       >
         {images.map((img) => (
-          <div
-            key={img.id}
-            className="mb-5 group cursor-pointer"
-            onClick={() => openModal(img)}
-          >
+          <div key={img.id} className="mb-5 group cursor-pointer" onClick={() => openModal(img)}>
             <div className="overflow-hidden rounded-2xl bg-white/5 backdrop-blur-sm shadow-lg hover:shadow-xl transition-all duration-300">
               {/* 图片区域 */}
               <div className="relative">
@@ -228,12 +215,7 @@ export function ImageGallery({
       </Masonry>
 
       {/* 图片预览模态框 */}
-      <Modal
-        isOpen={isModalOpen}
-        onClose={closeModal}
-        size="xl"
-        showCloseButton
-      >
+      <Modal isOpen={isModalOpen} onClose={closeModal} size="xl" showCloseButton>
         {selectedImage && (
           <div className="space-y-6">
             <div className="relative rounded-xl overflow-hidden bg-black/10 flex items-center justify-center min-h-[300px] max-h-[60vh]">

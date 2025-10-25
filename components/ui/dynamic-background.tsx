@@ -1,7 +1,7 @@
 "use client";
 
-import { useEffect, useRef, useState } from "react";
 import { motion } from "framer-motion";
+import { useEffect, useRef, useState } from "react";
 
 interface DynamicBackgroundProps {
   children: React.ReactNode;
@@ -205,20 +205,14 @@ export function DynamicBackground({
 
       for (let i = 0; i < particleCount; i++) {
         // 更慢更微妙的粒子移动
-        const x =
-          (Math.sin(animationTime * 0.0003 + i * 0.2) * 0.2 + 0.5) *
-          canvas.width;
-        const y =
-          (Math.cos(animationTime * 0.0003 + i * 0.15) * 0.2 + 0.5) *
-          canvas.height;
+        const x = (Math.sin(animationTime * 0.0003 + i * 0.2) * 0.2 + 0.5) * canvas.width;
+        const y = (Math.cos(animationTime * 0.0003 + i * 0.15) * 0.2 + 0.5) * canvas.height;
         // 更小的粒子大小
         const size = Math.sin(animationTime * 0.0008 + i) * 3 + 6;
         // 更低的透明度，让粒子更柔和
         const opacity = Math.sin(animationTime * 0.0003 + i * 0.3) * 0.15 + 0.1;
 
-        const colorIndex = Math.floor(
-          (i + animationTime * 0.003) % currentVariant.colors.length
-        );
+        const colorIndex = Math.floor((i + animationTime * 0.003) % currentVariant.colors.length);
         const color = currentVariant.colors[colorIndex];
 
         ctx.save();
@@ -231,28 +225,16 @@ export function DynamicBackground({
       }
 
       // 添加波浪效果
-      if (
-        currentVariant.pattern === "waves" ||
-        currentVariant.pattern === "flowing"
-      ) {
+      if (currentVariant.pattern === "waves" || currentVariant.pattern === "flowing") {
         ctx.save();
         ctx.globalAlpha = 0.08; // 更低的透明度
         for (let i = 0; i < 2; i++) {
           // 进一步减少波浪数量
-          const waveY =
-            (canvas.height / 3) * (i + 1) +
-            Math.sin(animationTime * 0.0008 + i) * 20; // 更慢的波浪移动
-          const waveGradient = ctx.createLinearGradient(
-            0,
-            waveY - 20,
-            0,
-            waveY + 20
-          );
+          const waveY = (canvas.height / 3) * (i + 1) + Math.sin(animationTime * 0.0008 + i) * 20; // 更慢的波浪移动
+          const waveGradient = ctx.createLinearGradient(0, waveY - 20, 0, waveY + 20);
 
-          const color1 =
-            currentVariant.colors[i % currentVariant.colors.length];
-          const color2 =
-            currentVariant.colors[(i + 1) % currentVariant.colors.length];
+          const color1 = currentVariant.colors[i % currentVariant.colors.length];
+          const color2 = currentVariant.colors[(i + 1) % currentVariant.colors.length];
 
           waveGradient.addColorStop(0, color1 + "00");
           waveGradient.addColorStop(0.5, color2 + "15"); // 更低的透明度
@@ -308,12 +290,7 @@ export function RainbowBackground({
   className?: string;
 }) {
   return (
-    <DynamicBackground
-      variant="rainbow"
-      intensity="medium"
-      speed="slow"
-      className={className}
-    >
+    <DynamicBackground variant="rainbow" intensity="medium" speed="slow" className={className}>
       {children}
     </DynamicBackground>
   );
@@ -327,12 +304,7 @@ export function AuroraBackground({
   className?: string;
 }) {
   return (
-    <DynamicBackground
-      variant="aurora"
-      intensity="medium"
-      speed="slow"
-      className={className}
-    >
+    <DynamicBackground variant="aurora" intensity="medium" speed="slow" className={className}>
       {children}
     </DynamicBackground>
   );
@@ -346,12 +318,7 @@ export function CosmicBackground({
   className?: string;
 }) {
   return (
-    <DynamicBackground
-      variant="cosmic"
-      intensity="low"
-      speed="slow"
-      className={className}
-    >
+    <DynamicBackground variant="cosmic" intensity="low" speed="slow" className={className}>
       {children}
     </DynamicBackground>
   );
@@ -365,12 +332,7 @@ export function SunsetBackground({
   className?: string;
 }) {
   return (
-    <DynamicBackground
-      variant="sunset"
-      intensity="medium"
-      speed="normal"
-      className={className}
-    >
+    <DynamicBackground variant="sunset" intensity="medium" speed="normal" className={className}>
       {children}
     </DynamicBackground>
   );
@@ -384,12 +346,7 @@ export function OceanBackground({
   className?: string;
 }) {
   return (
-    <DynamicBackground
-      variant="ocean"
-      intensity="medium"
-      speed="slow"
-      className={className}
-    >
+    <DynamicBackground variant="ocean" intensity="medium" speed="slow" className={className}>
       {children}
     </DynamicBackground>
   );
@@ -403,12 +360,7 @@ export function ForestBackground({
   className?: string;
 }) {
   return (
-    <DynamicBackground
-      variant="forest"
-      intensity="medium"
-      speed="slow"
-      className={className}
-    >
+    <DynamicBackground variant="forest" intensity="medium" speed="slow" className={className}>
       {children}
     </DynamicBackground>
   );

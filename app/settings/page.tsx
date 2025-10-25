@@ -1,21 +1,15 @@
 "use client";
 
-import { useState, useEffect } from "react";
 import { motion } from "framer-motion";
-import {
-  Card,
-  CardContent,
-  CardDescription,
-  CardHeader,
-  CardTitle,
-} from "@/components/ui/card";
-import { Button } from "@/components/ui/button";
-import { Footer } from "@/components/ui/footer";
-import { ThemeToggle } from "@/components/ThemeToggle";
-import { LoadingSpinner } from "@/components/ui/loading";
-import { ArrowLeft, Settings, Bell, BellOff, Save, Check } from "lucide-react";
+import { ArrowLeft, Bell, BellOff, Check, Save, Settings } from "lucide-react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
+import { useEffect, useState } from "react";
+import { ThemeToggle } from "@/components/ThemeToggle";
+import { Button } from "@/components/ui/button";
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
+import { Footer } from "@/components/ui/footer";
+import { LoadingSpinner } from "@/components/ui/loading";
 
 interface UserSettings {
   telegramChatId: string | null;
@@ -146,10 +140,7 @@ export default function SettingsPage() {
       {/* Header */}
       <header className="relative z-10 container mx-auto px-4 py-6">
         <div className="flex items-center justify-between">
-          <Link
-            href="/"
-            className="flex items-center space-x-2 text-gray-800 dark:text-gray-200"
-          >
+          <Link href="/" className="flex items-center space-x-2 text-gray-800 dark:text-gray-200">
             <ArrowLeft className="h-5 w-5" />
             <span>返回首页</span>
           </Link>
@@ -170,9 +161,7 @@ export default function SettingsPage() {
                 <Settings className="h-6 w-6" />
                 <span>设置</span>
               </CardTitle>
-              <CardDescription className="text-white/70">
-                管理您的通知偏好
-              </CardDescription>
+              <CardDescription className="text-white/70">管理您的通知偏好</CardDescription>
             </CardHeader>
 
             <CardContent className="space-y-6">
@@ -181,9 +170,7 @@ export default function SettingsPage() {
                 <div className="flex items-center justify-between">
                   <div className="flex items-center space-x-2">
                     <Bell className="h-5 w-5" />
-                    <span className="font-medium text-white">
-                      Telegram 通知
-                    </span>
+                    <span className="font-medium text-white">Telegram 通知</span>
                   </div>
                   <Button
                     variant="ghost"
@@ -210,9 +197,7 @@ export default function SettingsPage() {
                 </div>
 
                 <div className="space-y-2">
-                  <label className="text-sm font-medium text-white/80">
-                    Telegram Chat ID
-                  </label>
+                  <label className="text-sm font-medium text-white/80">Telegram Chat ID</label>
                   <input
                     type="text"
                     value={telegramIdInput}
@@ -223,21 +208,13 @@ export default function SettingsPage() {
                   />
                   <p className="text-xs text-white/60">
                     如何获取 Chat ID: 在 Telegram 搜索{" "}
-                    <span className="font-mono text-white/80">
-                      @userinfobot
-                    </span>{" "}
-                    并发送 /start
+                    <span className="font-mono text-white/80">@userinfobot</span> 并发送 /start
                   </p>
                 </div>
               </div>
 
               {/* Save Button */}
-              <Button
-                onClick={handleSave}
-                disabled={saving}
-                className="w-full"
-                size="lg"
-              >
+              <Button onClick={handleSave} disabled={saving} className="w-full" size="lg">
                 {saving ? (
                   <>
                     <LoadingSpinner className="mr-2" />

@@ -1,9 +1,9 @@
 "use client";
 
-import { useState, useEffect, useCallback } from "react";
+import { AlertCircle, CheckCircle, Info, X, XCircle } from "lucide-react";
+import { useCallback, useEffect, useState } from "react";
 import { cn } from "@/lib/utils";
 import { Button } from "./button";
-import { X, CheckCircle, AlertCircle, Info, XCircle } from "lucide-react";
 
 export type NotificationType = "success" | "error" | "warning" | "info";
 
@@ -75,9 +75,7 @@ export function Notification({
       className={cn(
         "relative overflow-hidden rounded-lg border p-4 shadow-lg transition-all duration-300",
         colors[type],
-        isVisible && !isLeaving
-          ? "translate-x-0 opacity-100"
-          : "translate-x-full opacity-0"
+        isVisible && !isLeaving ? "translate-x-0 opacity-100" : "translate-x-full opacity-0"
       )}
     >
       <div className="flex items-start">
@@ -87,12 +85,7 @@ export function Notification({
           {message && <p className="mt-1 text-sm opacity-90">{message}</p>}
           {action && (
             <div className="mt-3">
-              <Button
-                size="sm"
-                variant="outline"
-                onClick={action.onClick}
-                className="text-xs"
-              >
+              <Button size="sm" variant="outline" onClick={action.onClick} className="text-xs">
                 {action.label}
               </Button>
             </div>
@@ -130,18 +123,9 @@ export function NotificationContainer({
   };
 
   return (
-    <div
-      className={cn(
-        "fixed z-50 space-y-2 max-w-sm w-full",
-        positionClasses[position]
-      )}
-    >
+    <div className={cn("fixed z-50 space-y-2 max-w-sm w-full", positionClasses[position])}>
       {notifications.map((notification) => (
-        <Notification
-          key={notification.id}
-          {...notification}
-          onClose={onClose}
-        />
+        <Notification key={notification.id} {...notification} onClose={onClose} />
       ))}
     </div>
   );
@@ -151,9 +135,7 @@ export function NotificationContainer({
 export function useNotifications() {
   const [notifications, setNotifications] = useState<NotificationProps[]>([]);
 
-  const addNotification = (
-    notification: Omit<NotificationProps, "id" | "onClose">
-  ) => {
+  const addNotification = (notification: Omit<NotificationProps, "id" | "onClose">) => {
     const id = Math.random().toString(36).substr(2, 9);
     const newNotification: NotificationProps = {
       ...notification,

@@ -123,13 +123,11 @@ export async function moderateImageContent(
     // 使用 Cloudflare Workers AI 的图片内容筛查
     const inputs = {
       image: imageBuffer,
-      prompt: "Analyze this image for inappropriate content including nudity, violence, graphic content, and offensive material. Respond with JSON containing safety assessment.",
+      prompt:
+        "Analyze this image for inappropriate content including nudity, violence, graphic content, and offensive material. Respond with JSON containing safety assessment.",
     };
 
-    const response = await env.AI.run(
-      "@cf/meta/llama-3.1-8b-instruct-vision",
-      inputs
-    );
+    const response = await env.AI.run("@cf/meta/llama-3.1-8b-instruct-vision", inputs);
 
     // 解析响应
     const result = parseAIVisionResponse(response);
@@ -170,7 +168,7 @@ function parseAIResponse(response: any): any {
     if (jsonMatch) {
       return JSON.parse(jsonMatch[0]);
     }
-    
+
     // 如果无法解析，返回默认安全结果
     return {
       safe: true,
@@ -206,7 +204,7 @@ function parseAIVisionResponse(response: any): any {
         containsOffensive: parsed.containsOffensive || false,
       };
     }
-    
+
     return {
       safe: true,
       categories: [],
@@ -249,11 +247,19 @@ export function simpleContentModeration(text: string): ContentModerationResult {
   // 定义敏感关键词（示例）
   const sensitiveKeywords = [
     // 暴力
-    "kill", "murder", "violence", "attack",
+    "kill",
+    "murder",
+    "violence",
+    "attack",
     // 仇恨言论
-    "hate", "racism", "discrimination",
+    "hate",
+    "racism",
+    "discrimination",
     // 色情
-    "porn", "sex", "nude", "naked",
+    "porn",
+    "sex",
+    "nude",
+    "naked",
   ];
 
   const lowerText = text.toLowerCase();

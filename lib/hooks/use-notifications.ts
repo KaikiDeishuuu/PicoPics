@@ -13,11 +13,7 @@ export function useNotifications() {
   // Initialize NotificationService on mount
   useEffect(() => {
     NotificationService.setToastHandler((notification) => {
-      toast[notification.type](
-        notification.title,
-        notification.description,
-        notification.duration
-      );
+      toast[notification.type](notification.title, notification.description, notification.duration);
     });
   }, [toast]);
 
@@ -25,8 +21,7 @@ export function useNotifications() {
     // Quick notification methods
     success: (title: string, description?: string) =>
       NotificationService.success(title, description),
-    error: (title: string, description?: string) =>
-      NotificationService.error(title, description),
+    error: (title: string, description?: string) => NotificationService.error(title, description),
     warning: (title: string, description?: string) =>
       NotificationService.warning(title, description),
     info: (title: string, description?: string) => NotificationService.info(title, description),

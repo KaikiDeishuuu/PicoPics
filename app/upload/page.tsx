@@ -1,48 +1,42 @@
 "use client";
 
-import { useState, useEffect } from "react";
-import { motion, AnimatePresence } from "framer-motion";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
-import { UploadCard } from "@/components/UploadCard";
-import { QuotaBadge } from "@/components/QuotaBadge";
-import { ToastManager, useToast } from "@/components/Toast";
-import { Button } from "@/components/ui/button";
+import { AnimatePresence, motion } from "framer-motion";
 import {
-  Card,
-  CardContent,
-  CardDescription,
-  CardHeader,
-  CardTitle,
-} from "@/components/ui/card";
-import { LoadingSpinner } from "@/components/ui/loading";
-import { DynamicBackground } from "@/components/ui/dynamic-background";
-import { Footer } from "@/components/ui/footer";
-import { ThemeToggle } from "@/components/ThemeToggle";
-import {
-  pageVariants,
-  pageTransition,
-  cardHoverVariants,
-  listItemVariants,
-  StaggerContainer,
-  AnimatedDiv,
-  pulseVariants,
-} from "@/components/ui/animations";
-import {
-  ArrowLeft,
-  Upload,
-  Image,
-  FileText,
-  CheckCircle,
   AlertCircle,
-  Info,
-  Zap,
-  Shield,
+  ArrowLeft,
+  CheckCircle,
+  FileText,
   Globe,
+  Image,
+  Info,
+  Shield,
+  Upload,
+  Zap,
 } from "lucide-react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
-import { useUploadImage } from "@/lib/hooks/use-queries";
+import { useEffect, useState } from "react";
+import { QuotaBadge } from "@/components/QuotaBadge";
+import { ThemeToggle } from "@/components/ThemeToggle";
+import { ToastManager, useToast } from "@/components/Toast";
+import { UploadCard } from "@/components/UploadCard";
+import {
+  AnimatedDiv,
+  cardHoverVariants,
+  listItemVariants,
+  pageTransition,
+  pageVariants,
+  pulseVariants,
+  StaggerContainer,
+} from "@/components/ui/animations";
+import { Button } from "@/components/ui/button";
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
+import { DynamicBackground } from "@/components/ui/dynamic-background";
+import { Footer } from "@/components/ui/footer";
+import { LoadingSpinner } from "@/components/ui/loading";
 import { useNotifications } from "@/lib/hooks/use-notifications";
+import { useUploadImage } from "@/lib/hooks/use-queries";
 
 // 强制动态渲染，避免静态化
 export const dynamic = "force-dynamic";
@@ -60,9 +54,9 @@ function UploadPageContent() {
   const [accessToken, setAccessToken] = useState<string | null>(null);
   const [loading, setLoading] = useState(true);
   const [uploadProgress, setUploadProgress] = useState(0);
-  const [uploadStatus, setUploadStatus] = useState<
-    "idle" | "uploading" | "success" | "error"
-  >("idle");
+  const [uploadStatus, setUploadStatus] = useState<"idle" | "uploading" | "success" | "error">(
+    "idle"
+  );
   const router = useRouter();
   const { toast } = useToast();
   useNotifications(); // 初始化通知服务
@@ -127,12 +121,7 @@ function UploadPageContent() {
 
   if (loading) {
     return (
-      <DynamicBackground
-        variant="aurora"
-        intensity="medium"
-        speed="slow"
-        className="min-h-screen"
-      >
+      <DynamicBackground variant="aurora" intensity="medium" speed="slow" className="min-h-screen">
         <div className="container mx-auto px-4 py-16">
           <div className="text-center">
             <div className="flex justify-center mb-6">
@@ -148,12 +137,7 @@ function UploadPageContent() {
   }
 
   return (
-    <DynamicBackground
-      variant="aurora"
-      intensity="medium"
-      speed="slow"
-      className="min-h-screen"
-    >
+    <DynamicBackground variant="aurora" intensity="medium" speed="slow" className="min-h-screen">
       <motion.div
         initial="initial"
         animate="in"
@@ -199,9 +183,7 @@ function UploadPageContent() {
                     variant="outline"
                     size="sm"
                     className="card-modern"
-                    onClick={() =>
-                      router.push("/gallery?refresh=" + Date.now())
-                    }
+                    onClick={() => router.push("/gallery?refresh=" + Date.now())}
                   >
                     <Image className="h-4 w-4 mr-2" />
                     <span className="hidden sm:inline">My Gallery</span>
@@ -227,8 +209,8 @@ function UploadPageContent() {
                   uploadStatus === "success"
                     ? "border-green-200 bg-green-50/50"
                     : uploadStatus === "error"
-                    ? "border-red-200 bg-red-50/50"
-                    : "border-blue-200 bg-blue-50/50"
+                      ? "border-red-200 bg-red-50/50"
+                      : "border-blue-200 bg-blue-50/50"
                 }`}
               >
                 <CardContent className="p-6">
@@ -255,11 +237,9 @@ function UploadPageContent() {
                         {uploadStatus === "error" && "上传失败"}
                       </h3>
                       <p className="text-sm text-gray-600">
-                        {uploadStatus === "uploading" &&
-                          "请稍候，正在处理您的图片"}
+                        {uploadStatus === "uploading" && "请稍候，正在处理您的图片"}
                         {uploadStatus === "success" && "图片已成功上传到云端"}
-                        {uploadStatus === "error" &&
-                          "上传过程中出现错误，请重试"}
+                        {uploadStatus === "error" && "上传过程中出现错误，请重试"}
                       </p>
                       {uploadStatus === "uploading" && (
                         <div className="mt-2 w-full bg-gray-200 rounded-full h-2">
@@ -300,12 +280,7 @@ function UploadPageContent() {
                 <CardContent>
                   <UploadCard
                     onUpload={async (file, onProgress) => {
-                      console.log(
-                        "Starting upload for file:",
-                        file.name,
-                        file.size,
-                        file.type
-                      );
+                      console.log("Starting upload for file:", file.name, file.size, file.type);
                       setUploadStatus("uploading");
                       setUploadProgress(0);
                       try {
@@ -319,12 +294,8 @@ function UploadPageContent() {
                       } catch (error) {
                         console.error("Upload error:", error);
                         console.error("Error details:", {
-                          message:
-                            error instanceof Error
-                              ? error.message
-                              : String(error),
-                          stack:
-                            error instanceof Error ? error.stack : undefined,
+                          message: error instanceof Error ? error.message : String(error),
+                          stack: error instanceof Error ? error.stack : undefined,
                         });
                         setUploadStatus("error");
                         toast.error("Upload Failed", "Failed to upload image");
@@ -355,27 +326,21 @@ function UploadPageContent() {
                       <CheckCircle className="h-5 w-5 text-green-600 mt-0.5 flex-shrink-0" />
                       <div>
                         <h4 className="font-medium">支持的格式</h4>
-                        <p className="text-sm text-gray-600">
-                          JPG, PNG, GIF, WebP, SVG
-                        </p>
+                        <p className="text-sm text-gray-600">JPG, PNG, GIF, WebP, SVG</p>
                       </div>
                     </div>
                     <div className="flex items-start space-x-3">
                       <CheckCircle className="h-5 w-5 text-green-600 mt-0.5 flex-shrink-0" />
                       <div>
                         <h4 className="font-medium">文件大小</h4>
-                        <p className="text-sm text-gray-600">
-                          单个文件最大 10MB
-                        </p>
+                        <p className="text-sm text-gray-600">单个文件最大 10MB</p>
                       </div>
                     </div>
                     <div className="flex items-start space-x-3">
                       <CheckCircle className="h-5 w-5 text-green-600 mt-0.5 flex-shrink-0" />
                       <div>
                         <h4 className="font-medium">批量上传</h4>
-                        <p className="text-sm text-gray-600">
-                          支持同时选择多个文件
-                        </p>
+                        <p className="text-sm text-gray-600">支持同时选择多个文件</p>
                       </div>
                     </div>
                   </div>
@@ -387,11 +352,7 @@ function UploadPageContent() {
           {/* 侧边栏 */}
           <div className="space-y-6">
             {/* 用户配额 */}
-            <motion.div
-              variants={cardHoverVariants}
-              initial="rest"
-              whileHover="hover"
-            >
+            <motion.div variants={cardHoverVariants} initial="rest" whileHover="hover">
               <Card className="card-modern border-0 shadow-lg">
                 <CardHeader>
                   <CardTitle className="flex items-center space-x-2">
@@ -406,11 +367,7 @@ function UploadPageContent() {
             </motion.div>
 
             {/* 功能特性 */}
-            <motion.div
-              variants={cardHoverVariants}
-              initial="rest"
-              whileHover="hover"
-            >
+            <motion.div variants={cardHoverVariants} initial="rest" whileHover="hover">
               <Card className="card-modern border-0 shadow-lg">
                 <CardHeader>
                   <CardTitle className="flex items-center space-x-2">
@@ -446,14 +403,10 @@ function UploadPageContent() {
                         custom={index}
                         className="flex items-start space-x-3"
                       >
-                        <feature.icon
-                          className={`h-5 w-5 ${feature.color} mt-0.5 flex-shrink-0`}
-                        />
+                        <feature.icon className={`h-5 w-5 ${feature.color} mt-0.5 flex-shrink-0`} />
                         <div>
                           <h4 className="font-medium">{feature.title}</h4>
-                          <p className="text-sm text-gray-600">
-                            {feature.description}
-                          </p>
+                          <p className="text-sm text-gray-600">{feature.description}</p>
                         </div>
                       </motion.div>
                     ))}
@@ -463,11 +416,7 @@ function UploadPageContent() {
             </motion.div>
 
             {/* 快速操作 */}
-            <motion.div
-              variants={cardHoverVariants}
-              initial="rest"
-              whileHover="hover"
-            >
+            <motion.div variants={cardHoverVariants} initial="rest" whileHover="hover">
               <Card className="card-modern border-0 shadow-lg">
                 <CardHeader>
                   <CardTitle className="flex items-center space-x-2">

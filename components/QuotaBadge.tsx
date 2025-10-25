@@ -84,5 +84,3 @@ export function QuotaBadge({ used, limit, className }: QuotaBadgeProps) {
     </motion.div>
   );
 }
-
-

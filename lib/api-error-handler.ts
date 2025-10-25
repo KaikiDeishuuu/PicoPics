@@ -97,7 +97,10 @@ export function handleApiError(error: unknown): {
 /**
  * 从HTTP状态码推断错误类型
  */
-export function getErrorFromStatus(status: number, message?: string): {
+export function getErrorFromStatus(
+  status: number,
+  message?: string
+): {
   notification: ReturnType<typeof Notifications.upload.error>;
   code: string;
 } {
@@ -136,9 +139,7 @@ export function getErrorFromStatus(status: number, message?: string): {
       };
     default:
       return {
-        notification: Notifications.upload.error(
-          message || `服务器返回错误 ${status}`
-        ),
+        notification: Notifications.upload.error(message || `服务器返回错误 ${status}`),
         code: `HTTP_${status}`,
       };
   }

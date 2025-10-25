@@ -74,10 +74,7 @@ export class ApiClient {
     this.accessToken = accessToken;
   }
 
-  private async request<T>(
-    endpoint: string,
-    options: RequestInit = {}
-  ): Promise<ApiResponse<T>> {
+  private async request<T>(endpoint: string, options: RequestInit = {}): Promise<ApiResponse<T>> {
     const url = `${this.baseUrl}${endpoint}`;
     const headers: Record<string, string> = {
       "Content-Type": "application/json",
@@ -140,9 +137,7 @@ export class ApiClient {
 
       // 在开发环境中使用本地API路由
       const uploadUrl =
-        process.env.NODE_ENV === "development"
-          ? "/api/upload"
-          : `${this.baseUrl}/upload`;
+        process.env.NODE_ENV === "development" ? "/api/upload" : `${this.baseUrl}/upload`;
 
       console.log("Upload URL:", uploadUrl);
 
@@ -180,10 +175,7 @@ export class ApiClient {
             const errorResponse = JSON.parse(xhr.responseText);
             resolve({
               success: false,
-              error:
-                errorResponse.error ||
-                errorResponse.message ||
-                `HTTP ${xhr.status}`,
+              error: errorResponse.error || errorResponse.message || `HTTP ${xhr.status}`,
               code: errorResponse.code,
             });
           } catch {
@@ -270,8 +262,7 @@ export function createApiClient(accessToken?: string): ApiClient {
 export function createHistoryApiClient(accessToken?: string): ApiClient {
   // History API uses a different worker
   const historyApi =
-    process.env.NEXT_PUBLIC_HISTORY_API ||
-    "https://history-worker-v2-prod.haoweiw370.workers.dev";
+    process.env.NEXT_PUBLIC_HISTORY_API || "https://history-worker-v2-prod.haoweiw370.workers.dev";
 
   // Use the history API base URL directly
   const baseUrl = historyApi;

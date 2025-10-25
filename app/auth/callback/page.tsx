@@ -1,22 +1,20 @@
 "use client";
 
+import { motion } from "framer-motion";
+import { CheckCircle, Loader2, XCircle } from "lucide-react";
 import { useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
-import { motion } from "framer-motion";
-import { DynamicBackground } from "@/components/ui/dynamic-background";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { DynamicBackground } from "@/components/ui/dynamic-background";
 import { LoadingSpinner } from "@/components/ui/loading";
-import { CheckCircle, XCircle, Loader2 } from "lucide-react";
 
 // 强制动态渲染，避免静态化
 export const dynamic = "force-dynamic";
 
 export default function AuthCallback() {
   const router = useRouter();
-  const [status, setStatus] = useState<"loading" | "success" | "error">(
-    "loading"
-  );
+  const [status, setStatus] = useState<"loading" | "success" | "error">("loading");
   const [error, setError] = useState<string | null>(null);
 
   useEffect(() => {
@@ -94,12 +92,7 @@ export default function AuthCallback() {
 
   if (status === "loading") {
     return (
-      <DynamicBackground
-        variant="rainbow"
-        intensity="medium"
-        speed="slow"
-        className="min-h-screen"
-      >
+      <DynamicBackground variant="rainbow" intensity="medium" speed="slow" className="min-h-screen">
         <motion.div
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
@@ -111,14 +104,10 @@ export default function AuthCallback() {
               <div className="flex justify-center mb-4">
                 <Loader2 className="h-12 w-12 text-white animate-spin" />
               </div>
-              <CardTitle className="text-2xl text-white">
-                Processing Authentication
-              </CardTitle>
+              <CardTitle className="text-2xl text-white">Processing Authentication</CardTitle>
             </CardHeader>
             <CardContent className="text-center">
-              <p className="text-white/80">
-                Please wait while we verify your identity...
-              </p>
+              <p className="text-white/80">Please wait while we verify your identity...</p>
             </CardContent>
           </Card>
         </motion.div>
@@ -128,12 +117,7 @@ export default function AuthCallback() {
 
   if (status === "error") {
     return (
-      <DynamicBackground
-        variant="sunset"
-        intensity="medium"
-        speed="slow"
-        className="min-h-screen"
-      >
+      <DynamicBackground variant="sunset" intensity="medium" speed="slow" className="min-h-screen">
         <motion.div
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
@@ -145,9 +129,7 @@ export default function AuthCallback() {
               <div className="flex justify-center mb-4">
                 <XCircle className="h-12 w-12 text-red-400" />
               </div>
-              <CardTitle className="text-2xl text-red-400">
-                Authentication Failed
-              </CardTitle>
+              <CardTitle className="text-2xl text-red-400">Authentication Failed</CardTitle>
             </CardHeader>
             <CardContent className="text-center space-y-4">
               <p className="text-white/80">{error}</p>
@@ -165,12 +147,7 @@ export default function AuthCallback() {
   }
 
   return (
-    <DynamicBackground
-      variant="ocean"
-      intensity="medium"
-      speed="slow"
-      className="min-h-screen"
-    >
+    <DynamicBackground variant="ocean" intensity="medium" speed="slow" className="min-h-screen">
       <motion.div
         initial={{ opacity: 0, y: 20 }}
         animate={{ opacity: 1, y: 0 }}
@@ -182,9 +159,7 @@ export default function AuthCallback() {
             <div className="flex justify-center mb-4">
               <CheckCircle className="h-12 w-12 text-green-400" />
             </div>
-            <CardTitle className="text-2xl text-green-400">
-              Authentication Successful
-            </CardTitle>
+            <CardTitle className="text-2xl text-green-400">Authentication Successful</CardTitle>
           </CardHeader>
           <CardContent className="text-center">
             <p className="text-white/80">

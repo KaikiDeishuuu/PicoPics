@@ -1,8 +1,8 @@
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { createApiClient, createHistoryApiClient } from "../api";
-import { queryKeys } from "../query-client";
-import { NotificationService, Notifications } from "../notifications";
 import { handleApiError } from "../api-error-handler";
+import { NotificationService, Notifications } from "../notifications";
+import { queryKeys } from "../query-client";
 
 // Custom hook for API client
 export function useApiClient(accessToken?: string) {
@@ -27,20 +27,14 @@ export function useUploadImage(accessToken?: string) {
   const apiClient = useApiClient(accessToken);
 
   return useMutation({
-    mutationFn: ({
-      file,
-      onProgress,
-    }: {
-      file: File;
-      onProgress?: (progress: number) => void;
-    }) => apiClient.uploadFile(file, onProgress),
+    mutationFn: ({ file, onProgress }: { file: File; onProgress?: (progress: number) => void }) =>
+      apiClient.uploadFile(file, onProgress),
     onSuccess: (data) => {
       // Invalidate and refetch user images
       queryClient.invalidateQueries({ queryKey: queryKeys.userImages });
 
       // Show success notification
-      const filename =
-        data?.data?.filename || data?.data?.r2ObjectKey || "图片";
+      const filename = data?.data?.filename || data?.data?.r2ObjectKey || "图片";
       NotificationService.show(Notifications.upload.success(filename));
     },
     onError: (error: unknown) => {

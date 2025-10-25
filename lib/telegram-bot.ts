@@ -62,10 +62,7 @@ class TelegramBotService {
    * 格式化消息内容
    */
   private escapeHtml(text: string): string {
-    return text
-      .replace(/&/g, "&amp;")
-      .replace(/</g, "&lt;")
-      .replace(/>/g, "&gt;");
+    return text.replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;");
   }
 
   // ========== 预定义的通知消息 ==========
@@ -150,10 +147,7 @@ class TelegramBotService {
   /**
    * IP解封通知
    */
-  async notifyIPUnbanned(data: {
-    ip: string;
-    unbannedBy?: string;
-  }): Promise<boolean> {
+  async notifyIPUnbanned(data: { ip: string; unbannedBy?: string }): Promise<boolean> {
     const text = `
 ✅ <b>IP已解封</b>
 

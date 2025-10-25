@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useRef, useEffect } from "react";
+import { useEffect, useRef, useState } from "react";
 import { cn } from "@/lib/utils";
 import { LoadingSpinner } from "./loading";
 
@@ -139,11 +139,7 @@ export function ImageGrid({ images, className, onImageClick }: ImageGridProps) {
       )}
     >
       {images.map((image) => (
-        <div
-          key={image.id}
-          className="group cursor-pointer"
-          onClick={() => onImageClick?.(image)}
-        >
+        <div key={image.id} className="group cursor-pointer" onClick={() => onImageClick?.(image)}>
           <OptimizedImage
             src={image.src}
             alt={image.alt}

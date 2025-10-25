@@ -101,7 +101,9 @@ export function UploadCard({ file, progress, status, error, onRemove }: UploadCa
           )}
 
           {status === "error" && error && (
-            <div className="mt-2 text-xs text-red-400 bg-red-900/30 p-2 rounded border border-red-400/30">{error}</div>
+            <div className="mt-2 text-xs text-red-400 bg-red-900/30 p-2 rounded border border-red-400/30">
+              {error}
+            </div>
           )}
         </div>
       </div>

@@ -1,17 +1,8 @@
 "use client";
 
 import { motion } from "framer-motion";
+import { Code, Github, Globe, Heart, MessageCircle, Shield, Star, Zap } from "lucide-react";
 import { Card, CardContent } from "@/components/ui/card";
-import {
-  Github,
-  MessageCircle,
-  Globe,
-  Heart,
-  Star,
-  Code,
-  Zap,
-  Shield,
-} from "lucide-react";
 
 interface FooterProps {
   className?: string;
@@ -67,8 +58,7 @@ export function Footer({ className = "" }: FooterProps) {
               </h3>
             </div>
             <p className="text-white/70 text-sm leading-relaxed">
-              Modern image hosting platform built with Next.js 15 + Cloudflare
-              Workers.
+              Modern image hosting platform built with Next.js 15 + Cloudflare Workers.
             </p>
             <div className="flex flex-wrap gap-2">
               {features.map((feature, index) => (
@@ -85,9 +75,7 @@ export function Footer({ className = "" }: FooterProps) {
 
           {/* 快速链接 */}
           <div className="bg-white/5 rounded-lg border border-white/10 p-5 space-y-4">
-            <h4 className="text-lg font-semibold text-white mb-3">
-              Quick Links
-            </h4>
+            <h4 className="text-lg font-semibold text-white mb-3">Quick Links</h4>
             <div className="grid grid-cols-1 gap-2">
               {[
                 { name: "Home", href: "/" },
@@ -126,9 +114,7 @@ export function Footer({ className = "" }: FooterProps) {
             <div className="p-3 bg-black/40 rounded-lg border border-white/10 mt-3">
               <div className="flex items-center space-x-2">
                 <Heart className="h-4 w-4 text-red-400" />
-                <span className="text-sm font-medium text-white">
-                  Made with ❤️ by Kaiki
-                </span>
+                <span className="text-sm font-medium text-white">Made with ❤️ by Kaiki</span>
               </div>
             </div>
           </div>

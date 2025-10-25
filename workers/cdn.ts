@@ -27,10 +27,7 @@ function getCorsHeaders(env: Env, request: Request): Record<string, string> {
   const origin = request.headers.get("Origin");
   const allowedOrigins = env.ALLOWED_ORIGINS?.split(",") || ["*"];
 
-  if (
-    allowedOrigins.includes("*") ||
-    (origin && allowedOrigins.includes(origin))
-  ) {
+  if (allowedOrigins.includes("*") || (origin && allowedOrigins.includes(origin))) {
     return {
       "Access-Control-Allow-Origin": origin || "*",
       "Access-Control-Allow-Methods": "GET, HEAD, OPTIONS",
@@ -74,9 +71,7 @@ app.get("/:key", async (c) => {
 
     // 如果请求缩略图，使用 Cloudflare Image Resizing
     if (width || height) {
-      const resizeUrl = new URL(
-        `https://imagedelivery.net/${env.IMAGES_BUCKET_ID}/${key}`
-      );
+      const resizeUrl = new URL(`https://imagedelivery.net/${env.IMAGES_BUCKET_ID}/${key}`);
       if (width) resizeUrl.searchParams.set("width", width);
       if (height) resizeUrl.searchParams.set("height", height);
       resizeUrl.searchParams.set("quality", quality);

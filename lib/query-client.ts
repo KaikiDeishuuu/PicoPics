@@ -26,5 +26,3 @@ export const queryKeys = {
   adminUsers: ["adminUsers"] as const,
   systemSettings: ["systemSettings"] as const,
 } as const;
-
-

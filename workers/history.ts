@@ -36,10 +36,7 @@ function getCorsHeaders(env: Env, request: Request): Record<string, string> {
   const origin = request.headers.get("Origin");
   const allowedOrigins = env.ALLOWED_ORIGINS?.split(",") || ["*"];
 
-  if (
-    allowedOrigins.includes("*") ||
-    (origin && allowedOrigins.includes(origin))
-  ) {
+  if (allowedOrigins.includes("*") || (origin && allowedOrigins.includes(origin))) {
     return {
       "Access-Control-Allow-Origin": origin || "*",
       "Access-Control-Allow-Methods": "GET, POST, OPTIONS",
@@ -97,9 +94,7 @@ app.get("/api/history", async (c) => {
 
   try {
     // 先检查表结构
-    const tableInfo = await env.DB.prepare(
-      "PRAGMA table_info(user_images)"
-    ).all();
+    const tableInfo = await env.DB.prepare("PRAGMA table_info(user_images)").all();
     console.log("Table structure:", tableInfo.results);
 
     // 尝试不同的列名
@@ -122,9 +117,7 @@ app.get("/api/history", async (c) => {
       } catch (createdAtError) {
         console.error("created_at query failed:", createdAtError);
         // 如果都不存在，使用默认排序
-        records = await env.DB.prepare(
-          `SELECT * FROM user_images WHERE user_id = ?`
-        )
+        records = await env.DB.prepare(`SELECT * FROM user_images WHERE user_id = ?`)
           .bind(authResult.user.id.toString())
           .all();
       }
@@ -137,8 +130,7 @@ app.get("/api/history", async (c) => {
         url: `https://cdn-worker-v2-prod.haoweiw370.workers.dev/${record.r2_object_key}`,
         size: record.file_size,
         type: record.mime_type,
-        uploadedAt:
-          record.upload_date || record.created_at || new Date().toISOString(),
+        uploadedAt: record.upload_date || record.created_at || new Date().toISOString(),
         r2ObjectKey: record.r2_object_key,
       })) || [];
 

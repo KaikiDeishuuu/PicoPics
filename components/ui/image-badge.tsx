@@ -1,7 +1,7 @@
 "use client";
 
 import { motion } from "framer-motion";
-import { Copy, Check, ExternalLink, Download, Share2 } from "lucide-react";
+import { Check, Copy, Download, ExternalLink, Share2 } from "lucide-react";
 import { useState } from "react";
 
 interface ImageBadgeProps {
@@ -48,13 +48,7 @@ function UrlFormatItem({ label, description, code, onCopy, copied }: UrlFormatIt
   );
 }
 
-export function ImageBadge({
-  url,
-  filename,
-  size,
-  uploadedAt,
-  className = "",
-}: ImageBadgeProps) {
+export function ImageBadge({ url, filename, size, uploadedAt, className = "" }: ImageBadgeProps) {
   const [copied, setCopied] = useState(false);
   const [showDetails, setShowDetails] = useState(false);
 
@@ -63,7 +57,7 @@ export function ImageBadge({
     const k = 1024;
     const sizes = ["Bytes", "KB", "MB", "GB"];
     const i = Math.floor(Math.log(bytes) / Math.log(k));
-    return parseFloat((bytes / Math.pow(k, i)).toFixed(2)) + " " + sizes[i];
+    return parseFloat((bytes / k ** i).toFixed(2)) + " " + sizes[i];
   };
 
   const formatDate = (dateString: string) => {
@@ -290,7 +284,7 @@ export function SimpleImageBadge({
     const k = 1024;
     const sizes = ["Bytes", "KB", "MB", "GB"];
     const i = Math.floor(Math.log(bytes) / Math.log(k));
-    return parseFloat((bytes / Math.pow(k, i)).toFixed(2)) + " " + sizes[i];
+    return parseFloat((bytes / k ** i).toFixed(2)) + " " + sizes[i];
   };
 
   const copyToClipboard = async () => {

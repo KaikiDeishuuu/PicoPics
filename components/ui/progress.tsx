@@ -1,7 +1,7 @@
 "use client";
 
-import { cn } from "@/lib/utils";
 import { forwardRef } from "react";
+import { cn } from "@/lib/utils";
 
 interface ProgressProps {
   value: number;
@@ -105,12 +105,7 @@ export function CircularProgress({
   };
 
   return (
-    <div
-      className={cn(
-        "relative inline-flex items-center justify-center",
-        className
-      )}
-    >
+    <div className={cn("relative inline-flex items-center justify-center", className)}>
       <svg width={size} height={size} className="transform -rotate-90">
         <circle
           cx={size / 2}
@@ -130,10 +125,7 @@ export function CircularProgress({
           fill="transparent"
           strokeDasharray={strokeDasharray}
           strokeDashoffset={strokeDashoffset}
-          className={cn(
-            "transition-all duration-300 ease-out",
-            variantClasses[variant]
-          )}
+          className={cn("transition-all duration-300 ease-out", variantClasses[variant])}
           strokeLinecap="round"
         />
       </svg>
@@ -154,11 +146,7 @@ interface StepProgressProps {
   className?: string;
 }
 
-export function StepProgress({
-  steps,
-  currentStep,
-  className,
-}: StepProgressProps) {
+export function StepProgress({ steps, currentStep, className }: StepProgressProps) {
   return (
     <div className={cn("w-full", className)}>
       <div className="flex items-center justify-between">
@@ -174,10 +162,8 @@ export function StepProgress({
                   className={cn(
                     "w-8 h-8 rounded-full flex items-center justify-center text-sm font-medium transition-colors duration-200",
                     isCompleted && "bg-blue-600 text-white",
-                    isCurrent &&
-                      "bg-blue-100 text-blue-600 border-2 border-blue-600",
-                    isUpcoming &&
-                      "bg-gray-200 text-gray-500 dark:bg-gray-700 dark:text-gray-400"
+                    isCurrent && "bg-blue-100 text-blue-600 border-2 border-blue-600",
+                    isUpcoming && "bg-gray-200 text-gray-500 dark:bg-gray-700 dark:text-gray-400"
                   )}
                 >
                   {isCompleted ? "✓" : index + 1}
