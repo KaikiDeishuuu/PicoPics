@@ -1,25 +1,25 @@
-# 🔒 PicoPics 安全环境配置指南
+#  PicoPics 安全环境配置指南
 
 > **重要安全提醒**: 本指南强调所有敏感配置都通过 wrangler secret 命令设置，**绝不**将明文凭据提交到 GitHub！
 
 本文档详细说明 PicoPics 项目的环境变量配置，包括普通环境变量和敏感的 Secret Variables 的设置方法。
 
-## 🛡️ 安全原则
+# 安全原则
 
-### ❌ 绝对不要做的事
+###  绝对不要做的事
 
 - 不要在 `wrangler.toml` 中写入真实的账户 ID、数据库 ID 等敏感信息
 - 不要将包含真实配置的 `wrangler.toml` 文件提交到 GitHub
 - 不要在代码中硬编码 API 密钥、数据库连接串等敏感信息
 
-### ✅ 正确的做法
+###  正确的做法
 
 - 使用 `wrangler secret put` 命令设置敏感信息
 - 敏感信息存储在 Cloudflare 的安全存储中
 - 配置文件只包含注释和占位符说明
 - 使用 `setup-env.sh` 脚本自动生成安全的配置文件
 
-## 📋 目录
+# 目录
 
 - [快速开始](#快速开始)
 - [配置流程](#配置流程)
@@ -30,7 +30,7 @@
 - [前端应用配置](#前端应用配置)
 - [批量配置脚本](#批量配置脚本)
 
-## 🚀 快速开始
+# 快速开始
 
 ### 1. 克隆项目并安装依赖
 
@@ -280,7 +280,7 @@ npx wrangler kv:namespace create "USER_CACHE"
 # ... 手动执行所有 wrangler secret put 命令
 ```
 
-## 🔍 故障排除
+# 故障排除
 
 ### 查看配置
 
@@ -324,7 +324,7 @@ npx wrangler secret delete VARIABLE_NAME --env production
 ./setup-env.sh
 ```
 
-## 📝 配置清单
+# 配置清单
 
 - [ ] Cloudflare 账户登录
 - [ ] R2 存储桶创建
@@ -337,11 +337,11 @@ npx wrangler secret delete VARIABLE_NAME --env production
 
 ---
 
-## 🎯 下一步
+# 下一步
 
 配置完成后，按照 [DEPLOY_GUIDE.md](./DEPLOY_GUIDE.md) 进行部署测试。
 
-## 🔐 安全提醒
+# 安全提醒
 
 - **永远不要** 将真实的 `wrangler.toml` 文件提交到 GitHub
 - **永远不要** 在代码中硬编码敏感信息

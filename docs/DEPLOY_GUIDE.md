@@ -168,8 +168,8 @@ npm run deploy:prod
 
 | 类型  | 名称   | 内容                                      | 代理状态            |
 | ----- | ------ | ----------------------------------------- | ------------------- |
-| CNAME | upload | uploader-worker-prod.你的账户.workers.dev | ✅ 代理（橙色云朵） |
-| CNAME | pic    | cdn-worker-prod.你的账户.workers.dev      | ✅ 代理（橙色云朵） |
+| CNAME | upload | uploader-worker-prod.你的账户.workers.dev |  代理（橙色云朵） |
+| CNAME | pic    | cdn-worker-prod.你的账户.workers.dev      |  代理（橙色云朵） |
 
 ### 4.2 更新 Workers 配置
 
@@ -363,11 +363,11 @@ ALLOWED_ORIGINS = "https://yourdomain.com,https://www.yourdomain.com"
 
 ## 下一步
 
-- ✅ 配置自定义域名
-- ✅ 调整配额限制
-- ✅ 启用 Cloudflare WAF
-- ✅ 配置 Cloudflare Analytics
-- ✅ 设置告警规则
+-  配置自定义域名
+-  调整配额限制
+-  启用 Cloudflare WAF
+-  配置 Cloudflare Analytics
+-  设置告警规则
 
 ## 快速命令总结
 

@@ -53,7 +53,7 @@ TELEGRAM_CHAT_ID = "your-chat-id"
   - 图片链接
   - 上传时间
 
-### 🗑️ 图片删除
+###  图片删除
 
 - **触发时机**：用户删除图片
 - **通知内容**：
@@ -72,7 +72,7 @@ TELEGRAM_CHAT_ID = "your-chat-id"
   - 操作者
   - 封禁时间
 
-### ✅ IP 解封
+###  IP 解封
 
 - **触发时机**：管理员从黑名单移除 IP
 - **通知内容**：
@@ -99,7 +99,7 @@ TELEGRAM_CHAT_ID = "your-chat-id"
 
 👤 用户ID: 12345678
 📷 文件名: image.jpg
-📊 大小: 2.45 MB
+ 大小: 2.45 MB
 🔗 链接: 查看图片
 🕐 时间: 2025/01/15 14:30:25
 ```
@@ -108,14 +108,14 @@ TELEGRAM_CHAT_ID = "your-chat-id"
 
 部分通知会使用静默模式（不发出声音）：
 
-- ✅ IP 解封
-- 🗑️ 图片删除
+-  IP 解封
+-  图片删除
 
 重要通知会发出声音提醒：
 
 - 📤 图片上传成功
 - 🚫 IP 封禁
-- ⚠️ 内容审核警告
+-  内容审核警告
 
 ## 错误处理
 
@@ -141,9 +141,9 @@ TELEGRAM_CHAT_ID = "your-chat-id"
 ```typescript
 // 发送自定义消息
 const message = `
-🔔 <b>自定义通知</b>
+ <b>自定义通知</b>
 
-📝 内容: ${content}
+ 内容: ${content}
 🕐 时间: ${new Date().toLocaleString("zh-CN")}
 `.trim();
 
@@ -174,11 +174,11 @@ await sendTelegramNotification(env, message);
 
 **检查清单：**
 
-1. ✅ Bot Token 是否正确配置
-2. ✅ Chat ID 是否正确配置
-3. ✅ 机器人是否被添加到群组（群组通知）
-4. ✅ 是否与机器人对话过（个人通知）
-5. ✅ Worker 日志是否有错误
+1.  Bot Token 是否正确配置
+2.  Chat ID 是否正确配置
+3.  机器人是否被添加到群组（群组通知）
+4.  是否与机器人对话过（个人通知）
+5.  Worker 日志是否有错误
 
 ### 问题：消息格式错误
 

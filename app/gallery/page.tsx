@@ -27,14 +27,26 @@ import {
   StaggerContainer,
 } from "@/components/ui/animations";
 import { Button } from "@/components/ui/button";
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
+import {
+  Card,
+  CardContent,
+  CardDescription,
+  CardHeader,
+  CardTitle,
+} from "@/components/ui/card";
 import { DynamicBackground } from "@/components/ui/dynamic-background";
 import { Footer } from "@/components/ui/footer";
 import { ImageGallery } from "@/components/ui/gallery";
 import { ImageBadge, SimpleImageBadge } from "@/components/ui/image-badge";
 import { LoadingSpinner } from "@/components/ui/loading";
-import { ImageGridSkeleton, ModernLoading } from "@/components/ui/modern-loading";
-import { NotificationContainer, useNotifications } from "@/components/ui/notification";
+import {
+  ImageGridSkeleton,
+  ModernLoading,
+} from "@/components/ui/modern-loading";
+import {
+  NotificationContainer,
+  useNotifications,
+} from "@/components/ui/notification";
 import { useDeleteImage, useUserImages } from "@/lib/hooks/use-queries";
 
 // 强制动态渲染
@@ -68,7 +80,8 @@ function GalleryContent() {
   const [selectedImages, setSelectedImages] = useState<string[]>([]);
   const [isSelectMode, setIsSelectMode] = useState(false);
   const router = useRouter();
-  const { notifications, addNotification, removeNotification } = useNotifications();
+  const { notifications, addNotification, removeNotification } =
+    useNotifications();
 
   // React Query hooks
   const {
@@ -80,7 +93,9 @@ function GalleryContent() {
 
   // 处理API响应数据
   const images =
-    imagesResponse?.success && Array.isArray(imagesResponse.data) ? imagesResponse.data : [];
+    imagesResponse?.success && Array.isArray(imagesResponse.data)
+      ? imagesResponse.data
+      : [];
   const deleteMutation = useDeleteImage(accessToken || undefined);
 
   // 调试信息
@@ -144,7 +159,10 @@ function GalleryContent() {
         case "size":
           return (b.size || 0) - (a.size || 0);
         default:
-          return new Date(b.uploadedAt || 0).getTime() - new Date(a.uploadedAt || 0).getTime();
+          return (
+            new Date(b.uploadedAt || 0).getTime() -
+            new Date(a.uploadedAt || 0).getTime()
+          );
       }
     });
 
@@ -155,13 +173,16 @@ function GalleryContent() {
   useEffect(() => {
     if (accessToken) {
       console.log("Testing API call...");
-      fetch("https://history-worker-v2-prod.haoweiw370.workers.dev/api/history", {
-        method: "GET",
-        headers: {
-          Authorization: `Bearer ${accessToken}`,
-          "Content-Type": "application/json",
-        },
-      })
+      fetch(
+        "https://history-worker-v2-prod.haoweiw370.workers.dev/api/history",
+        {
+          method: "GET",
+          headers: {
+            Authorization: `Bearer ${accessToken}`,
+            "Content-Type": "application/json",
+          },
+        }
+      )
         .then((response) => {
           console.log("API Response Status:", response.status);
           return response.json();
@@ -177,7 +198,11 @@ function GalleryContent() {
 
   // 处理图片删除
   const handleDeleteImage = async (imageId: string) => {
-    if (!confirm("Are you sure you want to delete this image? This action cannot be undone.")) {
+    if (
+      !confirm(
+        "Are you sure you want to delete this image? This action cannot be undone."
+      )
+    ) {
       return;
     }
 
@@ -212,7 +237,9 @@ function GalleryContent() {
     }
 
     try {
-      await Promise.all(selectedImages.map((imageId) => deleteMutation.mutateAsync(imageId)));
+      await Promise.all(
+        selectedImages.map((imageId) => deleteMutation.mutateAsync(imageId))
+      );
       setSelectedImages([]);
       setIsSelectMode(false);
       addNotification({
@@ -272,7 +299,12 @@ function GalleryContent() {
   }
 
   return (
-    <DynamicBackground variant="cosmic" intensity="low" speed="slow" className="min-h-screen">
+    <DynamicBackground
+      variant="cosmic"
+      intensity="low"
+      speed="slow"
+      className="min-h-screen"
+    >
       <motion.div
         initial="initial"
         animate="in"
@@ -305,9 +337,12 @@ function GalleryContent() {
                       </Button>
                     </Link>
                     <div>
-                      <CardTitle className="text-xl md:text-2xl text-white">My Gallery</CardTitle>
+                      <CardTitle className="text-xl md:text-2xl text-white">
+                        My Gallery
+                      </CardTitle>
                       <CardDescription className="text-sm md:text-base text-white/80">
-                        Welcome back, {user?.login}! You have {images.length} images
+                        Welcome back, {user?.login}! You have {images.length}{" "}
+                        images
                       </CardDescription>
                     </div>
                   </div>
@@ -318,7 +353,11 @@ function GalleryContent() {
                       onClick={handleRefresh}
                       disabled={isLoading}
                     >
-                      <RefreshCw className={`h-4 w-4 mr-2 ${isLoading ? "animate-spin" : ""}`} />
+                      <RefreshCw
+                        className={`h-4 w-4 mr-2 ${
+                          isLoading ? "animate-spin" : ""
+                        }`}
+                      />
                       Refresh
                     </Button>
                     <Link href="/upload">
@@ -361,7 +400,11 @@ function GalleryContent() {
                   <div className="flex gap-2">
                     <select
                       value={filterBy}
-                      onChange={(e) => setFilterBy(e.target.value as "all" | "images" | "videos")}
+                      onChange={(e) =>
+                        setFilterBy(
+                          e.target.value as "all" | "images" | "videos"
+                        )
+                      }
                       className="px-3 py-2 border border-white/20 rounded-lg focus:ring-2 focus:ring-blue-500 bg-black/50 text-white"
                     >
                       <option value="all">All Files</option>
@@ -371,7 +414,9 @@ function GalleryContent() {
 
                     <select
                       value={sortBy}
-                      onChange={(e) => setSortBy(e.target.value as "date" | "name" | "size")}
+                      onChange={(e) =>
+                        setSortBy(e.target.value as "date" | "name" | "size")
+                      }
                       className="px-3 py-2 border border-white/20 rounded-lg focus:ring-2 focus:ring-blue-500 bg-black/50 text-white"
                     >
                       <option value="date">By Date</option>
@@ -487,7 +532,9 @@ function GalleryContent() {
                     <ImageIcon className="h-12 w-12 mx-auto mb-4" />
                     <h3 className="text-lg font-medium">暂无图片</h3>
                     <p className="text-sm text-gray-500 mt-2">
-                      {searchTerm ? "没有找到匹配的图片" : "开始上传您的第一张图片吧"}
+                      {searchTerm
+                        ? "没有找到匹配的图片"
+                        : "开始上传您的第一张图片吧"}
                     </p>
                   </div>
                   <Link href="/upload">

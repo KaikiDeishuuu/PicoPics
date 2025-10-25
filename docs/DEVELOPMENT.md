@@ -1,6 +1,6 @@
 # PicoPics V2 - 开发环境配置指南
 
-## 🚀 快速开始
+# 快速开始
 
 ### 1. 环境变量配置
 
@@ -42,7 +42,7 @@ npm install
 npm run dev
 ```
 
-## 🔧 开发注意事项
+# 开发注意事项
 
 ### 环境变量保护
 
@@ -55,8 +55,8 @@ npm run dev
 - API 端点应该**不包含**具体的路径（如 `/upload`, `/api/history`）
 - 路径会在代码中动态拼接
 - 示例：
-  - ✅ 正确：`https://your-worker.workers.dev`
-  - ❌ 错误：`https://your-worker.workers.dev/upload`
+  -  正确：`https://your-worker.workers.dev`
+  -  错误：`https://your-worker.workers.dev/upload`
 
 ### 本地开发 vs 生产环境
 
@@ -64,7 +64,7 @@ npm run dev
 - 生产环境使用预配置的 Workers
 - 通过环境变量自动切换
 
-## 🛠️ 项目结构
+##  项目结构
 
 ```
 PicoPics/
@@ -87,7 +87,7 @@ npm test
 npm run test:watch
 ```
 
-## 📦 构建和部署
+##  构建和部署
 
 ```bash
 # 构建项目
@@ -97,7 +97,7 @@ npm run build
 npx vercel --prod
 ```
 
-## 🔒 安全注意事项
+# 安全注意事项
 
 1. **敏感信息保护**：
    - 不要提交包含真实 API 密钥的文件

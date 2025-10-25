@@ -1,21 +1,21 @@
-# PicoPics V2 🚀
+# PicoPics V2
 
-> 现代化图片托管平台 - 基于 Next.js 15 + Cloudflare Workers 的高性能图片分享解决方案
+现代化图片托管平台 - 基于 Next.js 15 + Cloudflare Workers 的高性能图片分享解决方案
 
-![License](https://img.shields.io/badge/license-MIT-blue.svg)
-![Next.js](https://img.shields.io/badge/Next.js-15-black)
-![TypeScript](https://img.shields.io/badge/TypeScript-5.0-blue)
+[![License](https://img.shields.io/badge/license-MIT-blue.svg)](LICENSE)
+[![Next.js](https://img.shields.io/badge/Next.js-15-black)](https://nextjs.org/)
+[![TypeScript](https://img.shields.io/badge/TypeScript-5.0-blue)](https://www.typescriptlang.org/)
 
-## ✨ 核心特性
+## 核心特性
 
-- 🚀 **高性能** - Cloudflare 边缘计算，毫秒级响应
-- 🔐 **安全可靠** - GitHub OAuth + JWT 认证
-- 📱 **响应式设计** - 完美适配所有设备
-- 🎨 **现代化 UI** - 流畅动画和暗色主题
-- 🔔 **实时通知** - Telegram Bot 集成
-- 🎛️ **管理面板** - 完整的后台管理系统
+- **高性能** - Cloudflare 边缘计算，毫秒级响应
+- **安全可靠** - GitHub OAuth + JWT 认证
+- **响应式设计** - 完美适配所有设备
+- **现代化 UI** - 流畅动画和暗色主题
+- **实时通知** - Telegram Bot 集成
+- **管理面板** - 完整的后台管理系统
 
-## 🏗️ 技术栈
+## 技术栈
 
 ### 前端
 
@@ -37,7 +37,7 @@
 - Vercel (前端)
 - Cloudflare Workers (后端)
 
-## 🚀 快速开始
+## 快速开始
 
 ### 安装依赖
 
@@ -71,7 +71,7 @@ npx vercel --prod
 npm run deploy
 ```
 
-## 📚 文档
+## 文档
 
 查看 [docs](./docs) 目录获取完整文档：
 
@@ -82,18 +82,18 @@ npm run deploy
 - [Telegram Bot](./docs/TELEGRAM_NOTIFICATION_GUIDE.md) - Telegram 集成
 - [安全指南](./docs/SECURITY.md) - 安全最佳实践
 
-## 🎯 主要功能
+## 主要功能
 
-- ✅ 图片上传和管理
-- ✅ 多格式分享链接 (URL/HTML/Markdown/BBCode)
-- ✅ React Masonry 瀑布流布局
-- ✅ 用户认证和授权
-- ✅ 实时通知系统
-- ✅ 管理员面板
-- ✅ IP 黑名单管理
-- ✅ 系统监控
+- 图片上传和管理
+- 多格式分享链接 (URL/HTML/Markdown/BBCode)
+- React Masonry 瀑布流布局
+- 用户认证和授权
+- 实时通知系统
+- 管理员面板
+- IP 黑名单管理
+- 系统监控
 
-## 🛠️ 开发命令
+## 开发命令
 
 ```bash
 npm run dev          # 启动开发服务器
@@ -103,14 +103,14 @@ npm run format       # 代码格式化
 npm run test         # 运行测试
 ```
 
-## 📄 许可证
+## 许可证
 
 MIT License - 详见 [LICENSE](./LICENSE)
 
-## 🤝 贡献
+## 贡献
 
 欢迎提交 Issue 和 Pull Request！
 
 ---
 
-**PicoPics V2** - 让图片分享更简单、更快速、更安全 🚀
+**PicoPics V2** - 让图片分享更简单、更快速、更安全
