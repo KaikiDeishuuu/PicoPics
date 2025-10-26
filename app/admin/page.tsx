@@ -35,12 +35,21 @@ import {
   StaggerContainer,
 } from "@/components/ui/animations";
 import { Button } from "@/components/ui/button";
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
+import {
+  Card,
+  CardContent,
+  CardDescription,
+  CardHeader,
+  CardTitle,
+} from "@/components/ui/card";
 import { DynamicBackground } from "@/components/ui/dynamic-background";
 import { Footer } from "@/components/ui/footer";
 import { IPManagement } from "@/components/ui/ip-management";
 import { LoadingSpinner } from "@/components/ui/loading";
-import { NotificationContainer, useNotifications } from "@/components/ui/notification";
+import {
+  NotificationContainer,
+  useNotifications,
+} from "@/components/ui/notification";
 import { SystemMonitor } from "@/components/ui/system-monitor";
 
 // 强制动态渲染
@@ -81,10 +90,16 @@ function AdminContent() {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [activeTab, setActiveTab] = useState<
-    "overview" | "users" | "analytics" | "ip-management" | "system-monitor" | "data-management"
+    | "overview"
+    | "users"
+    | "analytics"
+    | "ip-management"
+    | "system-monitor"
+    | "data-management"
   >("overview");
   const [images, setImages] = useState<any[]>([]);
-  const { notifications, addNotification, removeNotification } = useNotifications();
+  const { notifications, addNotification, removeNotification } =
+    useNotifications();
 
   // 认证检查
   useEffect(() => {
@@ -322,14 +337,17 @@ function AdminContent() {
         process.env.NEXT_PUBLIC_UPLOAD_API ||
         "https://uploader-worker-v2-prod.haoweiw370.workers.dev";
 
-      const response = await fetch(`${adminApi}/api/admin/images/${encodeURIComponent(key)}`, {
-        method: "DELETE",
-        headers: {
-          Authorization: `Bearer ${accessToken}`,
-          "X-Admin-Token": token,
-          "Content-Type": "application/json",
-        },
-      });
+      const response = await fetch(
+        `${adminApi}/api/admin/images/${encodeURIComponent(key)}`,
+        {
+          method: "DELETE",
+          headers: {
+            Authorization: `Bearer ${accessToken}`,
+            "X-Admin-Token": token,
+            "Content-Type": "application/json",
+          },
+        }
+      );
 
       if (response.ok) {
         addNotification({
@@ -377,7 +395,12 @@ function AdminContent() {
   // 如果没有认证，重定向到首页
   if (!isAuthenticated) {
     return (
-      <DynamicBackground variant="sunset" intensity="medium" speed="slow" className="min-h-screen">
+      <DynamicBackground
+        variant="sunset"
+        intensity="medium"
+        speed="slow"
+        className="min-h-screen"
+      >
         <motion.div
           initial="initial"
           animate="in"
@@ -408,7 +431,12 @@ function AdminContent() {
   // 如果没有管理员权限
   if (!isAdmin) {
     return (
-      <DynamicBackground variant="sunset" intensity="medium" speed="slow" className="min-h-screen">
+      <DynamicBackground
+        variant="sunset"
+        intensity="medium"
+        speed="slow"
+        className="min-h-screen"
+      >
         <motion.div
           initial="initial"
           animate="in"
@@ -422,20 +450,24 @@ function AdminContent() {
               <div className="flex justify-center mb-4">
                 <Shield className="h-12 w-12 text-blue-400" />
               </div>
-              <CardTitle className="text-2xl text-foreground">Admin Authentication</CardTitle>
+              <CardTitle className="text-2xl text-foreground">
+                Admin Authentication
+              </CardTitle>
               <CardDescription className="text-muted-foreground">
                 Please enter admin token to access admin panel
               </CardDescription>
             </CardHeader>
             <CardContent className="space-y-4">
               <div className="space-y-2">
-                <label className="text-sm font-medium text-foreground">Admin Token</label>
+                <label className="text-sm font-medium text-foreground">
+                  Admin Token
+                </label>
                 <input
                   type="password"
                   value={tokenInput}
                   onChange={(e) => setTokenInput(e.target.value)}
                   placeholder="Enter admin token"
-                  className="w-full px-3 py-2 bg-black/50 border border-white/20 rounded-lg text-white placeholder-white/60 focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                  className="w-full px-3 py-2 bg-background border border-border rounded-lg text-foreground placeholder-muted-foreground focus:ring-2 focus:ring-primary focus:border-transparent"
                   onKeyPress={(e) => {
                     if (e.key === "Enter") {
                       handleTokenSubmit();
@@ -443,10 +475,12 @@ function AdminContent() {
                   }}
                 />
               </div>
-              {error && <div className="text-red-400 text-sm text-center">{error}</div>}
+              {error && (
+                <div className="text-red-400 text-sm text-center">{error}</div>
+              )}
               <Button
                 onClick={handleTokenSubmit}
-                className="text-foreground"
+                className="w-full h-12 text-base font-medium"
                 disabled={!tokenInput.trim() || loading}
               >
                 {loading ? (
@@ -462,7 +496,10 @@ function AdminContent() {
                 )}
               </Button>
               <Link href="/">
-                <Button className="w-full bg-black/80 text-white border-white/20 hover:bg-muted">
+                <Button
+                  variant="outline"
+                  className="w-full h-12 text-base font-medium"
+                >
                   <ArrowLeft className="h-4 w-4 mr-2" />
                   Back to Home
                 </Button>
@@ -475,7 +512,12 @@ function AdminContent() {
   }
 
   return (
-    <DynamicBackground variant="sunset" intensity="medium" speed="slow" className="min-h-screen">
+    <DynamicBackground
+      variant="sunset"
+      intensity="medium"
+      speed="slow"
+      className="min-h-screen"
+    >
       <motion.div
         initial="initial"
         animate="in"
@@ -515,7 +557,12 @@ function AdminContent() {
         </Card>
 
         {/* 标签页导航 */}
-        <motion.div variants={cardHoverVariants} initial="rest" whileHover="hover" className="mb-8">
+        <motion.div
+          variants={cardHoverVariants}
+          initial="rest"
+          whileHover="hover"
+          className="mb-8"
+        >
           <Card className="card-modern">
             <CardContent className="p-4">
               <div className="flex overflow-x-auto space-x-1 scrollbar-hide">
@@ -601,16 +648,28 @@ function AdminContent() {
                       change: "+15%",
                     },
                   ].map((stat, index) => (
-                    <motion.div key={index} variants={listItemVariants} custom={index}>
+                    <motion.div
+                      key={index}
+                      variants={listItemVariants}
+                      custom={index}
+                    >
                       <Card className="card-modern hover:shadow-xl transition-all duration-300 hover:-translate-y-1">
                         <CardContent className="p-6">
                           <div className="flex items-center justify-between">
                             <div>
-                              <p className="text-sm font-medium text-muted-foreground">{stat.title}</p>
-                              <p className="text-2xl font-bold text-foreground">{stat.value}</p>
-                              <p className="text-xs text-green-400">{stat.change}</p>
+                              <p className="text-sm font-medium text-muted-foreground">
+                                {stat.title}
+                              </p>
+                              <p className="text-2xl font-bold text-foreground">
+                                {stat.value}
+                              </p>
+                              <p className="text-xs text-green-400">
+                                {stat.change}
+                              </p>
                             </div>
-                            <div className={`p-3 rounded-lg bg-gradient-to-r ${stat.color}`}>
+                            <div
+                              className={`p-3 rounded-lg bg-gradient-to-r ${stat.color}`}
+                            >
                               <stat.icon className="h-6 w-6 text-foreground" />
                             </div>
                           </div>
@@ -646,10 +705,14 @@ function AdminContent() {
                           key={index}
                           className="flex items-center justify-between p-3 bg-muted/50 rounded-lg border border-border"
                         >
-                          <span className="font-medium text-foreground">{service.name}</span>
+                          <span className="font-medium text-foreground">
+                            {service.name}
+                          </span>
                           <div className="flex items-center space-x-2">
                             <CheckCircle className="h-4 w-4 text-green-400" />
-                            <span className="text-sm text-green-400">{service.status}</span>
+                            <span className="text-sm text-green-400">
+                              {service.status}
+                            </span>
                           </div>
                         </div>
                       ))}
@@ -680,7 +743,9 @@ function AdminContent() {
                       <Users className="h-5 w-5 text-blue-400" />
                       <span>用户管理</span>
                     </CardTitle>
-                    <CardDescription className="text-muted-foreground">管理系统用户和权限</CardDescription>
+                    <CardDescription className="text-muted-foreground">
+                      管理系统用户和权限
+                    </CardDescription>
                   </CardHeader>
                   <CardContent>
                     {loading ? (
@@ -689,12 +754,16 @@ function AdminContent() {
                       </div>
                     ) : users.length === 0 ? (
                       <div className="flex flex-col items-center justify-center py-16 text-center">
-                        <Users className="h-12 w-12 text-white/30 mb-4" />
-                        <h3 className="text-lg font-medium text-white/80 mb-2">暂无用户数据</h3>
-                        <p className="text-sm text-muted-foreground">当前数据库中没有用户记录</p>
+                        <Users className="h-12 w-12 text-muted-foreground mb-4" />
+                        <h3 className="text-lg font-medium text-foreground mb-2">
+                          暂无用户数据
+                        </h3>
+                        <p className="text-sm text-muted-foreground">
+                          当前数据库中没有用户记录
+                        </p>
                         <button
                           onClick={() => fetchUsers()}
-                          className="mt-4 px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white rounded-md transition-colors"
+                          className="mt-4 px-4 py-2 bg-primary hover:bg-primary/90 text-primary-foreground rounded-md transition-colors"
                         >
                           刷新数据
                         </button>
@@ -704,11 +773,21 @@ function AdminContent() {
                         <table className="w-full">
                           <thead>
                             <tr className="border-b border-border">
-                              <th className="text-left py-3 px-4 text-muted-foreground">用户ID</th>
-                              <th className="text-left py-3 px-4 text-muted-foreground">用户名</th>
-                              <th className="text-left py-3 px-4 text-muted-foreground">邮箱</th>
-                              <th className="text-left py-3 px-4 text-muted-foreground">上传数</th>
-                              <th className="text-left py-3 px-4 text-muted-foreground">最后活跃</th>
+                              <th className="text-left py-3 px-4 text-muted-foreground">
+                                用户ID
+                              </th>
+                              <th className="text-left py-3 px-4 text-muted-foreground">
+                                用户名
+                              </th>
+                              <th className="text-left py-3 px-4 text-muted-foreground">
+                                邮箱
+                              </th>
+                              <th className="text-left py-3 px-4 text-muted-foreground">
+                                上传数
+                              </th>
+                              <th className="text-left py-3 px-4 text-muted-foreground">
+                                最后活跃
+                              </th>
                             </tr>
                           </thead>
                           <tbody>
@@ -717,19 +796,27 @@ function AdminContent() {
                                 key={user.id}
                                 variants={listItemVariants}
                                 custom={index}
-                                className="border-b border-white/10 hover:bg-white/10 transition-colors"
+                                className="border-b border-border hover:bg-muted/50 transition-colors"
                               >
-                                <td className="py-3 px-4 text-foreground">{user.id}</td>
+                                <td className="py-3 px-4 text-foreground">
+                                  {user.id}
+                                </td>
                                 <td className="py-3 px-4 font-medium text-foreground">
                                   {user.username}
                                 </td>
-                                <td className="py-3 px-4 text-muted-foreground">{user.email}</td>
-                                <td className="py-3 px-4 text-muted-foreground">{user.uploads}</td>
+                                <td className="py-3 px-4 text-muted-foreground">
+                                  {user.email}
+                                </td>
+                                <td className="py-3 px-4 text-muted-foreground">
+                                  {user.uploads}
+                                </td>
                                 <td className="py-3 px-4">
                                   <div className="flex items-center space-x-2">
                                     <Clock className="h-4 w-4 text-muted-foreground" />
                                     <span className="text-sm text-muted-foreground">
-                                      {new Date(user.lastActive).toLocaleDateString()}
+                                      {new Date(
+                                        user.lastActive
+                                      ).toLocaleDateString()}
                                     </span>
                                   </div>
                                 </td>
@@ -771,9 +858,13 @@ function AdminContent() {
                   </CardHeader>
                   <CardContent>
                     <div className="text-center py-12">
-                      <PieChart className="h-16 w-16 text-white/40 mx-auto mb-4" />
-                      <h3 className="text-lg font-medium text-white mb-2">数据分析功能</h3>
-                      <p className="text-muted-foreground">详细的数据分析功能正在开发中，敬请期待！</p>
+                      <PieChart className="h-16 w-16 text-muted-foreground mx-auto mb-4" />
+                      <h3 className="text-lg font-medium text-foreground mb-2">
+                        数据分析功能
+                      </h3>
+                      <p className="text-muted-foreground">
+                        详细的数据分析功能正在开发中，敬请期待！
+                      </p>
                     </div>
                   </CardContent>
                 </Card>
@@ -789,7 +880,10 @@ function AdminContent() {
               exit={{ opacity: 0, y: -20 }}
               transition={{ duration: 0.3 }}
             >
-              <IPManagement accessToken={accessToken || ""} adminToken={adminToken || ""} />
+              <IPManagement
+                accessToken={accessToken || ""}
+                adminToken={adminToken || ""}
+              />
             </motion.div>
           )}
 
@@ -801,7 +895,10 @@ function AdminContent() {
               exit={{ opacity: 0, y: -20 }}
               transition={{ duration: 0.3 }}
             >
-              <SystemMonitor accessToken={accessToken || ""} adminToken={adminToken || ""} />
+              <SystemMonitor
+                accessToken={accessToken || ""}
+                adminToken={adminToken || ""}
+              />
             </motion.div>
           )}
 
@@ -836,12 +933,16 @@ function AdminContent() {
                       </div>
                     ) : images.length === 0 ? (
                       <div className="flex flex-col items-center justify-center py-16 text-center">
-                        <Database className="h-12 w-12 text-white/30 mb-4" />
-                        <h3 className="text-lg font-medium text-white/80 mb-2">暂无图片数据</h3>
-                        <p className="text-sm text-white/60 mb-4">当前数据库中没有图片记录</p>
+                        <Database className="h-12 w-12 text-muted-foreground mb-4" />
+                        <h3 className="text-lg font-medium text-foreground mb-2">
+                          暂无图片数据
+                        </h3>
+                        <p className="text-sm text-muted-foreground mb-4">
+                          当前数据库中没有图片记录
+                        </p>
                         <button
                           onClick={() => fetchImages()}
-                          className="px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white rounded-md transition-colors"
+                          className="px-4 py-2 bg-primary hover:bg-primary/90 text-primary-foreground rounded-md transition-colors"
                         >
                           刷新数据
                         </button>
@@ -853,7 +954,7 @@ function AdminContent() {
                             key={image.id}
                             variants={listItemVariants}
                             custom={index}
-                            className="bg-white/5 rounded-lg p-4 border border-white/10 hover:border-white/20 transition-all"
+                            className="bg-card rounded-lg p-4 border border-border hover:border-border/80 transition-all"
                           >
                             <div className="flex items-start justify-between">
                               <div className="flex-1 space-y-2">
@@ -864,10 +965,16 @@ function AdminContent() {
                                     className="w-24 h-24 object-cover rounded-md"
                                   />
                                   <div className="flex-1">
-                                    <h3 className="text-white font-medium">{image.filename}</h3>
-                                    <p className="text-sm text-muted-foreground">用户: {image.username}</p>
+                                    <h3 className="text-foreground font-medium">
+                                      {image.filename}
+                                    </h3>
                                     <p className="text-sm text-muted-foreground">
-                                      {new Date(image.uploadDate).toLocaleString("zh-CN")}
+                                      用户: {image.username}
+                                    </p>
+                                    <p className="text-sm text-muted-foreground">
+                                      {new Date(
+                                        image.uploadDate
+                                      ).toLocaleString("zh-CN")}
                                     </p>
                                     <p className="text-xs text-muted-foreground">
                                       {image.fileSize} bytes · {image.mimeType}

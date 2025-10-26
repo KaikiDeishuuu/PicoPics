@@ -1,7 +1,16 @@
 "use client";
 
 import { motion } from "framer-motion";
-import { Code, Github, Globe, Heart, MessageCircle, Shield, Star, Zap } from "lucide-react";
+import {
+  Code,
+  Github,
+  Globe,
+  Heart,
+  MessageCircle,
+  Shield,
+  Star,
+  Zap,
+} from "lucide-react";
 import { Card, CardContent } from "@/components/ui/card";
 import { ThemeToggle } from "@/components/ThemeToggle";
 
@@ -59,7 +68,8 @@ export function Footer({ className = "" }: FooterProps) {
               </h3>
             </div>
             <p className="text-muted-foreground text-sm leading-relaxed">
-              Modern image hosting platform built with Next.js 15 + Cloudflare Workers.
+              Modern image hosting platform built with Next.js 15 + Cloudflare
+              Workers.
             </p>
             <div className="flex flex-wrap gap-2">
               {features.map((feature, index) => (
@@ -76,7 +86,9 @@ export function Footer({ className = "" }: FooterProps) {
 
           {/* 快速链接 */}
           <div className="bg-card/50 rounded-lg border border-border p-5 space-y-4">
-            <h4 className="text-lg font-semibold text-foreground mb-3">Quick Links</h4>
+            <h4 className="text-lg font-semibold text-foreground mb-3">
+              Quick Links
+            </h4>
             <div className="grid grid-cols-1 gap-2">
               {[
                 { name: "Home", href: "/" },
@@ -87,7 +99,7 @@ export function Footer({ className = "" }: FooterProps) {
                 <a
                   key={index}
                   href={link.href}
-                  className="block text-sm text-white/80 hover:text-yellow-400 transition-colors duration-200 p-2 rounded-lg hover:bg-muted"
+                  className="block text-sm text-muted-foreground hover:text-primary transition-colors duration-200 p-2 rounded-lg hover:bg-muted/50"
                 >
                   {link.name}
                 </a>
@@ -97,7 +109,9 @@ export function Footer({ className = "" }: FooterProps) {
 
           {/* 联系信息 */}
           <div className="bg-card/50 rounded-lg border border-border p-5 space-y-4">
-            <h4 className="text-lg font-semibold text-white mb-3">Contact</h4>
+            <h4 className="text-lg font-semibold text-foreground mb-3">
+              Contact
+            </h4>
             <div className="space-y-2">
               {socialLinks.map((link, index) => (
                 <a
@@ -105,7 +119,7 @@ export function Footer({ className = "" }: FooterProps) {
                   href={link.url}
                   target="_blank"
                   rel="noopener noreferrer"
-                  className={`flex items-center space-x-2 text-sm text-white/80 transition-colors duration-200 ${link.color} p-2 rounded-lg hover:bg-white/10`}
+                  className={`flex items-center space-x-2 text-sm text-muted-foreground transition-colors duration-200 ${link.color} p-2 rounded-lg hover:bg-muted/50`}
                 >
                   <link.icon className="h-4 w-4" />
                   <span>{link.name}</span>
@@ -115,7 +129,9 @@ export function Footer({ className = "" }: FooterProps) {
             <div className="p-3 bg-muted/30 rounded-lg border border-border mt-3 space-y-3">
               <div className="flex items-center space-x-2">
                 <Heart className="h-4 w-4 text-red-400" />
-                <span className="text-sm font-medium text-foreground">Made with ❤️ by Kaiki</span>
+                <span className="text-sm font-medium text-foreground">
+                  Made with ❤️ by Kaiki
+                </span>
               </div>
               <div className="flex items-center justify-between pt-2 border-t border-border">
                 <span className="text-xs text-muted-foreground">Theme</span>

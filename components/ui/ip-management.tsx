@@ -148,7 +148,9 @@ export function IPManagement({ accessToken, adminToken }: IPManagementProps) {
           <div className="flex items-center justify-between">
             <div className="flex items-center space-x-2">
               <Shield className="h-6 w-6 text-blue-400" />
-              <CardTitle className="text-white">IP Blacklist Management</CardTitle>
+              <CardTitle className="text-foreground">
+                IP Blacklist Management
+              </CardTitle>
             </div>
             <Button
               onClick={() => setShowAddForm(!showAddForm)}
@@ -163,12 +165,12 @@ export function IPManagement({ accessToken, adminToken }: IPManagementProps) {
           <div className="flex items-center gap-2 sm:gap-4">
             <div className="flex-1 min-w-0">
               <div className="relative">
-                <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-white/60" />
+                <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-muted-foreground" />
                 <Input
                   placeholder="Search IP..."
                   value={searchTerm}
                   onChange={(e) => setSearchTerm(e.target.value)}
-                  className="pl-10 bg-black/50 border-white/20 text-white placeholder-white/60 w-full"
+                  className="pl-10 bg-background border-border text-foreground placeholder-muted-foreground w-full"
                 />
               </div>
             </div>
@@ -176,9 +178,11 @@ export function IPManagement({ accessToken, adminToken }: IPManagementProps) {
               onClick={fetchIPList}
               disabled={loading}
               variant="outline"
-              className="border-white/20 text-white hover:bg-white/10 h-10 flex-shrink-0"
+              className="border-border text-foreground hover:bg-muted/50 h-10 flex-shrink-0"
             >
-              <Clock className={`h-4 w-4 mr-2 ${loading ? "animate-spin" : ""}`} />
+              <Clock
+                className={`h-4 w-4 mr-2 ${loading ? "animate-spin" : ""}`}
+              />
               <span className="hidden sm:inline">Refresh</span>
               <span className="sm:hidden">Ref</span>
             </Button>
@@ -195,38 +199,47 @@ export function IPManagement({ accessToken, adminToken }: IPManagementProps) {
         >
           <Card className="card-modern">
             <CardHeader>
-              <CardTitle className="text-white">Add IP to Blacklist</CardTitle>
+              <CardTitle className="text-foreground">
+                Add IP to Blacklist
+              </CardTitle>
             </CardHeader>
             <CardContent className="space-y-4">
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                 <div>
-                  <label className="block text-sm font-medium text-white mb-2">IP Address</label>
+                  <label className="block text-sm font-medium text-foreground mb-2">
+                    IP Address
+                  </label>
                   <Input
                     placeholder="192.168.1.1 or 192.168.1.0/24"
                     value={newIP}
                     onChange={(e) => setNewIP(e.target.value)}
-                    className="bg-black/50 border-white/20 text-white placeholder-white/60"
+                    className="bg-background border-border text-foreground placeholder-muted-foreground"
                   />
                 </div>
                 <div>
-                  <label className="block text-sm font-medium text-white mb-2">Reason</label>
+                  <label className="block text-sm font-medium text-foreground mb-2">
+                    Reason
+                  </label>
                   <Input
                     placeholder="Reason for banning this IP"
                     value={newReason}
                     onChange={(e) => setNewReason(e.target.value)}
-                    className="bg-black/50 border-white/20 text-white placeholder-white/60"
+                    className="bg-background border-border text-foreground placeholder-muted-foreground"
                   />
                 </div>
               </div>
               <div className="flex space-x-2">
-                <Button onClick={addToBlacklist} className="bg-red-600 hover:bg-red-700 text-white">
+                <Button
+                  onClick={addToBlacklist}
+                  className="bg-red-600 hover:bg-red-700 text-white"
+                >
                   <Ban className="h-4 w-4 mr-2" />
                   Ban IP
                 </Button>
                 <Button
                   onClick={() => setShowAddForm(false)}
                   variant="outline"
-                  className="border-white/20 text-white hover:bg-white/10"
+                  className="border-border text-foreground hover:bg-muted/50"
                 >
                   Cancel
                 </Button>
@@ -240,7 +253,9 @@ export function IPManagement({ accessToken, adminToken }: IPManagementProps) {
       <Card className="card-modern">
         <CardHeader>
           <div className="flex items-center justify-between">
-            <CardTitle className="text-white">Blacklisted IPs ({filteredIPs.length})</CardTitle>
+            <CardTitle className="text-foreground">
+              Blacklisted IPs ({filteredIPs.length})
+            </CardTitle>
             <Badge variant="outline" className="border-red-500/50 text-red-400">
               {ipList.filter((ip) => ip.status === "active").length} Active
             </Badge>
@@ -249,12 +264,12 @@ export function IPManagement({ accessToken, adminToken }: IPManagementProps) {
         <CardContent>
           {loading ? (
             <div className="flex items-center justify-center py-8">
-              <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-white"></div>
+              <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-foreground"></div>
             </div>
           ) : filteredIPs.length === 0 ? (
             <div className="text-center py-8">
-              <AlertTriangle className="h-12 w-12 text-white/40 mx-auto mb-4" />
-              <p className="text-white/60">No IP addresses found</p>
+              <AlertTriangle className="h-12 w-12 text-muted-foreground mx-auto mb-4" />
+              <p className="text-muted-foreground">No IP addresses found</p>
             </div>
           ) : (
             <div className="space-y-3">
@@ -264,15 +279,19 @@ export function IPManagement({ accessToken, adminToken }: IPManagementProps) {
                   initial={{ opacity: 0, y: 20 }}
                   animate={{ opacity: 1, y: 0 }}
                   transition={{ delay: index * 0.1 }}
-                  className="flex items-center justify-between p-4 bg-black/40 rounded-lg border border-white/10"
+                  className="flex items-center justify-between p-4 bg-muted/30 rounded-lg border border-border/50"
                 >
                   <div className="flex-1">
                     <div className="flex items-center space-x-3">
-                      <code className="text-white font-mono text-sm bg-black/50 px-2 py-1 rounded">
+                      <code className="text-foreground font-mono text-sm bg-muted px-2 py-1 rounded">
                         {record.ip}
                       </code>
                       <Badge
-                        variant={record.status === "active" ? "destructive" : "secondary"}
+                        variant={
+                          record.status === "active"
+                            ? "destructive"
+                            : "secondary"
+                        }
                         className="text-xs"
                       >
                         {record.status === "active" ? (
@@ -288,9 +307,12 @@ export function IPManagement({ accessToken, adminToken }: IPManagementProps) {
                         )}
                       </Badge>
                     </div>
-                    <p className="text-white/70 text-sm mt-1">{record.reason}</p>
-                    <p className="text-white/50 text-xs mt-1">
-                      Added by {record.addedBy} on {new Date(record.addedAt).toLocaleString()}
+                    <p className="text-muted-foreground text-sm mt-1">
+                      {record.reason}
+                    </p>
+                    <p className="text-muted-foreground/70 text-xs mt-1">
+                      Added by {record.addedBy} on{" "}
+                      {new Date(record.addedAt).toLocaleString()}
                     </p>
                   </div>
                   <div className="flex items-center space-x-2">

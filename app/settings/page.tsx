@@ -7,7 +7,13 @@ import { useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
 import { ThemeToggle } from "@/components/ThemeToggle";
 import { Button } from "@/components/ui/button";
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
+import {
+  Card,
+  CardContent,
+  CardDescription,
+  CardHeader,
+  CardTitle,
+} from "@/components/ui/card";
 import { Footer } from "@/components/ui/footer";
 import { LoadingSpinner } from "@/components/ui/loading";
 
@@ -140,7 +146,10 @@ export default function SettingsPage() {
       {/* Header */}
       <header className="relative z-10 container mx-auto px-4 py-6">
         <div className="flex items-center justify-between">
-          <Link href="/" className="flex items-center space-x-2 text-gray-800 dark:text-gray-200">
+          <Link
+            href="/"
+            className="flex items-center space-x-2 text-gray-800 dark:text-gray-200"
+          >
             <ArrowLeft className="h-5 w-5" />
             <span>返回首页</span>
           </Link>
@@ -157,11 +166,13 @@ export default function SettingsPage() {
         >
           <Card className="card-modern border-0 shadow-lg">
             <CardHeader>
-              <CardTitle className="text-2xl md:text-3xl flex items-center space-x-2 text-white">
-                <Settings className="h-6 w-6" />
-                <span>设置</span>
+              <CardTitle className="text-2xl md:text-3xl flex items-center space-x-2 text-foreground">
+                <Settings className="h-6 w-6 text-primary" />
+                <span>Settings</span>
               </CardTitle>
-              <CardDescription className="text-white/70">管理您的通知偏好</CardDescription>
+              <CardDescription className="text-muted-foreground">
+                管理您的通知偏好
+              </CardDescription>
             </CardHeader>
 
             <CardContent className="space-y-6">
@@ -170,7 +181,9 @@ export default function SettingsPage() {
                 <div className="flex items-center justify-between">
                   <div className="flex items-center space-x-2">
                     <Bell className="h-5 w-5" />
-                    <span className="font-medium text-white">Telegram 通知</span>
+                    <span className="font-medium text-foreground">
+                      Telegram 通知
+                    </span>
                   </div>
                   <Button
                     variant="ghost"
@@ -197,24 +210,34 @@ export default function SettingsPage() {
                 </div>
 
                 <div className="space-y-2">
-                  <label className="text-sm font-medium text-white/80">Telegram Chat ID</label>
+                  <label className="text-sm font-medium text-foreground">
+                    Telegram Chat ID
+                  </label>
                   <input
                     type="text"
                     value={telegramIdInput}
                     onChange={(e) => setTelegramIdInput(e.target.value)}
                     placeholder="输入您的 Telegram Chat ID"
-                    className="w-full px-4 py-2 rounded-lg border border-white/20 bg-black/40 text-white placeholder-white/50 focus:outline-none focus:ring-2 focus:ring-blue-500"
+                    className="w-full px-4 py-2 rounded-lg border border-border bg-background text-foreground placeholder-muted-foreground focus:outline-none focus:ring-2 focus:ring-primary"
                     disabled={!settings.notificationEnabled}
                   />
-                  <p className="text-xs text-white/60">
+                  <p className="text-xs text-muted-foreground">
                     如何获取 Chat ID: 在 Telegram 搜索{" "}
-                    <span className="font-mono text-white/80">@userinfobot</span> 并发送 /start
+                    <span className="font-mono text-foreground">
+                      @userinfobot
+                    </span>{" "}
+                    并发送 /start
                   </p>
                 </div>
               </div>
 
               {/* Save Button */}
-              <Button onClick={handleSave} disabled={saving} className="w-full" size="lg">
+              <Button
+                onClick={handleSave}
+                disabled={saving}
+                className="w-full"
+                size="lg"
+              >
                 {saving ? (
                   <>
                     <LoadingSpinner className="mr-2" />

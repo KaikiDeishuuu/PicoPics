@@ -47,13 +47,16 @@ export function ImageGallery({
   loading = false,
 }: ImageGalleryProps) {
   const [selectedImage, setSelectedImage] = useState<GalleryImage | null>(null);
-  const [imageSizes, setImageSizes] = useState<Record<string, { width: number; height: number }>>(
-    {}
-  );
+  const [imageSizes, setImageSizes] = useState<
+    Record<string, { width: number; height: number }>
+  >({});
   const [isModalOpen, setIsModalOpen] = useState(false);
   const { toast } = useToast();
 
-  const handleImageLoad = (id: string, e: React.SyntheticEvent<HTMLImageElement>) => {
+  const handleImageLoad = (
+    id: string,
+    e: React.SyntheticEvent<HTMLImageElement>
+  ) => {
     const img = e.currentTarget;
     setImageSizes((prev) => ({
       ...prev,
@@ -61,7 +64,11 @@ export function ImageGallery({
     }));
   };
 
-  const handleCopy = async (image: GalleryImage, format: string, label: string) => {
+  const handleCopy = async (
+    image: GalleryImage,
+    format: string,
+    label: string
+  ) => {
     const filename = image.filename || `image-${image.id}`;
     let text = "";
 
@@ -115,7 +122,9 @@ export function ImageGallery({
         <Eye className="w-8 h-8 opacity-60" />
         <div>
           <h3 className="text-lg font-medium">暂无图片</h3>
-          <p className="text-sm text-muted-foreground">开始上传你的第一张图片吧</p>
+          <p className="text-sm text-muted-foreground">
+            开始上传你的第一张图片吧
+          </p>
         </div>
       </div>
     );
@@ -137,8 +146,12 @@ export function ImageGallery({
         columnClassName="my-masonry-grid_column"
       >
         {images.map((img) => (
-          <div key={img.id} className="mb-5 group cursor-pointer" onClick={() => openModal(img)}>
-            <div className="overflow-hidden rounded-2xl bg-white/5 backdrop-blur-sm shadow-lg hover:shadow-xl transition-all duration-300">
+          <div
+            key={img.id}
+            className="mb-5 group cursor-pointer"
+            onClick={() => openModal(img)}
+          >
+            <div className="overflow-hidden rounded-2xl bg-card/50 backdrop-blur-sm shadow-lg hover:shadow-xl transition-all duration-300">
               {/* 图片区域 */}
               <div className="relative">
                 <img
@@ -148,14 +161,14 @@ export function ImageGallery({
                   className="w-full h-auto object-cover transition-transform duration-300 group-hover:scale-[1.03]"
                 />
                 <div className="absolute inset-0 flex items-center justify-center bg-black/0 group-hover:bg-black/20 transition-all pointer-events-none">
-                  <Eye className="w-6 h-6 text-white opacity-0 group-hover:opacity-100 transition-opacity" />
+                  <Eye className="w-6 h-6 text-foreground opacity-0 group-hover:opacity-100 transition-opacity" />
                 </div>
               </div>
 
               {/* 信息区 */}
-              <div className="p-3 sm:p-4 space-y-2 bg-zinc-950/70 backdrop-blur-sm">
+              <div className="p-3 sm:p-4 space-y-2 bg-card/70 backdrop-blur-sm">
                 <div className="flex items-center justify-between gap-2">
-                  <h3 className="text-xs sm:text-sm font-medium text-white truncate flex-1 min-w-0">
+                  <h3 className="text-xs sm:text-sm font-medium text-foreground truncate flex-1 min-w-0">
                     {img.filename || `图片 ${img.id}`}
                   </h3>
                   {img.uploadDate && (
@@ -215,7 +228,12 @@ export function ImageGallery({
       </Masonry>
 
       {/* 图片预览模态框 */}
-      <Modal isOpen={isModalOpen} onClose={closeModal} size="xl" showCloseButton>
+      <Modal
+        isOpen={isModalOpen}
+        onClose={closeModal}
+        size="xl"
+        showCloseButton
+      >
         {selectedImage && (
           <div className="space-y-6">
             <div className="relative rounded-xl overflow-hidden bg-black/10 flex items-center justify-center min-h-[300px] max-h-[60vh]">

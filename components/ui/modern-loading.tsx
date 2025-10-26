@@ -39,7 +39,7 @@ export function ModernLoading({
         <motion.div
           animate={{ rotate: 360 }}
           transition={{ duration: 1, repeat: Infinity, ease: "linear" }}
-          className={`${sizeClasses[size]} text-white`}
+          className={`${sizeClasses[size]} text-foreground`}
         >
           <Loader2 className="w-full h-full" />
         </motion.div>
@@ -47,7 +47,7 @@ export function ModernLoading({
           initial={{ opacity: 0 }}
           animate={{ opacity: 1 }}
           transition={{ delay: 0.2 }}
-          className={`${textSizeClasses[size]} text-white/80 text-center`}
+          className={`${textSizeClasses[size]} text-foreground/80 text-center`}
         >
           {message}
         </motion.p>
@@ -66,15 +66,15 @@ export function ModernLoading({
         <motion.div
           animate={{ scale: [1, 1.2, 1] }}
           transition={{ duration: 1.5, repeat: Infinity }}
-          className={`${sizeClasses[size]} bg-white/20 rounded-full flex items-center justify-center`}
+          className={`${sizeClasses[size]} bg-muted/50 rounded-full flex items-center justify-center`}
         >
-          <ImageIcon className="w-1/2 h-1/2 text-white" />
+          <ImageIcon className="w-1/2 h-1/2 text-foreground" />
         </motion.div>
         <motion.p
           initial={{ opacity: 0 }}
           animate={{ opacity: 1 }}
           transition={{ delay: 0.2 }}
-          className={`${textSizeClasses[size]} text-white/80 text-center`}
+          className={`${textSizeClasses[size]} text-foreground/80 text-center`}
         >
           {message}
         </motion.p>
@@ -103,7 +103,7 @@ export function ModernLoading({
                 repeat: Infinity,
                 delay: index * 0.2,
               }}
-              className="w-3 h-3 bg-white rounded-full"
+              className="w-3 h-3 bg-foreground/60 rounded-full"
             />
           ))}
         </div>
@@ -111,7 +111,7 @@ export function ModernLoading({
           initial={{ opacity: 0 }}
           animate={{ opacity: 1 }}
           transition={{ delay: 0.2 }}
-          className={`${textSizeClasses[size]} text-white/80 text-center`}
+          className={`${textSizeClasses[size]} text-foreground/80 text-center`}
         >
           {message}
         </motion.p>
@@ -137,12 +137,12 @@ export function ModernLoading({
                 repeat: Infinity,
                 delay: index * 0.1,
               }}
-              className="bg-white/10 rounded-lg p-4 space-y-3"
+              className="bg-muted/30 rounded-lg p-4 space-y-3"
             >
-              <div className="bg-white/20 rounded-lg h-48 w-full" />
+              <div className="bg-muted/50 rounded-lg h-48 w-full" />
               <div className="space-y-2">
-                <div className="bg-white/20 rounded h-4 w-3/4" />
-                <div className="bg-white/20 rounded h-3 w-1/2" />
+                <div className="bg-muted/50 rounded h-4 w-3/4" />
+                <div className="bg-muted/50 rounded h-3 w-1/2" />
               </div>
             </motion.div>
           ))}
@@ -151,7 +151,7 @@ export function ModernLoading({
           initial={{ opacity: 0 }}
           animate={{ opacity: 1 }}
           transition={{ delay: 0.2 }}
-          className={`${textSizeClasses[size]} text-white/80 text-center`}
+          className={`${textSizeClasses[size]} text-foreground/80 text-center`}
         >
           {message}
         </motion.p>
@@ -168,15 +168,15 @@ export function ImageCardSkeleton() {
     <motion.div
       initial={{ opacity: 0, y: 20 }}
       animate={{ opacity: 1, y: 0 }}
-      className="bg-white/10 rounded-lg overflow-hidden"
+      className="bg-card/30 rounded-lg overflow-hidden"
     >
-      <div className="aspect-square bg-white/20 animate-pulse" />
+      <div className="aspect-square bg-muted/50 animate-pulse" />
       <div className="p-4 space-y-2">
-        <div className="bg-white/20 rounded h-4 w-3/4 animate-pulse" />
-        <div className="bg-white/20 rounded h-3 w-1/2 animate-pulse" />
+        <div className="bg-muted/50 rounded h-4 w-3/4 animate-pulse" />
+        <div className="bg-muted/50 rounded h-3 w-1/2 animate-pulse" />
         <div className="flex justify-between items-center">
-          <div className="bg-white/20 rounded h-3 w-1/4 animate-pulse" />
-          <div className="bg-white/20 rounded h-6 w-6 animate-pulse" />
+          <div className="bg-muted/50 rounded h-3 w-1/4 animate-pulse" />
+          <div className="bg-muted/50 rounded h-6 w-6 animate-pulse" />
         </div>
       </div>
     </motion.div>

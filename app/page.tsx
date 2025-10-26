@@ -217,7 +217,7 @@ export default function Home() {
           {/* Logo 区域 */}
           <div className="flex items-center gap-3">
             <div className="rounded-lg border border-blue-400/20 bg-gradient-to-br from-blue-500 via-cyan-500 to-purple-600 grid h-10 w-10 place-items-center shadow-lg shadow-blue-500/40">
-              <span className="text-white font-bold text-lg drop-shadow-md">
+              <span className="text-foreground font-bold text-lg drop-shadow-md">
                 K
               </span>
             </div>
@@ -251,7 +251,7 @@ export default function Home() {
               {/* Logout 按钮 */}
               <button
                 onClick={handleLogout}
-                className="text-foreground/80 hover:text-foreground px-3 py-1.5 rounded-md bg-red-600/80 hover:bg-red-600 text-white transition-colors"
+                className="text-foreground/80 hover:text-foreground px-3 py-1.5 rounded-md bg-red-600/80 hover:bg-red-600 text-foreground transition-colors"
               >
                 <span className="text-lg md:mr-2">×</span>
                 <span className="hidden md:inline">Quit</span>

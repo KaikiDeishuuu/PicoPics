@@ -329,7 +329,7 @@ function GalleryContent() {
                       <Button
                         variant="outline"
                         size="sm"
-                        className="bg-black/80 text-white border-white/20 hover:bg-muted"
+                        className="bg-card/80 backdrop-blur-md border border-border text-foreground hover:bg-muted/50 relative z-50"
                       >
                         <ArrowLeft className="h-4 w-4 mr-2" />
                         <span className="hidden sm:inline">Back to Home</span>
@@ -512,8 +512,10 @@ function GalleryContent() {
                 <CardContent className="text-center py-12">
                   <div className="mb-4">
                     <ImageIcon className="h-12 w-12 mx-auto mb-4 text-red-400" />
-                    <h3 className="text-lg font-medium text-foreground">加载失败</h3>
-                    <p className="text-sm text-white/70 mt-2">
+                    <h3 className="text-lg font-medium text-foreground">
+                      加载失败
+                    </h3>
+                    <p className="text-sm text-muted-foreground mt-2">
                       {error?.message ||
                         imagesResponse?.error ||
                         "无法加载图片列表，请检查网络连接"}

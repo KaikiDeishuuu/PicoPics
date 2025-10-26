@@ -20,35 +20,53 @@ interface UrlFormatItemProps {
   copied: boolean;
 }
 
-function UrlFormatItem({ label, description, code, onCopy, copied }: UrlFormatItemProps) {
+function UrlFormatItem({
+  label,
+  description,
+  code,
+  onCopy,
+  copied,
+}: UrlFormatItemProps) {
   return (
     <div className="space-y-1">
       <div className="flex items-center justify-between">
         <div>
-          <span className="text-white/80 text-xs font-medium">{label}</span>
-          <span className="text-white/50 text-xs ml-2">{description}</span>
+          <span className="text-foreground/80 text-xs font-medium">
+            {label}
+          </span>
+          <span className="text-muted-foreground text-xs ml-2">
+            {description}
+          </span>
         </div>
         <motion.button
           whileHover={{ scale: 1.05 }}
           whileTap={{ scale: 0.95 }}
           onClick={onCopy}
-          className="p-1 bg-white/10 hover:bg-white/20 rounded transition-colors"
+          className="p-1 bg-muted hover:bg-muted/80 rounded transition-colors"
         >
           {copied ? (
             <Check className="w-3 h-3 text-green-400" />
           ) : (
-            <Copy className="w-3 h-3 text-white" />
+            <Copy className="w-3 h-3 text-foreground" />
           )}
         </motion.button>
       </div>
-      <div className="bg-black/30 rounded p-2 border border-white/5">
-        <code className="text-white/70 text-xs font-mono break-all">{code}</code>
+      <div className="bg-muted/50 rounded p-2 border border-border/50">
+        <code className="text-foreground/70 text-xs font-mono break-all">
+          {code}
+        </code>
       </div>
     </div>
   );
 }
 
-export function ImageBadge({ url, filename, size, uploadedAt, className = "" }: ImageBadgeProps) {
+export function ImageBadge({
+  url,
+  filename,
+  size,
+  uploadedAt,
+  className = "",
+}: ImageBadgeProps) {
   const [copied, setCopied] = useState(false);
   const [showDetails, setShowDetails] = useState(false);
 
@@ -98,13 +116,13 @@ export function ImageBadge({ url, filename, size, uploadedAt, className = "" }: 
     <motion.div
       initial={{ opacity: 0, y: 10 }}
       animate={{ opacity: 1, y: 0 }}
-      className={`bg-black/80 backdrop-blur-md border border-white/20 rounded-lg p-4 space-y-3 ${className}`}
+      className={`bg-card backdrop-blur-md border border-border rounded-lg p-4 space-y-3 ${className}`}
     >
       {/* 文件名和操作按钮 */}
       <div className="flex items-center justify-between">
         <div className="flex-1 min-w-0">
-          <h4 className="text-white font-medium truncate">{filename}</h4>
-          <p className="text-white/60 text-sm">
+          <h4 className="text-foreground font-medium truncate">{filename}</h4>
+          <p className="text-muted-foreground text-sm">
             {formatFileSize(size)} • {formatDate(uploadedAt)}
           </p>
         </div>
@@ -113,32 +131,32 @@ export function ImageBadge({ url, filename, size, uploadedAt, className = "" }: 
             whileHover={{ scale: 1.05 }}
             whileTap={{ scale: 0.95 }}
             onClick={copyToClipboard}
-            className="p-2 bg-white/10 hover:bg-white/20 rounded-lg transition-colors"
+            className="p-2 bg-muted hover:bg-muted/80 rounded-lg transition-colors"
             title="Copy URL"
           >
             {copied ? (
               <Check className="w-4 h-4 text-green-400" />
             ) : (
-              <Copy className="w-4 h-4 text-white" />
+              <Copy className="w-4 h-4 text-foreground" />
             )}
           </motion.button>
           <motion.button
             whileHover={{ scale: 1.05 }}
             whileTap={{ scale: 0.95 }}
             onClick={openInNewTab}
-            className="p-2 bg-white/10 hover:bg-white/20 rounded-lg transition-colors"
+            className="p-2 bg-muted hover:bg-muted/80 rounded-lg transition-colors"
             title="Open in new tab"
           >
-            <ExternalLink className="w-4 h-4 text-white" />
+            <ExternalLink className="w-4 h-4 text-foreground" />
           </motion.button>
           <motion.button
             whileHover={{ scale: 1.05 }}
             whileTap={{ scale: 0.95 }}
             onClick={downloadImage}
-            className="p-2 bg-white/10 hover:bg-white/20 rounded-lg transition-colors"
+            className="p-2 bg-muted hover:bg-muted/80 rounded-lg transition-colors"
             title="Download"
           >
-            <Download className="w-4 h-4 text-white" />
+            <Download className="w-4 h-4 text-foreground" />
           </motion.button>
         </div>
       </div>
@@ -146,12 +164,14 @@ export function ImageBadge({ url, filename, size, uploadedAt, className = "" }: 
       {/* 多格式URL显示区域 */}
       <div className="space-y-2">
         <div className="flex items-center justify-between">
-          <span className="text-white/80 text-sm font-medium">Link Formats:</span>
+          <span className="text-foreground/80 text-sm font-medium">
+            Link Formats:
+          </span>
           <motion.button
             whileHover={{ scale: 1.05 }}
             whileTap={{ scale: 0.95 }}
             onClick={() => setShowDetails(!showDetails)}
-            className="text-white/60 hover:text-white text-sm transition-colors"
+            className="text-muted-foreground hover:text-foreground text-sm transition-colors"
           >
             {showDetails ? "Hide Formats" : "Show Formats"}
           </motion.button>
@@ -162,7 +182,7 @@ export function ImageBadge({ url, filename, size, uploadedAt, className = "" }: 
           animate={{ height: showDetails ? "auto" : 0 }}
           className="overflow-hidden"
         >
-          <div className="bg-black/50 rounded-lg p-3 border border-white/10 space-y-2">
+          <div className="bg-muted/30 rounded-lg p-3 border border-border/50 space-y-2">
             {/* Direct URL */}
             <UrlFormatItem
               label="Direct"
@@ -177,7 +197,9 @@ export function ImageBadge({ url, filename, size, uploadedAt, className = "" }: 
               description="HTML img tag with alt"
               code={`<img src="${url}" alt="${filename}">`}
               onCopy={() => {
-                navigator.clipboard.writeText(`<img src="${url}" alt="${filename}">`);
+                navigator.clipboard.writeText(
+                  `<img src="${url}" alt="${filename}">`
+                );
                 setCopied(true);
                 setTimeout(() => setCopied(false), 2000);
               }}
@@ -213,7 +235,9 @@ export function ImageBadge({ url, filename, size, uploadedAt, className = "" }: 
               description="(Link)"
               code={`[![${filename}](${url})](${url})`}
               onCopy={() => {
-                navigator.clipboard.writeText(`[![${filename}](${url})](${url})`);
+                navigator.clipboard.writeText(
+                  `[![${filename}](${url})](${url})`
+                );
                 setCopied(true);
                 setTimeout(() => setCopied(false), 2000);
               }}
@@ -301,23 +325,27 @@ export function SimpleImageBadge({
     <motion.div
       initial={{ opacity: 0, scale: 0.9 }}
       animate={{ opacity: 1, scale: 1 }}
-      className={`bg-black/90 backdrop-blur-md border border-white/30 rounded-lg p-3 ${className}`}
+      className={`bg-card/90 backdrop-blur-md border border-border/30 rounded-lg p-3 ${className}`}
     >
       <div className="flex items-center justify-between">
         <div className="flex-1 min-w-0">
-          <p className="text-white font-medium text-sm truncate">{filename}</p>
-          <p className="text-white/60 text-xs">{formatFileSize(size)}</p>
+          <p className="text-foreground font-medium text-sm truncate">
+            {filename}
+          </p>
+          <p className="text-muted-foreground text-xs">
+            {formatFileSize(size)}
+          </p>
         </div>
         <motion.button
           whileHover={{ scale: 1.05 }}
           whileTap={{ scale: 0.95 }}
           onClick={copyToClipboard}
-          className="ml-3 p-2 bg-white/10 hover:bg-white/20 rounded-lg transition-colors"
+          className="ml-3 p-2 bg-muted hover:bg-muted/80 rounded-lg transition-colors"
         >
           {copied ? (
             <Check className="w-4 h-4 text-green-400" />
           ) : (
-            <Copy className="w-4 h-4 text-white" />
+            <Copy className="w-4 h-4 text-foreground" />
           )}
         </motion.button>
       </div>

@@ -105,11 +105,11 @@ export function SystemMonitor({ accessToken, adminToken }: SystemMonitorProps) {
           <div className="flex items-center justify-between">
             <div className="flex items-center space-x-2">
               <Activity className="h-6 w-6 text-green-400" />
-              <CardTitle className="text-white">System Monitor</CardTitle>
+              <CardTitle className="text-foreground">System Monitor</CardTitle>
             </div>
             <div className="flex items-center space-x-2">
               {lastUpdate && (
-                <span className="text-xs text-white/60">
+                <span className="text-xs text-muted-foreground">
                   Last update: {lastUpdate.toLocaleTimeString()}
                 </span>
               )}
@@ -118,9 +118,11 @@ export function SystemMonitor({ accessToken, adminToken }: SystemMonitorProps) {
                 disabled={loading}
                 variant="outline"
                 size="sm"
-                className="border-white/20 text-white hover:bg-white/10"
+                className="border-border text-foreground hover:bg-muted/50"
               >
-                <RefreshCw className={`h-4 w-4 mr-2 ${loading ? "animate-spin" : ""}`} />
+                <RefreshCw
+                  className={`h-4 w-4 mr-2 ${loading ? "animate-spin" : ""}`}
+                />
                 Refresh
               </Button>
             </div>
@@ -130,7 +132,7 @@ export function SystemMonitor({ accessToken, adminToken }: SystemMonitorProps) {
 
       {loading && !stats ? (
         <div className="flex items-center justify-center py-8">
-          <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-white"></div>
+          <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-foreground"></div>
         </div>
       ) : stats ? (
         <>
@@ -139,9 +141,14 @@ export function SystemMonitor({ accessToken, adminToken }: SystemMonitorProps) {
             <Card className="card-modern">
               <CardHeader className="pb-3">
                 <div className="flex items-center justify-between">
-                  <CardTitle className="text-sm text-white">CPU Usage</CardTitle>
+                  <CardTitle className="text-sm text-foreground">
+                    CPU Usage
+                  </CardTitle>
                   <div
-                    className={`flex items-center space-x-1 ${getStatusColor(stats.cpu, "cpu")}`}
+                    className={`flex items-center space-x-1 ${getStatusColor(
+                      stats.cpu,
+                      "cpu"
+                    )}`}
                   >
                     {getStatusIcon(stats.cpu, "cpu")}
                     <span className="text-sm font-medium">{stats.cpu}%</span>
@@ -161,7 +168,9 @@ export function SystemMonitor({ accessToken, adminToken }: SystemMonitorProps) {
             <Card className="card-modern">
               <CardHeader className="pb-3">
                 <div className="flex items-center justify-between">
-                  <CardTitle className="text-sm text-white">Memory Usage</CardTitle>
+                  <CardTitle className="text-sm text-foreground">
+                    Memory Usage
+                  </CardTitle>
                   <div
                     className={`flex items-center space-x-1 ${getStatusColor(
                       stats.memory,
@@ -186,9 +195,14 @@ export function SystemMonitor({ accessToken, adminToken }: SystemMonitorProps) {
             <Card className="card-modern">
               <CardHeader className="pb-3">
                 <div className="flex items-center justify-between">
-                  <CardTitle className="text-sm text-white">Disk Usage</CardTitle>
+                  <CardTitle className="text-sm text-foreground">
+                    Disk Usage
+                  </CardTitle>
                   <div
-                    className={`flex items-center space-x-1 ${getStatusColor(stats.disk, "disk")}`}
+                    className={`flex items-center space-x-1 ${getStatusColor(
+                      stats.disk,
+                      "disk"
+                    )}`}
                   >
                     {getStatusIcon(stats.disk, "disk")}
                     <span className="text-sm font-medium">{stats.disk}%</span>
@@ -210,26 +224,26 @@ export function SystemMonitor({ accessToken, adminToken }: SystemMonitorProps) {
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
             <Card className="card-modern">
               <CardHeader>
-                <CardTitle className="text-white flex items-center space-x-2">
+                <CardTitle className="text-foreground flex items-center space-x-2">
                   <Globe className="h-5 w-5 text-blue-400" />
                   <span>Network Traffic</span>
                 </CardTitle>
               </CardHeader>
               <CardContent className="space-y-4">
                 <div className="flex items-center justify-between">
-                  <span className="text-white/80">Inbound</span>
+                  <span className="text-muted-foreground">Inbound</span>
                   <div className="flex items-center space-x-2">
                     <TrendingUp className="h-4 w-4 text-green-400" />
-                    <span className="text-white font-mono">
+                    <span className="text-foreground font-mono">
                       {(stats.network.in / 1024 / 1024).toFixed(2)} MB/s
                     </span>
                   </div>
                 </div>
                 <div className="flex items-center justify-between">
-                  <span className="text-white/80">Outbound</span>
+                  <span className="text-muted-foreground">Outbound</span>
                   <div className="flex items-center space-x-2">
                     <TrendingDown className="h-4 w-4 text-red-400" />
-                    <span className="text-white font-mono">
+                    <span className="text-foreground font-mono">
                       {(stats.network.out / 1024 / 1024).toFixed(2)} MB/s
                     </span>
                   </div>
@@ -239,21 +253,21 @@ export function SystemMonitor({ accessToken, adminToken }: SystemMonitorProps) {
 
             <Card className="card-modern">
               <CardHeader>
-                <CardTitle className="text-white flex items-center space-x-2">
+                <CardTitle className="text-foreground flex items-center space-x-2">
                   <Server className="h-5 w-5 text-purple-400" />
                   <span>Performance</span>
                 </CardTitle>
               </CardHeader>
               <CardContent className="space-y-4">
                 <div className="flex items-center justify-between">
-                  <span className="text-white/80">Response Time</span>
+                  <span className="text-muted-foreground">Response Time</span>
                   <Badge
                     variant={
                       stats.responseTime < 100
                         ? "default"
                         : stats.responseTime < 500
-                          ? "secondary"
-                          : "destructive"
+                        ? "secondary"
+                        : "destructive"
                     }
                     className="text-xs"
                   >
@@ -261,8 +275,10 @@ export function SystemMonitor({ accessToken, adminToken }: SystemMonitorProps) {
                   </Badge>
                 </div>
                 <div className="flex items-center justify-between">
-                  <span className="text-white/80">Uptime</span>
-                  <span className="text-white font-mono text-sm">{stats.uptime}</span>
+                  <span className="text-muted-foreground">Uptime</span>
+                  <span className="text-foreground font-mono text-sm">
+                    {stats.uptime}
+                  </span>
                 </div>
               </CardContent>
             </Card>
@@ -271,7 +287,7 @@ export function SystemMonitor({ accessToken, adminToken }: SystemMonitorProps) {
           {/* 请求统计 */}
           <Card className="card-modern">
             <CardHeader>
-              <CardTitle className="text-white flex items-center space-x-2">
+              <CardTitle className="text-foreground flex items-center space-x-2">
                 <Database className="h-5 w-5 text-yellow-400" />
                 <span>Request Statistics</span>
               </CardTitle>
@@ -279,30 +295,37 @@ export function SystemMonitor({ accessToken, adminToken }: SystemMonitorProps) {
             <CardContent>
               <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
                 <div className="text-center">
-                  <div className="text-2xl font-bold text-white mb-1">
+                  <div className="text-2xl font-bold text-foreground mb-1">
                     {stats.requests.total.toLocaleString()}
                   </div>
-                  <div className="text-sm text-white/80">Total Requests</div>
+                  <div className="text-sm text-muted-foreground">
+                    Total Requests
+                  </div>
                 </div>
                 <div className="text-center">
                   <div className="text-2xl font-bold text-green-400 mb-1">
                     {stats.requests.success.toLocaleString()}
                   </div>
-                  <div className="text-sm text-white/80">Successful</div>
+                  <div className="text-sm text-muted-foreground">
+                    Successful
+                  </div>
                 </div>
                 <div className="text-center">
                   <div className="text-2xl font-bold text-red-400 mb-1">
                     {stats.requests.error.toLocaleString()}
                   </div>
-                  <div className="text-sm text-white/80">Errors</div>
+                  <div className="text-sm text-muted-foreground">Errors</div>
                 </div>
               </div>
               <div className="mt-4">
-                <div className="flex items-center justify-between text-sm text-white/80 mb-2">
+                <div className="flex items-center justify-between text-sm text-muted-foreground mb-2">
                   <span>Success Rate</span>
                   <span>
                     {stats.requests.total > 0
-                      ? ((stats.requests.success / stats.requests.total) * 100).toFixed(1)
+                      ? (
+                          (stats.requests.success / stats.requests.total) *
+                          100
+                        ).toFixed(1)
                       : 0}
                     %
                   </span>
@@ -313,7 +336,8 @@ export function SystemMonitor({ accessToken, adminToken }: SystemMonitorProps) {
                     style={{
                       width: `${
                         stats.requests.total > 0
-                          ? (stats.requests.success / stats.requests.total) * 100
+                          ? (stats.requests.success / stats.requests.total) *
+                            100
                           : 0
                       }%`,
                     }}
@@ -326,8 +350,10 @@ export function SystemMonitor({ accessToken, adminToken }: SystemMonitorProps) {
       ) : (
         <Card className="card-modern">
           <CardContent className="text-center py-8">
-            <AlertTriangle className="h-12 w-12 text-white/40 mx-auto mb-4" />
-            <p className="text-white/60">Failed to load system statistics</p>
+            <AlertTriangle className="h-12 w-12 text-muted-foreground mx-auto mb-4" />
+            <p className="text-muted-foreground">
+              Failed to load system statistics
+            </p>
           </CardContent>
         </Card>
       )}

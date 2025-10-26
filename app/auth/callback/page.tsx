@@ -14,7 +14,9 @@ export const dynamic = "force-dynamic";
 
 export default function AuthCallback() {
   const router = useRouter();
-  const [status, setStatus] = useState<"loading" | "success" | "error">("loading");
+  const [status, setStatus] = useState<"loading" | "success" | "error">(
+    "loading"
+  );
   const [error, setError] = useState<string | null>(null);
 
   useEffect(() => {
@@ -92,7 +94,12 @@ export default function AuthCallback() {
 
   if (status === "loading") {
     return (
-      <DynamicBackground variant="rainbow" intensity="medium" speed="slow" className="min-h-screen">
+      <DynamicBackground
+        variant="rainbow"
+        intensity="medium"
+        speed="slow"
+        className="min-h-screen"
+      >
         <motion.div
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
@@ -102,12 +109,16 @@ export default function AuthCallback() {
           <Card className="card-modern max-w-md mx-4">
             <CardHeader className="text-center">
               <div className="flex justify-center mb-4">
-                <Loader2 className="h-12 w-12 text-white animate-spin" />
+                <Loader2 className="h-12 w-12 text-primary animate-spin" />
               </div>
-              <CardTitle className="text-2xl text-white">Processing Authentication</CardTitle>
+              <CardTitle className="text-2xl text-foreground">
+                Processing Authentication
+              </CardTitle>
             </CardHeader>
             <CardContent className="text-center">
-              <p className="text-white/80">Please wait while we verify your identity...</p>
+              <p className="text-muted-foreground">
+                Please wait while we verify your identity...
+              </p>
             </CardContent>
           </Card>
         </motion.div>
@@ -117,7 +128,12 @@ export default function AuthCallback() {
 
   if (status === "error") {
     return (
-      <DynamicBackground variant="sunset" intensity="medium" speed="slow" className="min-h-screen">
+      <DynamicBackground
+        variant="sunset"
+        intensity="medium"
+        speed="slow"
+        className="min-h-screen"
+      >
         <motion.div
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
@@ -129,13 +145,16 @@ export default function AuthCallback() {
               <div className="flex justify-center mb-4">
                 <XCircle className="h-12 w-12 text-red-400" />
               </div>
-              <CardTitle className="text-2xl text-red-400">Authentication Failed</CardTitle>
+              <CardTitle className="text-2xl text-red-400">
+                Authentication Failed
+              </CardTitle>
             </CardHeader>
             <CardContent className="text-center space-y-4">
-              <p className="text-white/80">{error}</p>
+              <p className="text-muted-foreground">{error}</p>
               <Button
                 onClick={() => router.push("/")}
-                className="w-full bg-black/80 text-white border-white/20 hover:bg-white/10"
+                variant="outline"
+                className="w-full"
               >
                 Back to Home
               </Button>
@@ -147,7 +166,12 @@ export default function AuthCallback() {
   }
 
   return (
-    <DynamicBackground variant="ocean" intensity="medium" speed="slow" className="min-h-screen">
+    <DynamicBackground
+      variant="ocean"
+      intensity="medium"
+      speed="slow"
+      className="min-h-screen"
+    >
       <motion.div
         initial={{ opacity: 0, y: 20 }}
         animate={{ opacity: 1, y: 0 }}
@@ -159,10 +183,12 @@ export default function AuthCallback() {
             <div className="flex justify-center mb-4">
               <CheckCircle className="h-12 w-12 text-green-400" />
             </div>
-            <CardTitle className="text-2xl text-green-400">Authentication Successful</CardTitle>
+            <CardTitle className="text-2xl text-green-400">
+              Authentication Successful
+            </CardTitle>
           </CardHeader>
           <CardContent className="text-center">
-            <p className="text-white/80">
+            <p className="text-muted-foreground">
               You have successfully logged in, redirecting to homepage...
             </p>
           </CardContent>

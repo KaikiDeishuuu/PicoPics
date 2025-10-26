@@ -195,6 +195,15 @@ class IPBlacklist {
 
 const app = new Hono<{ Bindings: Env }>();
 
+// 格式化字节数
+function formatBytes(bytes: number): string {
+  if (bytes === 0) return "0 B";
+  const k = 1024;
+  const sizes = ["B", "KB", "MB", "GB", "TB"];
+  const i = Math.floor(Math.log(bytes) / Math.log(k));
+  return parseFloat((bytes / k ** i).toFixed(2)) + " " + sizes[i];
+}
+
 // Middleware
 app.use(
   "*",
@@ -331,6 +340,9 @@ app.post("/auth/callback", async (c) => {
 
 // Upload endpoint
 app.post("/upload", async (c) => {
+  console.log("UPLOAD: Starting upload request");
+  console.log("UPLOAD: TELEGRAM_BOT_TOKEN exists:", !!c.env.TELEGRAM_BOT_TOKEN);
+  console.log("UPLOAD: TELEGRAM_CHAT_ID exists:", !!c.env.TELEGRAM_CHAT_ID);
   try {
     const clientIP = c.req.header("CF-Connecting-IP") || "unknown";
 
@@ -646,9 +658,20 @@ app.post("/upload", async (c) => {
 🕐 ${new Date().toLocaleString("zh-CN")}
 ━━━━━━━━━━━━━━
     `.trim();
-    sendTelegramNotification(c.env, telegramMessage).catch((err) =>
-      console.error("Telegram notification failed:", err)
-    );
+
+    console.log("UPLOAD: About to send Telegram notification");
+    sendTelegramNotification(c.env, telegramMessage)
+      .then(() => {
+        console.log("UPLOAD: Telegram notification sent successfully");
+      })
+      .catch((err) => {
+        console.error("UPLOAD: Telegram notification failed:", err);
+        console.error("UPLOAD: Error details:", {
+          message: err instanceof Error ? err.message : String(err),
+          stack: err instanceof Error ? err.stack : undefined,
+        });
+      });
+    console.log("UPLOAD: Telegram notification call initiated");
 
     return c.json({
       success: true,
@@ -833,60 +856,69 @@ async function sendTelegramNotification(
   env: Env,
   message: string
 ): Promise<void> {
+  console.log("TELEGRAM: Starting notification");
+
   const botToken = env.TELEGRAM_BOT_TOKEN;
   const chatId = env.TELEGRAM_CHAT_ID;
 
-  console.log("🔔 [Telegram] Starting notification check...");
-  console.log("🔔 [Telegram] Has Bot Token:", !!botToken);
-  console.log("🔔 [Telegram] Has Chat ID:", !!chatId);
-  console.log("🔔 [Telegram] Chat ID value:", chatId);
+  console.log(
+    "TELEGRAM: Token exists:",
+    !!botToken,
+    "Chat ID exists:",
+    !!chatId
+  );
 
   if (!botToken || !chatId) {
-    console.error(
-      "❌ [Telegram] Missing credentials - Bot Token:",
-      !!botToken,
-      "Chat ID:",
-      !!chatId
-    );
-    console.log("❌ [Telegram] Skipping notification");
-    return;
+    console.log("TELEGRAM: Missing credentials, skipping");
+    throw new Error("Missing Telegram credentials");
   }
 
-  console.log("✅ [Telegram] Credentials OK, attempting to send message...");
-  console.log("📝 [Telegram] Message length:", message.length);
+  console.log("TELEGRAM: Making API call");
 
   try {
-    const url = `https://api.telegram.org/bot${botToken}/sendMessage`;
-    console.log("🌐 [Telegram] Request URL:", url);
-
-    const response = await fetch(url, {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({
-        chat_id: chatId,
-        text: message,
-        parse_mode: "HTML",
-      }),
+    // First test basic connectivity
+    console.log("TELEGRAM: Testing basic connectivity to telegram.org");
+    const testResponse = await fetch("https://api.telegram.org", {
+      method: "HEAD",
+      signal: AbortSignal.timeout(5000),
     });
+    console.log(
+      "TELEGRAM: Basic connectivity test result:",
+      testResponse.status
+    );
 
-    console.log("📡 [Telegram] Response status:", response.status);
+    const response = await fetch(
+      `https://api.telegram.org/bot${botToken}/sendMessage`,
+      {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          chat_id: chatId,
+          text: message,
+          parse_mode: "HTML",
+        }),
+        signal: AbortSignal.timeout(10000),
+      }
+    );
 
-    if (!response.ok) {
-      const errorText = await response.text();
-      console.error("❌ [Telegram] API error:", response.status);
-      console.error("❌ [Telegram] Error details:", errorText);
+    console.log("TELEGRAM: Response status:", response.status);
+
+    if (response.ok) {
+      console.log("TELEGRAM: SUCCESS - Notification sent");
+      return;
     } else {
-      const result = await response.json();
-      console.log("✅ [Telegram] Notification sent successfully!");
-      console.log("📋 [Telegram] Response:", JSON.stringify(result, null, 2));
+      const errorText = await response.text();
+      console.log(
+        "TELEGRAM: FAILED - Status:",
+        response.status,
+        "Error:",
+        errorText
+      );
+      throw new Error(`Telegram API error: ${response.status} - ${errorText}`);
     }
   } catch (error) {
-    console.error("❌ [Telegram] Notification failed with error:");
-    console.error(error);
-    if (error instanceof Error) {
-      console.error("Error message:", error.message);
-      console.error("Error stack:", error.stack);
-    }
+    console.log("TELEGRAM: EXCEPTION:", error);
+    throw error;
   }
 }
 
@@ -1408,14 +1440,75 @@ app.delete("/api/admin/ip-blacklist/:ip", async (c) => {
   }
 });
 
-// 格式化字节数
-function formatBytes(bytes: number): string {
-  if (bytes === 0) return "0 B";
-  const k = 1024;
-  const sizes = ["B", "KB", "MB", "GB", "TB"];
-  const i = Math.floor(Math.log(bytes) / Math.log(k));
-  return parseFloat((bytes / k ** i).toFixed(2)) + " " + sizes[i];
-}
+// Test endpoint for Telegram notifications
+app.get("/test-telegram", async (c) => {
+  console.log("TEST: Telegram test endpoint called");
+
+  const botToken = c.env.TELEGRAM_BOT_TOKEN;
+  const chatId = c.env.TELEGRAM_CHAT_ID;
+
+  console.log("TEST: Token exists:", !!botToken, "Chat ID exists:", !!chatId);
+
+  if (!botToken || !chatId) {
+    return c.json({
+      success: false,
+      error: "Missing Telegram credentials",
+      hasToken: !!botToken,
+      hasChatId: !!chatId,
+    });
+  }
+
+  try {
+    console.log("TEST: Making test API call");
+
+    const testMessage = `🧪 <b>测试通知</b>
+
+━━━━━━━━━━━━━━
+📅 ${new Date().toLocaleString("zh-CN")}
+━━━━━━━━━━━━━━
+    `.trim();
+
+    const response = await fetch(
+      `https://api.telegram.org/bot${botToken}/sendMessage`,
+      {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          chat_id: chatId,
+          text: testMessage,
+          parse_mode: "HTML",
+        }),
+        signal: AbortSignal.timeout(10000),
+      }
+    );
+
+    console.log("TEST: Response status:", response.status);
+
+    if (response.ok) {
+      const result = await response.json();
+      return c.json({
+        success: true,
+        message: "Test notification sent successfully",
+        response: result,
+      });
+    } else {
+      const errorText = await response.text();
+      return c.json({
+        success: false,
+        error: "Telegram API error",
+        status: response.status,
+        details: errorText,
+      });
+    }
+  } catch (error) {
+    console.log("TEST: Exception:", error);
+    return c.json({
+      success: false,
+      error: "Exception during test",
+      details: String(error),
+    });
+  }
+});
 
 // 获取用户设置
 app.get("/api/user/settings", async (c) => {
