@@ -57,6 +57,7 @@ function UploadPageContent() {
   const [uploadStatus, setUploadStatus] = useState<"idle" | "uploading" | "success" | "error">(
     "idle"
   );
+  const [isNavigating, setIsNavigating] = useState(false);
   const router = useRouter();
   const { toast } = useToast();
   useNotifications(); // 初始化通知服务
@@ -93,17 +94,20 @@ function UploadPageContent() {
 
   // 处理上传成功
   useEffect(() => {
-    if (uploadMutation.isSuccess) {
+    if (uploadMutation.isSuccess && !isNavigating) {
       setUploadStatus("success");
       setUploadProgress(100);
       toast.success("上传成功", "图片已成功上传到云端");
 
-      // 1秒后跳转到 Gallery 并刷新
-      setTimeout(() => {
+      // 延迟跳转，给用户时间看到成功消息
+      const timer = setTimeout(() => {
+        setIsNavigating(true);
         router.push("/gallery?refresh=" + Date.now());
-      }, 1000);
+      }, 2000);
+
+      return () => clearTimeout(timer);
     }
-  }, [uploadMutation.isSuccess, toast, router]);
+  }, [uploadMutation.isSuccess, isNavigating, toast, router]);
 
   // 处理上传错误
   useEffect(() => {
@@ -161,7 +165,13 @@ function UploadPageContent() {
                     variant="outline"
                     size="sm"
                     className="bg-black/80 backdrop-blur-md border border-white/20 text-white hover:bg-white/10"
-                    onClick={() => router.push("/")}
+                    onClick={() => {
+                      if (!isNavigating) {
+                        setIsNavigating(true);
+                        router.push("/");
+                      }
+                    }}
+                    disabled={isNavigating}
                   >
                     <ArrowLeft className="h-4 w-4 mr-2" />
                     <span className="hidden sm:inline">Back to Home</span>
@@ -183,7 +193,13 @@ function UploadPageContent() {
                     variant="outline"
                     size="sm"
                     className="card-modern"
-                    onClick={() => router.push("/gallery?refresh=" + Date.now())}
+                    onClick={() => {
+                      if (!isNavigating) {
+                        setIsNavigating(true);
+                        router.push("/gallery?refresh=" + Date.now());
+                      }
+                    }}
+                    disabled={isNavigating}
                   >
                     <Image className="h-4 w-4 mr-2" />
                     <span className="hidden sm:inline">My Gallery</span>
