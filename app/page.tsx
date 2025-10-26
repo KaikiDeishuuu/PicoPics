@@ -188,7 +188,9 @@ export default function Home() {
             <h1 className="text-6xl font-bold bg-gradient-to-r from-yellow-600 to-orange-600 bg-clip-text text-transparent mb-6">
               PicoPics V2
             </h1>
-            <p className="text-xl text-foreground drop-shadow-lg">正在加载...</p>
+            <p className="text-xl text-foreground drop-shadow-lg">
+              正在加载...
+            </p>
           </div>
         </div>
       </DynamicBackground>
@@ -211,7 +213,7 @@ export default function Home() {
         className="container mx-auto px-4 py-16"
       >
         {/* 导航栏 - 现代化设计 */}
-        <header className="flex items-center justify-between px-6 py-3 bg-black/60 backdrop-blur-md border border-white/10 rounded-xl mb-8">
+        <header className="flex items-center justify-between px-6 py-3 bg-card/80 backdrop-blur-md border border-border rounded-xl mb-8">
           {/* Logo 区域 */}
           <div className="flex items-center gap-3">
             <div className="rounded-lg border border-blue-400/20 bg-gradient-to-br from-blue-500 via-cyan-500 to-purple-600 grid h-10 w-10 place-items-center shadow-lg shadow-blue-500/40">
@@ -231,7 +233,7 @@ export default function Home() {
               <ThemeToggle />
 
               {/* GitHub 用户信息 */}
-              <div className="flex items-center gap-2 px-3 py-1.5 rounded-md bg-white/10 dark:bg-white/10 hover:bg-white/20 transition-colors">
+              <div className="flex items-center gap-2 px-3 py-1.5 rounded-md bg-muted/50 hover:bg-muted transition-colors">
                 <Github className="h-4 w-4 text-foreground" />
                 <span className="text-foreground/80 hover:text-foreground text-sm hidden md:inline">
                   {user?.login}
@@ -240,7 +242,7 @@ export default function Home() {
 
               {/* Admin 按钮 */}
               <Link href="/admin">
-                <button className="text-foreground/80 hover:text-foreground px-3 py-1.5 rounded-md bg-white/10 dark:bg-white/10 hover:bg-white/20 transition-colors">
+                <button className="text-foreground/80 hover:text-foreground px-3 py-1.5 rounded-md bg-muted/50 hover:bg-muted transition-colors">
                   <Shield className="h-4 w-4 md:mr-2 inline" />
                   <span className="hidden md:inline">Admin</span>
                 </button>
@@ -260,7 +262,7 @@ export default function Home() {
               <ThemeToggle />
               <button
                 onClick={handleLogin}
-                className="text-foreground/80 hover:text-foreground px-4 py-2 rounded-md bg-white/10 dark:bg-white/10 hover:bg-white/20 transition-colors"
+                className="text-foreground/80 hover:text-foreground px-4 py-2 rounded-md bg-muted/50 hover:bg-muted transition-colors"
               >
                 <Github className="h-4 w-4 inline mr-2" />
                 <span>Login with GitHub</span>
@@ -320,7 +322,7 @@ export default function Home() {
                 <Button
                   size="lg"
                   variant="outline"
-                  className="w-full sm:w-auto bg-black/80 backdrop-blur-sm border-2 border-blue-500 text-blue-400 hover:bg-blue-500/20"
+                  className="w-full sm:w-auto bg-card/80 backdrop-blur-sm border-2 border-blue-500 text-blue-400 hover:bg-blue-500/20"
                 >
                   <Image className="h-5 w-5 mr-2" />
                   My Gallery
@@ -493,7 +495,9 @@ export default function Home() {
           transition={{ duration: 0.8, delay: 1.2, ease: "easeOut" }}
           className="text-center"
         >
-          <h2 className="text-4xl font-bold text-foreground mb-8">Tech Stack</h2>
+          <h2 className="text-4xl font-bold text-foreground mb-8">
+            Tech Stack
+          </h2>
           <div className="tech-stack-container">
             {[
               { name: "Next.js 15" },
