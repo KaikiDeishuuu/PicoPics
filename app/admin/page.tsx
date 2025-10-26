@@ -485,13 +485,13 @@ function AdminContent() {
         className="container mx-auto px-4 py-8"
       >
         {/* 头部导航 - 单行布局 */}
-        <header className="flex items-center justify-between px-4 py-3 bg-black/70 backdrop-blur-md border border-white/20 rounded-xl mb-8">
+        <header className="flex items-center justify-between px-4 py-3 bg-card/80 backdrop-blur-md border border-border rounded-xl mb-8">
           <Link href="/">
-            <button className="text-white/80 hover:text-white transition-colors">
+            <button className="text-foreground/80 hover:text-foreground transition-colors">
               <ArrowLeft className="h-5 w-5" />
             </button>
           </Link>
-          <h1 className="text-white font-semibold text-base sm:text-lg flex items-center space-x-2">
+          <h1 className="text-foreground font-semibold text-base sm:text-lg flex items-center space-x-2">
             <Shield className="h-5 w-5 text-blue-400" />
             <span>Admin Panel</span>
           </h1>
@@ -508,7 +508,7 @@ function AdminContent() {
         {/* 欢迎信息 */}
         <Card className="card-modern mb-8">
           <CardContent className="py-3 px-4">
-            <p className="text-white/80 text-sm">
+            <p className="text-muted-foreground text-sm">
               Welcome back, {user?.login}! System administration console
             </p>
           </CardContent>
@@ -547,7 +547,7 @@ function AdminContent() {
                     className={`flex items-center space-x-1 sm:space-x-2 whitespace-nowrap ${
                       activeTab === tab.id
                         ? "bg-blue-600 text-white"
-                        : "text-white/80 hover:text-white hover:bg-white/10"
+                        : "text-foreground/80 hover:text-foreground hover:bg-muted"
                     }`}
                   >
                     <tab.icon className="h-4 w-4" />

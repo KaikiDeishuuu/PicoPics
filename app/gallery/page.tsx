@@ -337,10 +337,10 @@ function GalleryContent() {
                       </Button>
                     </Link>
                     <div>
-                      <CardTitle className="text-xl md:text-2xl text-white">
+                      <CardTitle className="text-xl md:text-2xl text-foreground">
                         My Gallery
                       </CardTitle>
-                      <CardDescription className="text-sm md:text-base text-white/80">
+                      <CardDescription className="text-sm md:text-base text-muted-foreground">
                         Welcome back, {user?.login}! You have {images.length}{" "}
                         images
                       </CardDescription>
@@ -385,13 +385,13 @@ function GalleryContent() {
                   {/* 搜索框 */}
                   <div className="flex-1">
                     <div className="relative">
-                      <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-white/60" />
+                      <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-muted-foreground" />
                       <input
                         type="text"
                         placeholder="Search images..."
                         value={searchTerm}
                         onChange={(e) => setSearchTerm(e.target.value)}
-                        className="w-full pl-10 pr-4 py-2 border border-white/20 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent bg-black/50 text-white placeholder-white/60"
+                        className="w-full pl-10 pr-4 py-2 border border-border rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent bg-card text-foreground placeholder-muted-foreground"
                       />
                     </div>
                   </div>
@@ -405,7 +405,7 @@ function GalleryContent() {
                           e.target.value as "all" | "images" | "videos"
                         )
                       }
-                      className="px-3 py-2 border border-white/20 rounded-lg focus:ring-2 focus:ring-blue-500 bg-black/50 text-white"
+                      className="px-3 py-2 border border-border rounded-lg focus:ring-2 focus:ring-blue-500 bg-card text-foreground"
                     >
                       <option value="all">All Files</option>
                       <option value="images">Images Only</option>
@@ -417,7 +417,7 @@ function GalleryContent() {
                       onChange={(e) =>
                         setSortBy(e.target.value as "date" | "name" | "size")
                       }
-                      className="px-3 py-2 border border-white/20 rounded-lg focus:ring-2 focus:ring-blue-500 bg-black/50 text-white"
+                      className="px-3 py-2 border border-border rounded-lg focus:ring-2 focus:ring-blue-500 bg-card text-foreground"
                     >
                       <option value="date">By Date</option>
                       <option value="name">By Name</option>
@@ -430,7 +430,7 @@ function GalleryContent() {
                         className={`px-3 py-2 transition-colors ${
                           viewMode === "grid"
                             ? "bg-blue-500 text-white"
-                            : "bg-black/40 text-white/70 hover:bg-black/60"
+                            : "bg-muted text-muted-foreground hover:bg-muted/80"
                         }`}
                       >
                         <Grid className="h-4 w-4" />
@@ -440,7 +440,7 @@ function GalleryContent() {
                         className={`px-3 py-2 transition-colors ${
                           viewMode === "list"
                             ? "bg-blue-500 text-white"
-                            : "bg-black/40 text-white/70 hover:bg-black/60"
+                            : "bg-muted text-muted-foreground hover:bg-muted/80"
                         }`}
                       >
                         <List className="h-4 w-4" />
