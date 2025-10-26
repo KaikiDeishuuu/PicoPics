@@ -787,19 +787,25 @@ async function sendTelegramNotification(env: Env, message: string): Promise<void
   const botToken = env.TELEGRAM_BOT_TOKEN;
   const chatId = env.TELEGRAM_CHAT_ID;
 
-  console.log("Telegram notification check:", {
-    hasBotToken: !!botToken,
-    hasChatId: !!chatId,
-    chatId: chatId,
-  });
+  console.log("🔔 [Telegram] Starting notification check...");
+  console.log("🔔 [Telegram] Has Bot Token:", !!botToken);
+  console.log("🔔 [Telegram] Has Chat ID:", !!chatId);
+  console.log("🔔 [Telegram] Chat ID value:", chatId);
 
   if (!botToken || !chatId) {
-    console.log("Telegram credentials missing, skipping notification");
+    console.error("❌ [Telegram] Missing credentials - Bot Token:", !!botToken, "Chat ID:", !!chatId);
+    console.log("❌ [Telegram] Skipping notification");
     return;
   }
 
+  console.log("✅ [Telegram] Credentials OK, attempting to send message...");
+  console.log("📝 [Telegram] Message length:", message.length);
+
   try {
-    const response = await fetch(`https://api.telegram.org/bot${botToken}/sendMessage`, {
+    const url = `https://api.telegram.org/bot${botToken}/sendMessage`;
+    console.log("🌐 [Telegram] Request URL:", url);
+    
+    const response = await fetch(url, {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({
@@ -809,14 +815,24 @@ async function sendTelegramNotification(env: Env, message: string): Promise<void
       }),
     });
 
+    console.log("📡 [Telegram] Response status:", response.status);
+
     if (!response.ok) {
       const errorText = await response.text();
-      console.error("Telegram API error:", response.status, errorText);
+      console.error("❌ [Telegram] API error:", response.status);
+      console.error("❌ [Telegram] Error details:", errorText);
     } else {
-      console.log("Telegram notification sent successfully");
+      const result = await response.json();
+      console.log("✅ [Telegram] Notification sent successfully!");
+      console.log("📋 [Telegram] Response:", JSON.stringify(result, null, 2));
     }
   } catch (error) {
-    console.error("Telegram notification failed:", error);
+    console.error("❌ [Telegram] Notification failed with error:");
+    console.error(error);
+    if (error instanceof Error) {
+      console.error("Error message:", error.message);
+      console.error("Error stack:", error.stack);
+    }
   }
 }
 
