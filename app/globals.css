@@ -89,7 +89,17 @@
     @apply border-border;
   }
   body {
-    @apply text-foreground;
+    @apply text-foreground bg-background;
+    color: hsl(var(--foreground));
+  }
+  
+  /* 强制浅色主题文字颜色 */
+  html:not(.dark) body {
+    color: #1e293b !important;
+  }
+  
+  html.dark body {
+    color: #f1f5f9 !important;
   }
 }
 

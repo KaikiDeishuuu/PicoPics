@@ -188,7 +188,7 @@ export default function Home() {
             <h1 className="text-6xl font-bold bg-gradient-to-r from-yellow-600 to-orange-600 bg-clip-text text-transparent mb-6">
               PicoPics V2
             </h1>
-            <p className="text-xl text-white drop-shadow-lg">正在加载...</p>
+            <p className="text-xl text-foreground drop-shadow-lg">正在加载...</p>
           </div>
         </div>
       </DynamicBackground>
@@ -219,7 +219,7 @@ export default function Home() {
                 K
               </span>
             </div>
-            <span className="text-white font-semibold hidden sm:inline">
+            <span className="text-foreground font-semibold hidden sm:inline">
               PicoPics
             </span>
           </div>
@@ -231,16 +231,16 @@ export default function Home() {
               <ThemeToggle />
 
               {/* GitHub 用户信息 */}
-              <div className="flex items-center gap-2 px-3 py-1.5 rounded-md bg-white/10 hover:bg-white/20 transition-colors">
-                <Github className="h-4 w-4 text-white" />
-                <span className="text-white/80 hover:text-white text-sm hidden md:inline">
+              <div className="flex items-center gap-2 px-3 py-1.5 rounded-md bg-white/10 dark:bg-white/10 hover:bg-white/20 transition-colors">
+                <Github className="h-4 w-4 text-foreground" />
+                <span className="text-foreground/80 hover:text-foreground text-sm hidden md:inline">
                   {user?.login}
                 </span>
               </div>
 
               {/* Admin 按钮 */}
               <Link href="/admin">
-                <button className="text-white/80 hover:text-white px-3 py-1.5 rounded-md bg-white/10 hover:bg-white/20 transition-colors">
+                <button className="text-foreground/80 hover:text-foreground px-3 py-1.5 rounded-md bg-white/10 dark:bg-white/10 hover:bg-white/20 transition-colors">
                   <Shield className="h-4 w-4 md:mr-2 inline" />
                   <span className="hidden md:inline">Admin</span>
                 </button>
@@ -249,7 +249,7 @@ export default function Home() {
               {/* Logout 按钮 */}
               <button
                 onClick={handleLogout}
-                className="text-white/80 hover:text-white px-3 py-1.5 rounded-md bg-red-600/80 hover:bg-red-600 transition-colors"
+                className="text-foreground/80 hover:text-foreground px-3 py-1.5 rounded-md bg-red-600/80 hover:bg-red-600 text-white transition-colors"
               >
                 <span className="text-lg md:mr-2">×</span>
                 <span className="hidden md:inline">Quit</span>
@@ -260,7 +260,7 @@ export default function Home() {
               <ThemeToggle />
               <button
                 onClick={handleLogin}
-                className="text-white/80 hover:text-white px-4 py-2 rounded-md bg-white/10 hover:bg-white/20 transition-colors"
+                className="text-foreground/80 hover:text-foreground px-4 py-2 rounded-md bg-white/10 dark:bg-white/10 hover:bg-white/20 transition-colors"
               >
                 <Github className="h-4 w-4 inline mr-2" />
                 <span>Login with GitHub</span>
@@ -284,7 +284,7 @@ export default function Home() {
             initial={{ opacity: 0, y: 30 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.8, delay: 0.2, ease: "easeOut" }}
-            className="text-lg sm:text-xl md:text-2xl lg:text-3xl text-white drop-shadow-lg mb-3 md:mb-4"
+            className="text-lg sm:text-xl md:text-2xl lg:text-3xl text-foreground drop-shadow-lg mb-3 md:mb-4"
           >
             Modern Image Hosting Platform
           </motion.p>
@@ -293,7 +293,7 @@ export default function Home() {
             initial={{ opacity: 0, y: 30 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.8, delay: 0.4, ease: "easeOut" }}
-            className="text-sm sm:text-base md:text-lg lg:text-xl text-white/90 drop-shadow-lg mb-8 md:mb-12 max-w-3xl mx-auto"
+            className="text-sm sm:text-base md:text-lg lg:text-xl text-foreground/90 drop-shadow-lg mb-8 md:mb-12 max-w-3xl mx-auto"
           >
             Next-generation image sharing solution built with Next.js 15 +
             Cloudflare Workers, delivering exceptional performance and user
@@ -334,7 +334,7 @@ export default function Home() {
               transition={{ duration: 0.8, delay: 0.6, ease: "easeOut" }}
               className="space-y-6"
             >
-              <p className="text-xl text-white drop-shadow-lg">
+              <p className="text-xl text-foreground drop-shadow-lg">
                 Please login to use image upload feature
               </p>
               <Button
@@ -357,10 +357,10 @@ export default function Home() {
           className="mb-16"
         >
           <div className="text-center mb-8">
-            <h2 className="text-3xl font-bold text-white drop-shadow-lg mb-4">
+            <h2 className="text-3xl font-bold text-foreground drop-shadow-lg mb-4">
               Core Features
             </h2>
-            <p className="text-white/90 drop-shadow-lg">
+            <p className="text-foreground/90 drop-shadow-lg">
               Experience the next-generation image hosting platform
             </p>
           </div>
@@ -387,10 +387,10 @@ export default function Home() {
                           className: "h-8 w-8 text-white",
                         })}
                       </motion.div>
-                      <h3 className="text-2xl font-bold text-white mb-2">
+                      <h3 className="text-2xl font-bold text-foreground mb-2">
                         {features[currentFeature].title}
                       </h3>
-                      <p className="text-white/80 max-w-md">
+                      <p className="text-foreground/80 max-w-md">
                         {features[currentFeature].description}
                       </p>
                     </div>
@@ -404,10 +404,10 @@ export default function Home() {
         {/* 特性网格 */}
         <StaggerContainer className="mb-8 md:mb-16 px-4">
           <div className="text-center mb-6 md:mb-8">
-            <h2 className="text-2xl md:text-3xl font-bold text-white mb-3 md:mb-4">
+            <h2 className="text-2xl md:text-3xl font-bold text-foreground mb-3 md:mb-4">
               Why Choose PicoPics V2?
             </h2>
-            <p className="text-sm md:text-base text-white/80">
+            <p className="text-sm md:text-base text-foreground/80">
               Modern tech stack, exceptional user experience
             </p>
           </div>
@@ -470,13 +470,13 @@ export default function Home() {
                       >
                         <feature.icon className="h-6 w-6 text-white" />
                       </div>
-                      <CardTitle className="text-xl text-white">
+                      <CardTitle className="text-xl text-foreground">
                         {feature.title}
                       </CardTitle>
                     </div>
                   </CardHeader>
                   <CardContent>
-                    <CardDescription className="text-base text-white/80">
+                    <CardDescription className="text-base text-muted-foreground">
                       {feature.description}
                     </CardDescription>
                   </CardContent>
@@ -493,7 +493,7 @@ export default function Home() {
           transition={{ duration: 0.8, delay: 1.2, ease: "easeOut" }}
           className="text-center"
         >
-          <h2 className="text-4xl font-bold text-white mb-8">Tech Stack</h2>
+          <h2 className="text-4xl font-bold text-foreground mb-8">Tech Stack</h2>
           <div className="tech-stack-container">
             {[
               { name: "Next.js 15" },
