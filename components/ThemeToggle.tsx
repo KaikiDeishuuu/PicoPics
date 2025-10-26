@@ -9,9 +9,9 @@ export function ThemeToggle() {
   const { theme, setTheme } = useTheme();
 
   const themes = [
-    { value: "light", icon: Sun, label: "浅色" },
-    { value: "dark", icon: Moon, label: "深色" },
-    { value: "system", icon: Monitor, label: "系统" },
+    { value: "light", icon: Sun, label: "Light" },
+    { value: "dark", icon: Moon, label: "Dark" },
+    { value: "system", icon: Monitor, label: "System" },
   ] as const;
 
   const currentTheme = themes.find((t) => t.value === theme) || themes[0];

@@ -10,22 +10,22 @@
     /* Base colors */
     --background: 0 0% 100%;
     --foreground: 222.2 84% 4.9%;
-    
+
     /* Surface layers (Elevation system) */
     --bg-base: 0 0% 100%;
     --bg-subtle: 210 40% 98%;
     --bg-surface: 210 20% 96%;
     --bg-elevated: 220 15% 95%;
-    
+
     /* Card layers */
     --card: 0 0% 100%;
     --card-foreground: 222.2 84% 4.9%;
     --card-border: 220 13% 91%;
-    
+
     /* Popover */
     --popover: 0 0% 100%;
     --popover-foreground: 222.2 84% 4.9%;
-    
+
     /* Interactive elements */
     --primary: 221.2 83.2% 53.3%;
     --primary-foreground: 210 40% 98%;
@@ -37,7 +37,7 @@
     --accent-foreground: 222.2 84% 4.9%;
     --destructive: 0 84.2% 60.2%;
     --destructive-foreground: 210 40% 98%;
-    
+
     /* Borders and inputs */
     --border: 214.3 31.8% 91.4%;
     --input: 214.3 31.8% 91.4%;
@@ -49,22 +49,22 @@
     /* Base colors */
     --background: 222.2 84% 4.9%;
     --foreground: 210 40% 98%;
-    
+
     /* Surface layers (Elevation system) */
     --bg-base: 222.2 84% 4.9%;
     --bg-subtle: 217.2 32.6% 12%;
     --bg-surface: 217.2 32.6% 17.5%;
     --bg-elevated: 220 28% 23%;
-    
+
     /* Card layers */
     --card: 222.2 84% 4.9%;
     --card-foreground: 210 40% 98%;
     --card-border: 217.2 32.6% 30%;
-    
+
     /* Popover */
     --popover: 222.2 84% 4.9%;
     --popover-foreground: 210 40% 98%;
-    
+
     /* Interactive elements */
     --primary: 217.2 91.2% 59.8%;
     --primary-foreground: 222.2 84% 4.9%;
@@ -76,7 +76,7 @@
     --accent-foreground: 210 40% 98%;
     --destructive: 0 62.8% 30.6%;
     --destructive-foreground: 210 40% 98%;
-    
+
     /* Borders and inputs */
     --border: 217.2 32.6% 17.5%;
     --input: 217.2 32.6% 17.5%;
@@ -131,9 +131,7 @@
   /* High contrast text for readability (WCAG AAA) */
   color: hsl(var(--foreground));
   /* Subtle shadow for depth without heaviness */
-  box-shadow: 
-    inset 0 0 0 1px rgba(0, 0, 0, 0.03),
-    0 1px 3px rgba(0, 0, 0, 0.06),
+  box-shadow: inset 0 0 0 1px rgba(0, 0, 0, 0.03), 0 1px 3px rgba(0, 0, 0, 0.06),
     0 4px 12px rgba(0, 0, 0, 0.04);
   transition: all 0.3s ease;
 }
@@ -141,28 +139,22 @@
 .dark .card-modern {
   background: hsl(var(--bg-elevated));
   border-color: hsl(var(--card-border));
-  box-shadow: 
-    inset 0 0 0 1px rgba(255, 255, 255, 0.05),
-    0 4px 16px rgba(0, 0, 0, 0.4),
-    0 8px 32px rgba(0, 0, 0, 0.3);
+  box-shadow: inset 0 0 0 1px rgba(255, 255, 255, 0.05),
+    0 4px 16px rgba(0, 0, 0, 0.4), 0 8px 32px rgba(0, 0, 0, 0.3);
   color: hsl(var(--foreground));
 }
 
 .card-modern:hover {
   border-color: hsl(var(--primary) / 0.4);
-  box-shadow: 
-    inset 0 0 0 1px hsl(var(--primary) / 0.1),
-    0 4px 8px rgba(0, 0, 0, 0.08),
-    0 8px 24px rgba(0, 0, 0, 0.06);
+  box-shadow: inset 0 0 0 1px hsl(var(--primary) / 0.1),
+    0 4px 8px rgba(0, 0, 0, 0.08), 0 8px 24px rgba(0, 0, 0, 0.06);
   transform: translateY(-2px);
 }
 
 .dark .card-modern:hover {
   border-color: hsl(var(--primary) / 0.3);
-  box-shadow: 
-    inset 0 0 0 1px hsl(var(--primary) / 0.1),
-    0 8px 24px rgba(0, 0, 0, 0.5),
-    0 12px 40px rgba(0, 0, 0, 0.4);
+  box-shadow: inset 0 0 0 1px hsl(var(--primary) / 0.1),
+    0 8px 24px rgba(0, 0, 0, 0.5), 0 12px 40px rgba(0, 0, 0, 0.4);
 }
 
 .card-glass {
@@ -172,17 +164,13 @@
   border: 1px solid hsl(var(--card-border));
   border-radius: 1rem;
   color: hsl(var(--foreground));
-  box-shadow: 
-    0 1px 2px rgba(0, 0, 0, 0.04),
-    0 4px 12px rgba(0, 0, 0, 0.05);
+  box-shadow: 0 1px 2px rgba(0, 0, 0, 0.04), 0 4px 12px rgba(0, 0, 0, 0.05);
 }
 
 .dark .card-glass {
   background: hsl(var(--bg-surface));
   border-color: hsl(var(--card-border));
-  box-shadow: 
-    0 4px 12px rgba(0, 0, 0, 0.4),
-    0 8px 24px rgba(0, 0, 0, 0.3);
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.4), 0 8px 24px rgba(0, 0, 0, 0.3);
   color: hsl(var(--foreground));
 }
 
@@ -193,17 +181,13 @@
   border: 1px solid hsl(var(--card-border) / 0.5);
   border-radius: 1rem;
   color: hsl(var(--foreground));
-  box-shadow: 
-    0 1px 2px rgba(0, 0, 0, 0.03),
-    0 4px 8px rgba(0, 0, 0, 0.04);
+  box-shadow: 0 1px 2px rgba(0, 0, 0, 0.03), 0 4px 8px rgba(0, 0, 0, 0.04);
 }
 
 .dark .glass-modern-soft {
   background: hsl(var(--bg-subtle));
   border-color: hsl(var(--card-border) / 0.5);
-  box-shadow: 
-    0 2px 8px rgba(0, 0, 0, 0.3),
-    0 4px 16px rgba(0, 0, 0, 0.2);
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.3), 0 4px 16px rgba(0, 0, 0, 0.2);
   color: hsl(var(--foreground));
 }
 
@@ -240,16 +224,12 @@
 .tech-tag:hover {
   border-color: hsl(var(--primary) / 0.4);
   transform: translateY(-2px);
-  box-shadow: 
-    0 2px 4px rgba(0, 0, 0, 0.06),
-    0 8px 16px rgba(0, 0, 0, 0.08);
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.06), 0 8px 16px rgba(0, 0, 0, 0.08);
 }
 
 .dark .tech-tag:hover {
   border-color: hsl(var(--primary) / 0.3);
-  box-shadow: 
-    0 2px 8px rgba(0, 0, 0, 0.4),
-    0 8px 16px rgba(0, 0, 0, 0.3);
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.4), 0 8px 16px rgba(0, 0, 0, 0.3);
 }
 
 /* ========== Footer优化 ========== */
@@ -274,33 +254,25 @@
   padding: 1.5rem;
   transition: all 0.3s ease;
   color: hsl(var(--foreground));
-  box-shadow: 
-    0 1px 2px rgba(0, 0, 0, 0.03),
-    0 4px 8px rgba(0, 0, 0, 0.04);
+  box-shadow: 0 1px 2px rgba(0, 0, 0, 0.03), 0 4px 8px rgba(0, 0, 0, 0.04);
 }
 
 .dark .footer-card {
   background: hsl(var(--bg-surface));
   border-color: hsl(var(--card-border));
   color: hsl(var(--foreground));
-  box-shadow: 
-    0 4px 8px rgba(0, 0, 0, 0.3),
-    0 8px 16px rgba(0, 0, 0, 0.2);
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.3), 0 8px 16px rgba(0, 0, 0, 0.2);
 }
 
 .footer-card:hover {
   transform: translateY(-2px);
   border-color: hsl(var(--primary) / 0.4);
-  box-shadow: 
-    0 4px 8px rgba(0, 0, 0, 0.06),
-    0 12px 24px rgba(0, 0, 0, 0.08);
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.06), 0 12px 24px rgba(0, 0, 0, 0.08);
 }
 
 .dark .footer-card:hover {
   border-color: hsl(var(--primary) / 0.3);
-  box-shadow: 
-    0 8px 16px rgba(0, 0, 0, 0.4),
-    0 16px 32px rgba(0, 0, 0, 0.3);
+  box-shadow: 0 8px 16px rgba(0, 0, 0, 0.4), 0 16px 32px rgba(0, 0, 0, 0.3);
 }
 
 /* ========== 响应式优化 ========== */

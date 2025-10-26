@@ -504,13 +504,17 @@ function UploadPageContent() {
                         custom={index}
                         className="flex items-start space-x-3 p-3 rounded-lg hover:bg-muted/30 transition-colors"
                       >
-                        <div className={`p-2 ${feature.bgColor} rounded-lg flex-shrink-0`}>
+                        <div
+                          className={`p-2 ${feature.bgColor} rounded-lg flex-shrink-0`}
+                        >
                           <feature.icon
                             className={`h-4 w-4 ${feature.color}`}
                           />
                         </div>
                         <div className="flex-1">
-                          <h4 className="font-medium text-foreground mb-0.5">{feature.title}</h4>
+                          <h4 className="font-medium text-foreground mb-0.5">
+                            {feature.title}
+                          </h4>
                           <p className="text-sm text-muted-foreground">
                             {feature.description}
                           </p>
@@ -539,8 +543,8 @@ function UploadPageContent() {
                 </CardHeader>
                 <CardContent className="p-4 space-y-2">
                   <Link href="/gallery">
-                    <Button 
-                      variant="outline" 
+                    <Button
+                      variant="outline"
                       className="w-full justify-start border-border hover:bg-accent hover:text-accent-foreground transition-colors"
                     >
                       <Image className="h-4 w-4 mr-2 text-blue-400" />
@@ -548,8 +552,8 @@ function UploadPageContent() {
                     </Button>
                   </Link>
                   <Link href="/admin">
-                    <Button 
-                      variant="outline" 
+                    <Button
+                      variant="outline"
                       className="w-full justify-start border-border hover:bg-accent hover:text-accent-foreground transition-colors"
                     >
                       <Shield className="h-4 w-4 mr-2 text-purple-400" />
