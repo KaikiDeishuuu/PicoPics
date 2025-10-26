@@ -329,7 +329,7 @@ function GalleryContent() {
                       <Button
                         variant="outline"
                         size="sm"
-                        className="bg-black/80 text-white border-white/20 hover:bg-white/10"
+                        className="bg-black/80 text-white border-white/20 hover:bg-muted"
                       >
                         <ArrowLeft className="h-4 w-4 mr-2" />
                         <span className="hidden sm:inline">Back to Home</span>
@@ -429,7 +429,7 @@ function GalleryContent() {
                         onClick={() => setViewMode("grid")}
                         className={`px-3 py-2 transition-colors ${
                           viewMode === "grid"
-                            ? "bg-blue-500 text-white"
+                            ? "bg-blue-500 text-foreground"
                             : "bg-muted text-muted-foreground hover:bg-muted/80"
                         }`}
                       >
@@ -439,7 +439,7 @@ function GalleryContent() {
                         onClick={() => setViewMode("list")}
                         className={`px-3 py-2 transition-colors ${
                           viewMode === "list"
-                            ? "bg-blue-500 text-white"
+                            ? "bg-blue-500 text-foreground"
                             : "bg-muted text-muted-foreground hover:bg-muted/80"
                         }`}
                       >
@@ -465,7 +465,7 @@ function GalleryContent() {
                   <CardContent className="pt-6">
                     <div className="flex items-center justify-between">
                       <div className="flex items-center space-x-4">
-                        <span className="text-sm font-medium text-white">
+                        <span className="text-sm font-medium text-foreground">
                           已选择 {selectedImages.length} 张图片
                         </span>
                         <Button
@@ -512,7 +512,7 @@ function GalleryContent() {
                 <CardContent className="text-center py-12">
                   <div className="mb-4">
                     <ImageIcon className="h-12 w-12 mx-auto mb-4 text-red-400" />
-                    <h3 className="text-lg font-medium text-white">加载失败</h3>
+                    <h3 className="text-lg font-medium text-foreground">加载失败</h3>
                     <p className="text-sm text-white/70 mt-2">
                       {error?.message ||
                         imagesResponse?.error ||

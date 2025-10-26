@@ -422,14 +422,14 @@ function AdminContent() {
               <div className="flex justify-center mb-4">
                 <Shield className="h-12 w-12 text-blue-400" />
               </div>
-              <CardTitle className="text-2xl text-white">Admin Authentication</CardTitle>
-              <CardDescription className="text-white/80">
+              <CardTitle className="text-2xl text-foreground">Admin Authentication</CardTitle>
+              <CardDescription className="text-muted-foreground">
                 Please enter admin token to access admin panel
               </CardDescription>
             </CardHeader>
             <CardContent className="space-y-4">
               <div className="space-y-2">
-                <label className="text-sm font-medium text-white">Admin Token</label>
+                <label className="text-sm font-medium text-foreground">Admin Token</label>
                 <input
                   type="password"
                   value={tokenInput}
@@ -446,7 +446,7 @@ function AdminContent() {
               {error && <div className="text-red-400 text-sm text-center">{error}</div>}
               <Button
                 onClick={handleTokenSubmit}
-                className="w-full bg-blue-600 hover:bg-blue-700 text-white"
+                className="text-foreground"
                 disabled={!tokenInput.trim() || loading}
               >
                 {loading ? (
@@ -462,7 +462,7 @@ function AdminContent() {
                 )}
               </Button>
               <Link href="/">
-                <Button className="w-full bg-black/80 text-white border-white/20 hover:bg-white/10">
+                <Button className="w-full bg-black/80 text-white border-white/20 hover:bg-muted">
                   <ArrowLeft className="h-4 w-4 mr-2" />
                   Back to Home
                 </Button>
@@ -546,7 +546,7 @@ function AdminContent() {
                     }}
                     className={`flex items-center space-x-1 sm:space-x-2 whitespace-nowrap ${
                       activeTab === tab.id
-                        ? "bg-blue-600 text-white"
+                        ? "bg-blue-600 text-foreground"
                         : "text-foreground/80 hover:text-foreground hover:bg-muted"
                     }`}
                   >
@@ -606,12 +606,12 @@ function AdminContent() {
                         <CardContent className="p-6">
                           <div className="flex items-center justify-between">
                             <div>
-                              <p className="text-sm font-medium text-white/70">{stat.title}</p>
-                              <p className="text-2xl font-bold text-white">{stat.value}</p>
+                              <p className="text-sm font-medium text-muted-foreground">{stat.title}</p>
+                              <p className="text-2xl font-bold text-foreground">{stat.value}</p>
                               <p className="text-xs text-green-400">{stat.change}</p>
                             </div>
                             <div className={`p-3 rounded-lg bg-gradient-to-r ${stat.color}`}>
-                              <stat.icon className="h-6 w-6 text-white" />
+                              <stat.icon className="h-6 w-6 text-foreground" />
                             </div>
                           </div>
                         </CardContent>
@@ -630,7 +630,7 @@ function AdminContent() {
               >
                 <Card className="card-modern">
                   <CardHeader>
-                    <CardTitle className="flex items-center space-x-2 text-white">
+                    <CardTitle className="flex items-center space-x-2 text-foreground">
                       <Activity className="h-5 w-5 text-green-400" />
                       <span>系统状态</span>
                     </CardTitle>
@@ -644,9 +644,9 @@ function AdminContent() {
                       ].map((service, index) => (
                         <div
                           key={index}
-                          className="flex items-center justify-between p-3 bg-black/40 rounded-lg border border-white/10"
+                          className="flex items-center justify-between p-3 bg-muted/50 rounded-lg border border-border"
                         >
-                          <span className="font-medium text-white">{service.name}</span>
+                          <span className="font-medium text-foreground">{service.name}</span>
                           <div className="flex items-center space-x-2">
                             <CheckCircle className="h-4 w-4 text-green-400" />
                             <span className="text-sm text-green-400">{service.status}</span>
@@ -676,11 +676,11 @@ function AdminContent() {
               >
                 <Card className="card-modern">
                   <CardHeader>
-                    <CardTitle className="flex items-center space-x-2 text-white">
+                    <CardTitle className="flex items-center space-x-2 text-foreground">
                       <Users className="h-5 w-5 text-blue-400" />
                       <span>用户管理</span>
                     </CardTitle>
-                    <CardDescription className="text-white/70">管理系统用户和权限</CardDescription>
+                    <CardDescription className="text-muted-foreground">管理系统用户和权限</CardDescription>
                   </CardHeader>
                   <CardContent>
                     {loading ? (
@@ -691,7 +691,7 @@ function AdminContent() {
                       <div className="flex flex-col items-center justify-center py-16 text-center">
                         <Users className="h-12 w-12 text-white/30 mb-4" />
                         <h3 className="text-lg font-medium text-white/80 mb-2">暂无用户数据</h3>
-                        <p className="text-sm text-white/60">当前数据库中没有用户记录</p>
+                        <p className="text-sm text-muted-foreground">当前数据库中没有用户记录</p>
                         <button
                           onClick={() => fetchUsers()}
                           className="mt-4 px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white rounded-md transition-colors"
@@ -703,12 +703,12 @@ function AdminContent() {
                       <div className="overflow-x-auto">
                         <table className="w-full">
                           <thead>
-                            <tr className="border-b border-white/20">
-                              <th className="text-left py-3 px-4 text-white/80">用户ID</th>
-                              <th className="text-left py-3 px-4 text-white/80">用户名</th>
-                              <th className="text-left py-3 px-4 text-white/80">邮箱</th>
-                              <th className="text-left py-3 px-4 text-white/80">上传数</th>
-                              <th className="text-left py-3 px-4 text-white/80">最后活跃</th>
+                            <tr className="border-b border-border">
+                              <th className="text-left py-3 px-4 text-muted-foreground">用户ID</th>
+                              <th className="text-left py-3 px-4 text-muted-foreground">用户名</th>
+                              <th className="text-left py-3 px-4 text-muted-foreground">邮箱</th>
+                              <th className="text-left py-3 px-4 text-muted-foreground">上传数</th>
+                              <th className="text-left py-3 px-4 text-muted-foreground">最后活跃</th>
                             </tr>
                           </thead>
                           <tbody>
@@ -719,16 +719,16 @@ function AdminContent() {
                                 custom={index}
                                 className="border-b border-white/10 hover:bg-white/10 transition-colors"
                               >
-                                <td className="py-3 px-4 text-white">{user.id}</td>
-                                <td className="py-3 px-4 font-medium text-white">
+                                <td className="py-3 px-4 text-foreground">{user.id}</td>
+                                <td className="py-3 px-4 font-medium text-foreground">
                                   {user.username}
                                 </td>
-                                <td className="py-3 px-4 text-white/80">{user.email}</td>
-                                <td className="py-3 px-4 text-white/80">{user.uploads}</td>
+                                <td className="py-3 px-4 text-muted-foreground">{user.email}</td>
+                                <td className="py-3 px-4 text-muted-foreground">{user.uploads}</td>
                                 <td className="py-3 px-4">
                                   <div className="flex items-center space-x-2">
-                                    <Clock className="h-4 w-4 text-white/60" />
-                                    <span className="text-sm text-white/70">
+                                    <Clock className="h-4 w-4 text-muted-foreground" />
+                                    <span className="text-sm text-muted-foreground">
                                       {new Date(user.lastActive).toLocaleDateString()}
                                     </span>
                                   </div>
@@ -761,11 +761,11 @@ function AdminContent() {
               >
                 <Card className="card-modern">
                   <CardHeader>
-                    <CardTitle className="flex items-center space-x-2 text-white">
+                    <CardTitle className="flex items-center space-x-2 text-foreground">
                       <PieChart className="h-5 w-5 text-purple-400" />
                       <span>数据分析</span>
                     </CardTitle>
-                    <CardDescription className="text-white/70">
+                    <CardDescription className="text-muted-foreground">
                       系统使用情况和性能指标
                     </CardDescription>
                   </CardHeader>
@@ -773,7 +773,7 @@ function AdminContent() {
                     <div className="text-center py-12">
                       <PieChart className="h-16 w-16 text-white/40 mx-auto mb-4" />
                       <h3 className="text-lg font-medium text-white mb-2">数据分析功能</h3>
-                      <p className="text-white/70">详细的数据分析功能正在开发中，敬请期待！</p>
+                      <p className="text-muted-foreground">详细的数据分析功能正在开发中，敬请期待！</p>
                     </div>
                   </CardContent>
                 </Card>
@@ -821,11 +821,11 @@ function AdminContent() {
               >
                 <Card className="card-modern">
                   <CardHeader>
-                    <CardTitle className="flex items-center space-x-2 text-white">
+                    <CardTitle className="flex items-center space-x-2 text-foreground">
                       <Database className="h-5 w-5 text-blue-400" />
                       <span>数据管理</span>
                     </CardTitle>
-                    <CardDescription className="text-white/70">
+                    <CardDescription className="text-muted-foreground">
                       管理所有上传的图片和用户数据
                     </CardDescription>
                   </CardHeader>
@@ -865,11 +865,11 @@ function AdminContent() {
                                   />
                                   <div className="flex-1">
                                     <h3 className="text-white font-medium">{image.filename}</h3>
-                                    <p className="text-sm text-white/60">用户: {image.username}</p>
-                                    <p className="text-sm text-white/60">
+                                    <p className="text-sm text-muted-foreground">用户: {image.username}</p>
+                                    <p className="text-sm text-muted-foreground">
                                       {new Date(image.uploadDate).toLocaleString("zh-CN")}
                                     </p>
-                                    <p className="text-xs text-white/50">
+                                    <p className="text-xs text-muted-foreground">
                                       {image.fileSize} bytes · {image.mimeType}
                                     </p>
                                   </div>

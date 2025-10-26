@@ -17,7 +17,7 @@ export function Footer({ className = "" }: FooterProps) {
       name: "GitHub",
       url: "https://github.com/KaikiDeishuuu/PicoPics",
       icon: Github,
-      color: "hover:text-gray-900 dark:hover:text-white",
+      color: "hover:text-gray-900 dark:hover:text-foreground",
     },
     {
       name: "Telegram",
@@ -58,7 +58,7 @@ export function Footer({ className = "" }: FooterProps) {
                 PicoPics V2
               </h3>
             </div>
-            <p className="text-white/70 text-sm leading-relaxed">
+            <p className="text-muted-foreground text-sm leading-relaxed">
               Modern image hosting platform built with Next.js 15 + Cloudflare Workers.
             </p>
             <div className="flex flex-wrap gap-2">
@@ -76,7 +76,7 @@ export function Footer({ className = "" }: FooterProps) {
 
           {/* 快速链接 */}
           <div className="bg-card/50 rounded-lg border border-border p-5 space-y-4">
-            <h4 className="text-lg font-semibold text-white mb-3">Quick Links</h4>
+            <h4 className="text-lg font-semibold text-foreground mb-3">Quick Links</h4>
             <div className="grid grid-cols-1 gap-2">
               {[
                 { name: "Home", href: "/" },
@@ -87,7 +87,7 @@ export function Footer({ className = "" }: FooterProps) {
                 <a
                   key={index}
                   href={link.href}
-                  className="block text-sm text-white/80 hover:text-yellow-400 transition-colors duration-200 p-2 rounded-lg hover:bg-white/10"
+                  className="block text-sm text-white/80 hover:text-yellow-400 transition-colors duration-200 p-2 rounded-lg hover:bg-muted"
                 >
                   {link.name}
                 </a>
@@ -115,10 +115,10 @@ export function Footer({ className = "" }: FooterProps) {
             <div className="p-3 bg-muted/30 rounded-lg border border-border mt-3 space-y-3">
               <div className="flex items-center space-x-2">
                 <Heart className="h-4 w-4 text-red-400" />
-                <span className="text-sm font-medium text-white">Made with ❤️ by Kaiki</span>
+                <span className="text-sm font-medium text-foreground">Made with ❤️ by Kaiki</span>
               </div>
-              <div className="flex items-center justify-between pt-2 border-t border-white/10">
-                <span className="text-xs text-white/70">Theme</span>
+              <div className="flex items-center justify-between pt-2 border-t border-border">
+                <span className="text-xs text-muted-foreground">Theme</span>
                 <ThemeToggle />
               </div>
             </div>
@@ -127,7 +127,7 @@ export function Footer({ className = "" }: FooterProps) {
 
         {/* 版权信息 */}
         <div className="mt-6 pt-6 border-t border-white/10 text-center">
-          <div className="flex flex-wrap items-center justify-center space-x-4 text-sm text-white/70">
+          <div className="flex flex-wrap items-center justify-center space-x-4 text-sm text-muted-foreground">
             <span>© {currentYear} PicoPics V2</span>
             <span>•</span>
             <span>MIT License</span>

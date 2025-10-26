@@ -73,16 +73,21 @@ class UploadQuota {
   }
 
   async getQuota(userId: string): Promise<UploadQuotaState> {
-    const dailyUploads = (await this.state.storage.get<number>(`uploads:${userId}`)) || 0;
-    const dailyBytes = (await this.state.storage.get<number>(`bytes:${userId}`)) || 0;
-    const lastReset = (await this.state.storage.get<number>("lastReset")) || Date.now();
+    const dailyUploads =
+      (await this.state.storage.get<number>(`uploads:${userId}`)) || 0;
+    const dailyBytes =
+      (await this.state.storage.get<number>(`bytes:${userId}`)) || 0;
+    const lastReset =
+      (await this.state.storage.get<number>("lastReset")) || Date.now();
 
     return { dailyUploads, dailyBytes, lastReset };
   }
 
   async incrementUsage(userId: string, bytes: number): Promise<void> {
-    const currentUploads = (await this.state.storage.get<number>(`uploads:${userId}`)) || 0;
-    const currentBytes = (await this.state.storage.get<number>(`bytes:${userId}`)) || 0;
+    const currentUploads =
+      (await this.state.storage.get<number>(`uploads:${userId}`)) || 0;
+    const currentBytes =
+      (await this.state.storage.get<number>(`bytes:${userId}`)) || 0;
 
     await this.state.storage.put(`uploads:${userId}`, currentUploads + 1);
     await this.state.storage.put(`bytes:${userId}`, currentBytes + bytes);
@@ -146,9 +151,13 @@ class IPBlacklist {
 
     for (const [key, blockedUntil] of keys) {
       const ip = key.replace("blocked:", "");
-      const reason = (await this.state.storage.get(`reason:${ip}`)) || "No reason provided";
-      const addedBy = (await this.state.storage.get(`addedBy:${ip}`)) || "system";
-      const addedAt = (await this.state.storage.get(`addedAt:${ip}`)) || new Date().toISOString();
+      const reason =
+        (await this.state.storage.get(`reason:${ip}`)) || "No reason provided";
+      const addedBy =
+        (await this.state.storage.get(`addedBy:${ip}`)) || "system";
+      const addedAt =
+        (await this.state.storage.get(`addedAt:${ip}`)) ||
+        new Date().toISOString();
 
       const isActive = Date.now() < (blockedUntil as number);
 
@@ -191,7 +200,12 @@ app.use(
   "*",
   cors({
     origin: "*", // Will be validated in the route handler
-    allowHeaders: ["Content-Type", "Authorization", "X-Admin-Token", "CF-Turnstile-Token"],
+    allowHeaders: [
+      "Content-Type",
+      "Authorization",
+      "X-Admin-Token",
+      "CF-Turnstile-Token",
+    ],
     allowMethods: ["GET", "POST", "PUT", "DELETE", "OPTIONS"],
     maxAge: 86400,
   })
@@ -222,30 +236,39 @@ app.post("/auth/callback", async (c) => {
 
     if (!code) {
       console.log("Missing authorization code");
-      return c.json({ success: false, error: "Missing authorization code" }, 400);
+      return c.json(
+        { success: false, error: "Missing authorization code" },
+        400
+      );
     }
 
     // 交换访问令牌
     console.log("Exchanging code for token...");
-    const tokenResponse = await fetch("https://github.com/login/oauth/access_token", {
-      method: "POST",
-      headers: {
-        Accept: "application/json",
-        "Content-Type": "application/json",
-      },
-      body: JSON.stringify({
-        client_id: c.env.GITHUB_CLIENT_ID,
-        client_secret: c.env.GITHUB_CLIENT_SECRET,
-        code,
-      }),
-    });
+    const tokenResponse = await fetch(
+      "https://github.com/login/oauth/access_token",
+      {
+        method: "POST",
+        headers: {
+          Accept: "application/json",
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          client_id: c.env.GITHUB_CLIENT_ID,
+          client_secret: c.env.GITHUB_CLIENT_SECRET,
+          code,
+        }),
+      }
+    );
 
     console.log("Token response status:", tokenResponse.status);
 
     if (!tokenResponse.ok) {
       const errorText = await tokenResponse.text();
       console.log("Token exchange failed:", errorText);
-      return c.json({ success: false, error: "Failed to exchange code for token" }, 400);
+      return c.json(
+        { success: false, error: "Failed to exchange code for token" },
+        400
+      );
     }
 
     const tokenData = await tokenResponse.json();
@@ -280,7 +303,10 @@ app.post("/auth/callback", async (c) => {
     if (!userResponse.ok) {
       const errorText = await userResponse.text();
       console.log("User fetch failed:", errorText);
-      return c.json({ success: false, error: "Failed to fetch user info" }, 400);
+      return c.json(
+        { success: false, error: "Failed to fetch user info" },
+        400
+      );
     }
 
     const user = await userResponse.json();
@@ -330,12 +356,18 @@ app.post("/upload", async (c) => {
         } else {
           // Fallback to token substring if GitHub verification fails
           userId = token.substring(0, 8);
-          console.log("GitHub verification failed, using token as userId:", userId);
+          console.log(
+            "GitHub verification failed, using token as userId:",
+            userId
+          );
         }
       } catch (error) {
         // Fallback to token substring on error
         userId = token.substring(0, 8);
-        console.log("Error verifying GitHub token, using token as userId:", userId);
+        console.log(
+          "Error verifying GitHub token, using token as userId:",
+          userId
+        );
       }
     }
 
@@ -353,7 +385,8 @@ app.post("/upload", async (c) => {
           {
             success: false,
             code: "IP_BLOCKED",
-            message: "Your IP has been temporarily blocked due to suspicious activity",
+            message:
+              "Your IP has been temporarily blocked due to suspicious activity",
           },
           403
         );
@@ -438,7 +471,9 @@ app.post("/upload", async (c) => {
         {
           success: false,
           code: "FILE_TOO_LARGE",
-          message: `File too large. Maximum size: ${maxFileSize / (1024 * 1024)}MB`,
+          message: `File too large. Maximum size: ${
+            maxFileSize / (1024 * 1024)
+          }MB`,
         },
         413
       );
@@ -464,11 +499,15 @@ app.post("/upload", async (c) => {
 
     // Generate unique filename
     const fileExt = file.type.split("/")[1];
-    const fileName = `${Date.now()}-${Math.random().toString(36).substr(2, 9)}.${fileExt}`;
+    const fileName = `${Date.now()}-${Math.random()
+      .toString(36)
+      .substr(2, 9)}.${fileExt}`;
 
     // Upload to R2
     try {
-      console.log(`Uploading to R2: ${fileName}, size: ${file.size}, type: ${file.type}`);
+      console.log(
+        `Uploading to R2: ${fileName}, size: ${file.size}, type: ${file.type}`
+      );
       await c.env.IMAGES.put(fileName, file as any, {
         httpMetadata: {
           contentType: file.type,
@@ -535,7 +574,11 @@ app.post("/upload", async (c) => {
       console.log(`Saved image to database: ${r2ObjectKey} for user ${userId}`);
 
       // Save/update user profile if GitHub user info is available
-      if (githubUser && typeof githubUser === "object" && "login" in githubUser) {
+      if (
+        githubUser &&
+        typeof githubUser === "object" &&
+        "login" in githubUser
+      ) {
         try {
           await c.env.DB.prepare(
             `INSERT INTO user_profiles (user_id, username, email, avatar_url, updated_at)
@@ -579,7 +622,8 @@ app.post("/upload", async (c) => {
     // Format file size
     const fileSizeMB = (file.size / 1024 / 1024).toFixed(2);
     const fileSizeKB = (file.size / 1024).toFixed(2);
-    const sizeDisplay = file.size > 1024 * 1024 ? `${fileSizeMB} MB` : `${fileSizeKB} KB`;
+    const sizeDisplay =
+      file.size > 1024 * 1024 ? `${fileSizeMB} MB` : `${fileSizeKB} KB`;
 
     // Send Telegram notification (async)
     const telegramMessage = `
@@ -679,7 +723,9 @@ app.get("/api/admin/stats", async (c) => {
     }
 
     // 获取统计数据
-    const totalImages = await c.env.DB.prepare("SELECT COUNT(*) as count FROM user_images").first();
+    const totalImages = await c.env.DB.prepare(
+      "SELECT COUNT(*) as count FROM user_images"
+    ).first();
 
     const totalUsers = await c.env.DB.prepare(
       "SELECT COUNT(DISTINCT user_id) as count FROM user_images"
@@ -783,7 +829,10 @@ app.get("/api/admin/settings", async (c) => {
 });
 
 // Telegram通知辅助函数
-async function sendTelegramNotification(env: Env, message: string): Promise<void> {
+async function sendTelegramNotification(
+  env: Env,
+  message: string
+): Promise<void> {
   const botToken = env.TELEGRAM_BOT_TOKEN;
   const chatId = env.TELEGRAM_CHAT_ID;
 
@@ -793,7 +842,12 @@ async function sendTelegramNotification(env: Env, message: string): Promise<void
   console.log("🔔 [Telegram] Chat ID value:", chatId);
 
   if (!botToken || !chatId) {
-    console.error("❌ [Telegram] Missing credentials - Bot Token:", !!botToken, "Chat ID:", !!chatId);
+    console.error(
+      "❌ [Telegram] Missing credentials - Bot Token:",
+      !!botToken,
+      "Chat ID:",
+      !!chatId
+    );
     console.log("❌ [Telegram] Skipping notification");
     return;
   }
@@ -804,7 +858,7 @@ async function sendTelegramNotification(env: Env, message: string): Promise<void
   try {
     const url = `https://api.telegram.org/bot${botToken}/sendMessage`;
     console.log("🌐 [Telegram] Request URL:", url);
-    
+
     const response = await fetch(url, {
       method: "POST",
       headers: { "Content-Type": "application/json" },
@@ -877,7 +931,9 @@ async function checkContentSafety(
 }
 
 // Content moderation function (async)
-async function contentModeration(file: File): Promise<{ blocked: boolean; label?: string }> {
+async function contentModeration(
+  file: File
+): Promise<{ blocked: boolean; label?: string }> {
   try {
     const imageBuffer = await file.arrayBuffer();
     const imageArray = Array.from(new Uint8Array(imageBuffer));
@@ -899,7 +955,13 @@ async function contentModeration(file: File): Promise<{ blocked: boolean; label?
     }
 
     const result = await response.json();
-    const blockedLabels = ["bikini", "brassiere", "weapon", "rifle", "military uniform"];
+    const blockedLabels = [
+      "bikini",
+      "brassiere",
+      "weapon",
+      "rifle",
+      "military uniform",
+    ];
 
     for (const item of result.result || []) {
       if (item.score > 0.6) {
@@ -974,7 +1036,10 @@ app.delete("/api/delete", async (c) => {
       .first();
 
     if (!record) {
-      return c.json({ success: false, error: "图片不存在或您没有权限删除" }, 404);
+      return c.json(
+        { success: false, error: "图片不存在或您没有权限删除" },
+        404
+      );
     }
 
     // 使用事务确保 R2 和 D1 操作的原子性
@@ -998,7 +1063,9 @@ app.delete("/api/delete", async (c) => {
         return c.json({ success: false, error: "数据库删除失败" }, 500);
       }
 
-      console.log(`User ${authResult.user.login} successfully deleted image: ${r2ObjectKey}`);
+      console.log(
+        `User ${authResult.user.login} successfully deleted image: ${r2ObjectKey}`
+      );
 
       // Get client IP for notification
       const clientIP = c.req.header("CF-Connecting-IP") || "unknown";
@@ -1041,7 +1108,10 @@ app.delete("/api/delete", async (c) => {
         {
           success: false,
           error: "删除操作失败，请重试",
-          details: deleteError instanceof Error ? deleteError.message : String(deleteError),
+          details:
+            deleteError instanceof Error
+              ? deleteError.message
+              : String(deleteError),
         },
         500
       );
@@ -1115,11 +1185,16 @@ app.post("/api/clean-invalid", async (c) => {
     // 删除无效的数据库记录
     const deletePromises = invalidRecords.map(async (key) => {
       try {
-        await c.env.DB.prepare("DELETE FROM user_images WHERE r2_object_key = ? AND user_id = ?")
+        await c.env.DB.prepare(
+          "DELETE FROM user_images WHERE r2_object_key = ? AND user_id = ?"
+        )
           .bind(key, authResult.user.id.toString())
           .run();
       } catch (dbError) {
-        console.error(`Failed to delete database record for key ${key}:`, dbError);
+        console.error(
+          `Failed to delete database record for key ${key}:`,
+          dbError
+        );
       }
     });
 
@@ -1196,7 +1271,9 @@ app.post("/api/clear-storage", async (c) => {
     await Promise.all(deletePromises);
 
     // 删除所有数据库记录
-    const dbDeleteResult = await c.env.DB.prepare("DELETE FROM user_images WHERE user_id = ?")
+    const dbDeleteResult = await c.env.DB.prepare(
+      "DELETE FROM user_images WHERE user_id = ?"
+    )
       .bind(userId)
       .run();
 
@@ -1417,7 +1494,12 @@ app.put("/api/user/settings", async (c) => {
            notification_enabled = excluded.notification_enabled,
            updated_at = excluded.updated_at`
       )
-        .bind(userId, telegramChatId || null, notificationEnabled ? 1 : 0, new Date().toISOString())
+        .bind(
+          userId,
+          telegramChatId || null,
+          notificationEnabled ? 1 : 0,
+          new Date().toISOString()
+        )
         .run();
 
       return c.json({
@@ -1595,7 +1677,9 @@ app.delete("/api/admin/images/:key", async (c) => {
 
     // 2. 从 D1 删除
     try {
-      await c.env.DB.prepare("DELETE FROM user_images WHERE r2_object_key = ?").bind(key).run();
+      await c.env.DB.prepare("DELETE FROM user_images WHERE r2_object_key = ?")
+        .bind(key)
+        .run();
       console.log(`Admin deleted D1 record for: ${key}`);
     } catch (dbError) {
       console.error(`Failed to delete D1 record for ${key}:`, dbError);
@@ -1693,14 +1777,18 @@ app.post("/api/admin/cleanup", async (c) => {
 
     if (action === "cleanup-orphans") {
       // 清理 D1 中不存在对应 R2 对象的记录
-      const allRecords = await c.env.DB.prepare("SELECT r2_object_key FROM user_images").all();
+      const allRecords = await c.env.DB.prepare(
+        "SELECT r2_object_key FROM user_images"
+      ).all();
 
       for (const record of allRecords.results || []) {
         const key = record.r2_object_key as string;
         try {
           const r2Object = await c.env.IMAGES.head(key);
           if (!r2Object) {
-            await c.env.DB.prepare("DELETE FROM user_images WHERE r2_object_key = ?")
+            await c.env.DB.prepare(
+              "DELETE FROM user_images WHERE r2_object_key = ?"
+            )
               .bind(key)
               .run();
             deletedCount++;
@@ -1726,7 +1814,11 @@ app.post("/api/admin/cleanup", async (c) => {
           console.error(`Failed to delete R2 object ${key}:`, error);
         }
         // 删除 D1 记录
-        await c.env.DB.prepare("DELETE FROM user_images WHERE r2_object_key = ?").bind(key).run();
+        await c.env.DB.prepare(
+          "DELETE FROM user_images WHERE r2_object_key = ?"
+        )
+          .bind(key)
+          .run();
         deletedCount++;
       }
     }

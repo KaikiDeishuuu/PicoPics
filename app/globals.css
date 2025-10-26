@@ -12,15 +12,15 @@
     --foreground: 213 33% 19%;
 
     /* Surface layers (Elevation system) - 三层柔和的灰度层次 */
-    --bg-base: 210 33% 98%;           /* #f7f8fa 浅蓝灰背景 */
-    --bg-subtle: 0 0% 100%;           /* #ffffff 纯白卡片 */
-    --bg-surface: 210 28% 97%;        /* #f5f7f9 浅灰表面 */
-    --bg-elevated: 210 40% 95%;       /* #f3f4f6 灰白浮层 */
+    --bg-base: 210 33% 98%; /* #f7f8fa 浅蓝灰背景 */
+    --bg-subtle: 0 0% 100%; /* #ffffff 纯白卡片 */
+    --bg-surface: 210 28% 97%; /* #f5f7f9 浅灰表面 */
+    --bg-elevated: 210 40% 95%; /* #f3f4f6 灰白浮层 */
 
     /* Card layers */
-    --card: 0 0% 100%;                /* #ffffff 白色卡片 */
-    --card-foreground: 220 13% 18%;   /* #2b2b2b 深灰色文字 */
-    --card-border: 214 32% 91%;       /* #e5e7eb 柔和边框 */
+    --card: 0 0% 100%; /* #ffffff 白色卡片 */
+    --card-foreground: 220 13% 18%; /* #2b2b2b 深灰色文字 */
+    --card-border: 214 32% 91%; /* #e5e7eb 柔和边框 */
 
     /* Popover */
     --popover: 0 0% 100%;
@@ -32,14 +32,14 @@
     --secondary: 210 40% 96%;
     --secondary-foreground: 213 33% 19%;
     --muted: 210 40% 96%;
-    --muted-foreground: 215 16% 47%;  /* #6b7280 次要文字 */
+    --muted-foreground: 215 16% 47%; /* #6b7280 次要文字 */
     --accent: 210 40% 96%;
     --accent-foreground: 213 33% 19%;
     --destructive: 0 84% 60%;
     --destructive-foreground: 210 40% 98%;
 
     /* Borders and inputs */
-    --border: 214 32% 91%;            /* #e5e7eb 柔和边框 */
+    --border: 214 32% 91%; /* #e5e7eb 柔和边框 */
     --input: 214 32% 91%;
     --ring: 221 83% 53%;
     --radius: 0.5rem;
@@ -95,7 +95,7 @@
 
   /* 强制主题文字颜色 - 柔和的深灰色 */
   html:not(.dark) body {
-    color: #2b2b2b !important;  /* 柔和深灰，不是纯黑 */
+    color: #2b2b2b !important; /* 柔和深灰，不是纯黑 */
   }
 
   html.dark body {

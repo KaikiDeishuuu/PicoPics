@@ -194,11 +194,11 @@ function UploadPageContent() {
                     <span className="sm:hidden">Back</span>
                   </Button>
                   <div>
-                    <CardTitle className="text-xl md:text-2xl flex items-center space-x-2 text-white">
+                    <CardTitle className="text-xl md:text-2xl flex items-center space-x-2 text-foreground">
                       <Upload className="h-5 w-5 md:h-6 md:w-6 text-blue-400" />
                       <span>Image Upload</span>
                     </CardTitle>
-                    <CardDescription className="text-sm md:text-base text-white/80">
+                    <CardDescription className="text-sm md:text-base text-muted-foreground">
                       Welcome back, {user?.login}! Start uploading your images
                     </CardDescription>
                   </div>
@@ -289,7 +289,7 @@ function UploadPageContent() {
                         <div className="mt-4 flex gap-3">
                           <Button
                             size="sm"
-                            className="bg-blue-600 hover:bg-blue-700 text-white"
+                            className="text-foreground"
                             onClick={() => {
                               if (!isNavigating) {
                                 setIsNavigating(true);
