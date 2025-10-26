@@ -236,11 +236,11 @@ export function ImageGallery({
       >
         {selectedImage && (
           <div className="space-y-6">
-            <div className="relative rounded-xl overflow-hidden bg-black/10 flex items-center justify-center min-h-[300px] max-h-[60vh]">
+            <div className="relative rounded-xl overflow-hidden bg-black/10 flex items-center justify-center min-h-[300px]">
               <img
                 src={selectedImage.src}
                 alt={selectedImage.alt}
-                className="max-w-full max-h-full object-contain"
+                className="max-w-full h-auto object-contain"
               />
             </div>
 
