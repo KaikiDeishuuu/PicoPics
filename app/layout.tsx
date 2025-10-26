@@ -11,7 +11,8 @@ const inter = Inter({ subsets: ["latin"] });
 
 export const metadata: Metadata = {
   title: "PicoPicsV2-KAIKI'S IMAGE HOSTING",
-  description: "Modern image hosting platform based on Next.js 15 + Cloudflare Workers",
+  description:
+    "Modern image hosting platform based on Next.js 15 + Cloudflare Workers",
   manifest: "/manifest.json",
   icons: {
     icon: "/favicon.svg",
@@ -29,7 +30,11 @@ export const viewport = {
   maximumScale: 1,
 };
 
-export default function RootLayout({ children }: { children: React.ReactNode }) {
+export default function RootLayout({
+  children,
+}: {
+  children: React.ReactNode;
+}) {
   return (
     <html lang="zh-CN" suppressHydrationWarning>
       <body className={inter.className}>

@@ -3,6 +3,7 @@
 import { motion } from "framer-motion";
 import { Code, Github, Globe, Heart, MessageCircle, Shield, Star, Zap } from "lucide-react";
 import { Card, CardContent } from "@/components/ui/card";
+import { ThemeToggle } from "@/components/ThemeToggle";
 
 interface FooterProps {
   className?: string;
@@ -48,7 +49,7 @@ export function Footer({ className = "" }: FooterProps) {
       <div className="container mx-auto px-4 py-8">
         <div className="grid grid-cols-1 md:grid-cols-3 gap-4 md:gap-6">
           {/* 项目信息 */}
-          <div className="bg-white/5 rounded-lg border border-white/10 p-5 space-y-4">
+          <div className="bg-card/50 rounded-lg border border-border p-5 space-y-4">
             <div className="flex items-center space-x-2">
               <div className="w-8 h-8 bg-gradient-to-r from-yellow-400 to-orange-500 rounded-lg flex items-center justify-center">
                 <span className="text-white font-bold text-sm">P</span>
@@ -74,7 +75,7 @@ export function Footer({ className = "" }: FooterProps) {
           </div>
 
           {/* 快速链接 */}
-          <div className="bg-white/5 rounded-lg border border-white/10 p-5 space-y-4">
+          <div className="bg-card/50 rounded-lg border border-border p-5 space-y-4">
             <h4 className="text-lg font-semibold text-white mb-3">Quick Links</h4>
             <div className="grid grid-cols-1 gap-2">
               {[
@@ -95,7 +96,7 @@ export function Footer({ className = "" }: FooterProps) {
           </div>
 
           {/* 联系信息 */}
-          <div className="bg-white/5 rounded-lg border border-white/10 p-5 space-y-4">
+          <div className="bg-card/50 rounded-lg border border-border p-5 space-y-4">
             <h4 className="text-lg font-semibold text-white mb-3">Contact</h4>
             <div className="space-y-2">
               {socialLinks.map((link, index) => (
@@ -111,10 +112,14 @@ export function Footer({ className = "" }: FooterProps) {
                 </a>
               ))}
             </div>
-            <div className="p-3 bg-black/40 rounded-lg border border-white/10 mt-3">
+            <div className="p-3 bg-muted/30 rounded-lg border border-border mt-3 space-y-3">
               <div className="flex items-center space-x-2">
                 <Heart className="h-4 w-4 text-red-400" />
                 <span className="text-sm font-medium text-white">Made with ❤️ by Kaiki</span>
+              </div>
+              <div className="flex items-center justify-between pt-2 border-t border-white/10">
+                <span className="text-xs text-white/70">Theme</span>
+                <ThemeToggle />
               </div>
             </div>
           </div>
