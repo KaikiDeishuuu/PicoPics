@@ -437,15 +437,23 @@ function UploadPageContent() {
               initial="rest"
               whileHover="hover"
             >
-              <Card className="card-modern border-0 shadow-lg">
-                <CardHeader>
-                  <CardTitle className="flex items-center space-x-2">
-                    <Shield className="h-5 w-5 text-green-600" />
+              <Card className="card-modern border-0 shadow-lg overflow-hidden">
+                <CardHeader className="bg-gradient-to-r from-blue-500/10 to-cyan-500/10 border-b border-border">
+                  <CardTitle className="flex items-center space-x-2 text-foreground">
+                    <div className="p-2 bg-blue-500/20 rounded-lg">
+                      <Shield className="h-5 w-5 text-blue-400" />
+                    </div>
                     <span>使用配额</span>
                   </CardTitle>
                 </CardHeader>
-                <CardContent>
-                  <QuotaBadge used={0} limit={100000000} />
+                <CardContent className="p-6">
+                  <div className="space-y-4">
+                    <QuotaBadge used={0} limit={100000000} />
+                    <div className="flex items-center justify-between text-sm text-muted-foreground pt-2 border-t border-border">
+                      <span>已使用</span>
+                      <span className="font-medium text-foreground">0 MB</span>
+                    </div>
+                  </div>
                 </CardContent>
               </Card>
             </motion.div>
@@ -456,47 +464,54 @@ function UploadPageContent() {
               initial="rest"
               whileHover="hover"
             >
-              <Card className="card-modern border-0 shadow-lg">
-                <CardHeader>
-                  <CardTitle className="flex items-center space-x-2">
-                    <Zap className="h-5 w-5 text-yellow-600" />
+              <Card className="card-modern border-0 shadow-lg overflow-hidden">
+                <CardHeader className="bg-gradient-to-r from-yellow-500/10 to-orange-500/10 border-b border-border">
+                  <CardTitle className="flex items-center space-x-2 text-foreground">
+                    <div className="p-2 bg-yellow-500/20 rounded-lg">
+                      <Zap className="h-5 w-5 text-yellow-400" />
+                    </div>
                     <span>平台特性</span>
                   </CardTitle>
                 </CardHeader>
-                <CardContent>
+                <CardContent className="p-6">
                   <div className="space-y-4">
                     {[
                       {
                         icon: Zap,
                         title: "极速上传",
                         description: "Cloudflare Workers 边缘计算",
-                        color: "text-yellow-600",
+                        color: "text-yellow-400",
+                        bgColor: "bg-yellow-400/10",
                       },
                       {
                         icon: Shield,
                         title: "安全可靠",
                         description: "企业级安全防护",
-                        color: "text-green-600",
+                        color: "text-green-400",
+                        bgColor: "bg-green-400/10",
                       },
                       {
                         icon: Globe,
                         title: "全球加速",
                         description: "Vercel 全球 CDN 网络",
-                        color: "text-blue-600",
+                        color: "text-blue-400",
+                        bgColor: "bg-blue-400/10",
                       },
                     ].map((feature, index) => (
                       <motion.div
                         key={index}
                         variants={listItemVariants}
                         custom={index}
-                        className="flex items-start space-x-3"
+                        className="flex items-start space-x-3 p-3 rounded-lg hover:bg-muted/30 transition-colors"
                       >
-                        <feature.icon
-                          className={`h-5 w-5 ${feature.color} mt-0.5 flex-shrink-0`}
-                        />
-                        <div>
-                          <h4 className="font-medium">{feature.title}</h4>
-                          <p className="text-sm text-gray-600">
+                        <div className={`p-2 ${feature.bgColor} rounded-lg flex-shrink-0`}>
+                          <feature.icon
+                            className={`h-4 w-4 ${feature.color}`}
+                          />
+                        </div>
+                        <div className="flex-1">
+                          <h4 className="font-medium text-foreground mb-0.5">{feature.title}</h4>
+                          <p className="text-sm text-muted-foreground">
                             {feature.description}
                           </p>
                         </div>
@@ -513,24 +528,32 @@ function UploadPageContent() {
               initial="rest"
               whileHover="hover"
             >
-              <Card className="card-modern border-0 shadow-lg">
-                <CardHeader>
-                  <CardTitle className="flex items-center space-x-2">
-                    <FileText className="h-5 w-5 text-purple-600" />
+              <Card className="card-modern border-0 shadow-lg overflow-hidden">
+                <CardHeader className="bg-gradient-to-r from-purple-500/10 to-pink-500/10 border-b border-border">
+                  <CardTitle className="flex items-center space-x-2 text-foreground">
+                    <div className="p-2 bg-purple-500/20 rounded-lg">
+                      <FileText className="h-5 w-5 text-purple-400" />
+                    </div>
                     <span>快速操作</span>
                   </CardTitle>
                 </CardHeader>
-                <CardContent className="space-y-3">
+                <CardContent className="p-4 space-y-2">
                   <Link href="/gallery">
-                    <Button variant="outline" className="w-full justify-start">
-                      <Image className="h-4 w-4 mr-2" />
-                      查看我的图片
+                    <Button 
+                      variant="outline" 
+                      className="w-full justify-start border-border hover:bg-accent hover:text-accent-foreground transition-colors"
+                    >
+                      <Image className="h-4 w-4 mr-2 text-blue-400" />
+                      <span>查看我的图片</span>
                     </Button>
                   </Link>
                   <Link href="/admin">
-                    <Button variant="outline" className="w-full justify-start">
-                      <Shield className="h-4 w-4 mr-2" />
-                      管理面板
+                    <Button 
+                      variant="outline" 
+                      className="w-full justify-start border-border hover:bg-accent hover:text-accent-foreground transition-colors"
+                    >
+                      <Shield className="h-4 w-4 mr-2 text-purple-400" />
+                      <span>管理面板</span>
                     </Button>
                   </Link>
                 </CardContent>
