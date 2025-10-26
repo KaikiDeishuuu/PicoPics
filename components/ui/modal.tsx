@@ -60,7 +60,7 @@ export function Modal({
   };
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center p-4 overflow-y-auto">
+    <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
       {/* Backdrop */}
       <div
         className="absolute inset-0 bg-black/50 backdrop-blur-sm transition-opacity duration-200"
@@ -71,7 +71,7 @@ export function Modal({
       <div
         ref={modalRef}
         className={cn(
-          "relative bg-black/90 rounded-lg shadow-xl w-full mx-4 my-auto max-h-[90vh] transition-all duration-200 border border-white/20 flex flex-col",
+          "relative bg-black/90 rounded-lg shadow-xl w-full max-h-[90vh] transition-all duration-200 border border-white/20 flex flex-col overflow-hidden",
           sizeClasses[size],
           className
         )}
