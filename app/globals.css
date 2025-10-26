@@ -7,41 +7,41 @@
 
 @layer base {
   :root {
-    /* Base colors */
-    --background: 0 0% 100%;
-    --foreground: 222.2 84% 4.9%;
+    /* Base colors - 柔和的灰蓝调 (f7f8fa + 1e293b) */
+    --background: 210 33% 98%;
+    --foreground: 213 33% 19%;
 
-    /* Surface layers (Elevation system) */
-    --bg-base: 0 0% 100%;
-    --bg-subtle: 210 40% 98%;
-    --bg-surface: 210 20% 96%;
-    --bg-elevated: 220 15% 95%;
+    /* Surface layers (Elevation system) - 三层柔和的灰度层次 */
+    --bg-base: 210 33% 98%;           /* #f7f8fa 浅蓝灰背景 */
+    --bg-subtle: 0 0% 100%;           /* #ffffff 纯白卡片 */
+    --bg-surface: 210 28% 97%;        /* #f5f7f9 浅灰表面 */
+    --bg-elevated: 210 40% 95%;       /* #f3f4f6 灰白浮层 */
 
     /* Card layers */
-    --card: 0 0% 100%;
-    --card-foreground: 222.2 84% 4.9%;
-    --card-border: 220 13% 91%;
+    --card: 0 0% 100%;                /* #ffffff 白色卡片 */
+    --card-foreground: 220 13% 18%;   /* #2b2b2b 深灰色文字 */
+    --card-border: 214 32% 91%;       /* #e5e7eb 柔和边框 */
 
     /* Popover */
     --popover: 0 0% 100%;
-    --popover-foreground: 222.2 84% 4.9%;
+    --popover-foreground: 220 13% 18%;
 
     /* Interactive elements */
-    --primary: 221.2 83.2% 53.3%;
+    --primary: 221 83% 53%;
     --primary-foreground: 210 40% 98%;
     --secondary: 210 40% 96%;
-    --secondary-foreground: 222.2 84% 4.9%;
+    --secondary-foreground: 213 33% 19%;
     --muted: 210 40% 96%;
-    --muted-foreground: 215.4 16.3% 46.9%;
+    --muted-foreground: 215 16% 47%;  /* #6b7280 次要文字 */
     --accent: 210 40% 96%;
-    --accent-foreground: 222.2 84% 4.9%;
-    --destructive: 0 84.2% 60.2%;
+    --accent-foreground: 213 33% 19%;
+    --destructive: 0 84% 60%;
     --destructive-foreground: 210 40% 98%;
 
     /* Borders and inputs */
-    --border: 214.3 31.8% 91.4%;
-    --input: 214.3 31.8% 91.4%;
-    --ring: 221.2 83.2% 53.3%;
+    --border: 214 32% 91%;            /* #e5e7eb 柔和边框 */
+    --input: 214 32% 91%;
+    --ring: 221 83% 53%;
     --radius: 0.5rem;
   }
 
@@ -92,12 +92,12 @@
     @apply text-foreground bg-background;
     color: hsl(var(--foreground));
   }
-  
-  /* 强制浅色主题文字颜色 */
+
+  /* 强制主题文字颜色 - 柔和的深灰色 */
   html:not(.dark) body {
-    color: #1e293b !important;
+    color: #2b2b2b !important;  /* 柔和深灰，不是纯黑 */
   }
-  
+
   html.dark body {
     color: #f1f5f9 !important;
   }
