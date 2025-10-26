@@ -164,7 +164,7 @@ function UploadPageContent() {
                   <Button
                     variant="outline"
                     size="sm"
-                    className="bg-black/80 backdrop-blur-md border border-white/20 text-white hover:bg-white/10"
+                    className="bg-black/80 backdrop-blur-md border border-white/20 text-white hover:bg-white/10 relative z-50"
                     onClick={() => {
                       if (!isNavigating) {
                         setIsNavigating(true);
@@ -192,7 +192,7 @@ function UploadPageContent() {
                   <Button
                     variant="outline"
                     size="sm"
-                    className="card-modern"
+                    className="card-modern relative z-50"
                     onClick={() => {
                       if (!isNavigating) {
                         setIsNavigating(true);
@@ -218,7 +218,7 @@ function UploadPageContent() {
               initial={{ opacity: 0, y: -20 }}
               animate={{ opacity: 1, y: 0 }}
               exit={{ opacity: 0, y: -20 }}
-              className="mb-8"
+              className="mb-8 relative z-10"
             >
               <Card
                 className={`card-modern border-0 shadow-lg ${
@@ -265,6 +265,37 @@ function UploadPageContent() {
                             animate={{ width: `${uploadProgress}%` }}
                             transition={{ duration: 0.3 }}
                           />
+                        </div>
+                      )}
+                      {uploadStatus === "success" && (
+                        <div className="mt-4 flex gap-3">
+                          <Button
+                            size="sm"
+                            className="bg-blue-600 hover:bg-blue-700 text-white"
+                            onClick={() => {
+                              if (!isNavigating) {
+                                setIsNavigating(true);
+                                router.push("/gallery?refresh=" + Date.now());
+                              }
+                            }}
+                            disabled={isNavigating}
+                          >
+                            前往画廊
+                          </Button>
+                          <Button
+                            size="sm"
+                            variant="outline"
+                            className="border-gray-300 text-gray-700 hover:bg-gray-100"
+                            onClick={() => {
+                              if (!isNavigating) {
+                                setIsNavigating(true);
+                                router.push("/");
+                              }
+                            }}
+                            disabled={isNavigating}
+                          >
+                            返回首页
+                          </Button>
                         </div>
                       )}
                     </div>
