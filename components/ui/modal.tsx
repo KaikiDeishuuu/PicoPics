@@ -71,7 +71,7 @@ export function Modal({
       <div
         ref={modalRef}
         className={cn(
-          "relative bg-black/90 rounded-lg shadow-xl w-full max-h-[90vh] transition-all duration-200 border border-white/20 flex flex-col overflow-hidden",
+          "relative bg-black/90 rounded-lg shadow-xl w-full max-w-[90vw] max-h-[90vh] transition-all duration-200 border border-white/20 flex flex-col overflow-hidden m-4",
           sizeClasses[size],
           className
         )}
