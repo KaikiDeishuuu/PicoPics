@@ -46,7 +46,7 @@ export function IPManagement({ accessToken, adminToken }: IPManagementProps) {
       const response = await fetch(
         `${
           process.env.NEXT_PUBLIC_UPLOAD_API ||
-          "https://uploader-worker-v2-prod.haoweiw370.workers.dev"
+          "https://your-upload-worker.workers.dev"
         }/api/admin/ip-blacklist`,
         {
           method: "GET",
@@ -77,7 +77,7 @@ export function IPManagement({ accessToken, adminToken }: IPManagementProps) {
       const response = await fetch(
         `${
           process.env.NEXT_PUBLIC_UPLOAD_API ||
-          "https://uploader-worker-v2-prod.haoweiw370.workers.dev"
+          "https://your-upload-worker.workers.dev"
         }/api/admin/ip-blacklist`,
         {
           method: "POST",
@@ -110,7 +110,7 @@ export function IPManagement({ accessToken, adminToken }: IPManagementProps) {
       const response = await fetch(
         `${
           process.env.NEXT_PUBLIC_UPLOAD_API ||
-          "https://uploader-worker-v2-prod.haoweiw370.workers.dev"
+          "https://your-upload-worker.workers.dev"
         }/api/admin/ip-blacklist/${ip}`,
         {
           method: "DELETE",

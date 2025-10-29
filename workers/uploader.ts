@@ -702,7 +702,7 @@ app.post("/upload", async (c) => {
 
     // Generate public URL using CDN worker
     const publicUrl = `${
-      env.CDN_BASE_URL || "https://cdn-worker-v2-prod.haoweiw370.workers.dev"
+      env.CDN_BASE_URL || "https://your-cdn-worker.workers.dev"
     }/${fileName}`;
 
     // Get username for notification
@@ -2114,7 +2114,7 @@ app.get("/api/admin/images", async (c) => {
       mimeType: row.mime_type,
       username: row.username,
       url: `${
-        env.CDN_BASE_URL || "https://cdn-worker-v2-prod.haoweiw370.workers.dev"
+        env.CDN_BASE_URL || "https://your-cdn-worker.workers.dev"
       }/${row.r2_object_key}`,
     }));
 

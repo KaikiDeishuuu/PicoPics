@@ -166,7 +166,7 @@ function GalleryContent() {
   useEffect(() => {
     if (accessToken) {
       fetch(
-        "https://history-worker-v2-prod.haoweiw370.workers.dev/api/history",
+        "https://your-history-worker.workers.dev/api/history",
         {
           method: "GET",
           headers: {

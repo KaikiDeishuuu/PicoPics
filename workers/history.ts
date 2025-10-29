@@ -136,7 +136,7 @@ app.get("/api/history", async (c) => {
         fileName: record.filename,
         url: `${
           env.CDN_BASE_URL ||
-          "https://cdn-worker-v2-prod.haoweiw370.workers.dev"
+          "https://your-cdn-worker.workers.dev"
         }/${record.r2_object_key}`,
         size: record.file_size,
         type: record.mime_type,

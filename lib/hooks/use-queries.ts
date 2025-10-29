@@ -96,7 +96,7 @@ export function useQuota(accessToken?: string) {
     queryFn: async () => {
       console.log("QUOTA: Fetching quota data...");
       const response = await fetch(
-        "https://uploader-worker-v2-prod.haoweiw370.workers.dev/api/quota",
+        "https://your-upload-worker.workers.dev/api/quota",
         {
           headers: {
             Authorization: `Bearer ${accessToken}`,

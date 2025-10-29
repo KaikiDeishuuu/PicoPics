@@ -182,7 +182,7 @@ export const useAgentManager = () => {
         // 同步到Cloudflare Worker，使用UUID
         const workerUrl =
           process.env.NEXT_PUBLIC_AGENT_DATABASE_WORKER_URL ||
-          "https://agent-database.haoweiw370.workers.dev";
+          "https://your-agent-database.workers.dev";
 
         const response = await fetch(`${workerUrl}/api/agents/update-name`, {
           method: "POST",
@@ -313,7 +313,7 @@ export const useAgentManager = () => {
       try {
         const workerUrl =
           process.env.NEXT_PUBLIC_AGENT_DATABASE_WORKER_URL ||
-          "https://agent-database.haoweiw370.workers.dev";
+          "https://your-agent-database.workers.dev";
         const customNamesResponse = await fetch(
           `${workerUrl}/api/agents/custom-names`
         );
@@ -454,7 +454,7 @@ export const useAgentManager = () => {
         try {
           const workerUrl =
             process.env.NEXT_PUBLIC_AGENT_DATABASE_WORKER_URL ||
-            "https://agent-database.haoweiw370.workers.dev";
+            "https://your-agent-database.workers.dev";
 
           // 批量存储新agent到D1
           const storePromises = newAgentsToStore.map(async (agent) => {

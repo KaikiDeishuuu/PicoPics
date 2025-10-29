@@ -133,7 +133,7 @@ function AdminContent() {
       try {
         const adminApi =
           process.env.NEXT_PUBLIC_UPLOAD_API ||
-          "https://uploader-worker-v2-prod.haoweiw370.workers.dev";
+          "https://your-upload-worker.workers.dev";
 
         const response = await fetch(`${adminApi}/api/admin/stats`, {
           method: "GET",

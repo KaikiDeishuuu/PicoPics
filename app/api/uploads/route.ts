@@ -8,7 +8,7 @@ export async function GET(request: NextRequest) {
     // For Cloudflare Pages Functions, we redirect to the actual history worker
     const historyApi =
       process.env.NEXT_PUBLIC_HISTORY_API ||
-      "https://history-worker-v2-prod.haoweiw370.workers.dev";
+      "https://your-history-worker.workers.dev";
     const historyUrl = historyApi + "/api/history";
 
     // Forward the request to the actual history worker
