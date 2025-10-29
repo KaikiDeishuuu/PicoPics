@@ -1,0 +1,11 @@
+name = "history-worker-v2-prod"
+main = "history.ts"
+compatibility_date = "2024-01-01"
+
+[[d1_databases]]
+binding = "DB"
+database_name = "v2-pico-pics-db1"
+database_id = "90ca5dd2-fc00-475b-99ac-99810d559356"
+
+[vars]
+ALLOWED_ORIGINS = "*"

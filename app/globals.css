@@ -1,0 +1,341 @@
+/* 导入移动端优化样式 */
+@import "./mobile-optimization.css";
+
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base {
+  :root {
+    /* Base colors - 柔和的灰蓝调 (f7f8fa + 1e293b) */
+    --background: 210 33% 98%;
+    --foreground: 213 33% 19%;
+
+    /* Surface layers (Elevation system) - 三层柔和的灰度层次 */
+    --bg-base: 210 33% 98%; /* #f7f8fa 浅蓝灰背景 */
+    --bg-subtle: 0 0% 100%; /* #ffffff 纯白卡片 */
+    --bg-surface: 210 28% 97%; /* #f5f7f9 浅灰表面 */
+    --bg-elevated: 210 40% 95%; /* #f3f4f6 灰白浮层 */
+
+    /* Card layers */
+    --card: 0 0% 100%; /* #ffffff 白色卡片 */
+    --card-foreground: 220 13% 18%; /* #2b2b2b 深灰色文字 */
+    --card-border: 214 32% 91%; /* #e5e7eb 柔和边框 */
+
+    /* Popover */
+    --popover: 0 0% 100%;
+    --popover-foreground: 220 13% 18%;
+
+    /* Interactive elements */
+    --primary: 221 83% 53%;
+    --primary-foreground: 210 40% 98%;
+    --secondary: 210 40% 96%;
+    --secondary-foreground: 213 33% 19%;
+    --muted: 210 40% 96%;
+    --muted-foreground: 215 16% 47%; /* #6b7280 次要文字 */
+    --accent: 210 40% 96%;
+    --accent-foreground: 213 33% 19%;
+    --destructive: 0 84% 60%;
+    --destructive-foreground: 210 40% 98%;
+
+    /* Borders and inputs */
+    --border: 214 32% 91%; /* #e5e7eb 柔和边框 */
+    --input: 214 32% 91%;
+    --ring: 221 83% 53%;
+    --radius: 0.5rem;
+  }
+
+  .dark {
+    /* Base colors */
+    --background: 222.2 84% 4.9%;
+    --foreground: 210 40% 98%;
+
+    /* Surface layers (Elevation system) */
+    --bg-base: 222.2 84% 4.9%;
+    --bg-subtle: 217.2 32.6% 12%;
+    --bg-surface: 217.2 32.6% 17.5%;
+    --bg-elevated: 220 28% 23%;
+
+    /* Card layers */
+    --card: 222.2 84% 4.9%;
+    --card-foreground: 210 40% 98%;
+    --card-border: 217.2 32.6% 30%;
+
+    /* Popover */
+    --popover: 222.2 84% 4.9%;
+    --popover-foreground: 210 40% 98%;
+
+    /* Interactive elements */
+    --primary: 217.2 91.2% 59.8%;
+    --primary-foreground: 222.2 84% 4.9%;
+    --secondary: 217.2 32.6% 17.5%;
+    --secondary-foreground: 210 40% 98%;
+    --muted: 217.2 32.6% 17.5%;
+    --muted-foreground: 215 20.2% 65.1%;
+    --accent: 217.2 32.6% 17.5%;
+    --accent-foreground: 210 40% 98%;
+    --destructive: 0 62.8% 30.6%;
+    --destructive-foreground: 210 40% 98%;
+
+    /* Borders and inputs */
+    --border: 217.2 32.6% 17.5%;
+    --input: 217.2 32.6% 17.5%;
+    --ring: 224.3 76.3% 94.1%;
+  }
+}
+
+@layer base {
+  * {
+    @apply border-border;
+  }
+  body {
+    @apply text-foreground bg-background;
+    color: hsl(var(--foreground));
+  }
+
+  /* 强制主题文字颜色 - 柔和的深灰色 */
+  html:not(.dark) body {
+    color: #2b2b2b !important; /* 柔和深灰，不是纯黑 */
+  }
+
+  html.dark body {
+    color: #f1f5f9 !important;
+  }
+}
+
+/* 渐变背景动画 */
+@keyframes gradient-shift {
+  0% {
+    background-position: 0% 50%;
+  }
+  50% {
+    background-position: 100% 50%;
+  }
+  100% {
+    background-position: 0% 50%;
+  }
+}
+
+.animate-gradient-shift {
+  background-size: 200% 200%;
+  animation: gradient-shift 15s ease infinite;
+}
+
+/* 隐藏滚动条 */
+.scrollbar-hide {
+  -ms-overflow-style: none;
+  scrollbar-width: none;
+}
+
+.scrollbar-hide::-webkit-scrollbar {
+  display: none;
+}
+
+/* ========== 现代化容器样式（使用分层系统 + WCAG 对比度） ========== */
+.card-modern {
+  /* Layer 3: Elevated surface with subtle elevation */
+  background: hsl(var(--bg-elevated));
+  backdrop-filter: blur(10px);
+  border: 1px solid hsl(var(--card-border));
+  border-radius: 1rem;
+  /* High contrast text for readability (WCAG AAA) */
+  color: hsl(var(--foreground));
+  /* Subtle shadow for depth without heaviness */
+  box-shadow: inset 0 0 0 1px rgba(0, 0, 0, 0.03), 0 1px 3px rgba(0, 0, 0, 0.06),
+    0 4px 12px rgba(0, 0, 0, 0.04);
+  transition: all 0.3s ease;
+}
+
+.dark .card-modern {
+  background: hsl(var(--bg-elevated));
+  border-color: hsl(var(--card-border));
+  box-shadow: inset 0 0 0 1px rgba(255, 255, 255, 0.05),
+    0 4px 16px rgba(0, 0, 0, 0.4), 0 8px 32px rgba(0, 0, 0, 0.3);
+  color: hsl(var(--foreground));
+}
+
+.card-modern:hover {
+  border-color: hsl(var(--primary) / 0.4);
+  box-shadow: inset 0 0 0 1px hsl(var(--primary) / 0.1),
+    0 4px 8px rgba(0, 0, 0, 0.08), 0 8px 24px rgba(0, 0, 0, 0.06);
+  transform: translateY(-2px);
+}
+
+.dark .card-modern:hover {
+  border-color: hsl(var(--primary) / 0.3);
+  box-shadow: inset 0 0 0 1px hsl(var(--primary) / 0.1),
+    0 8px 24px rgba(0, 0, 0, 0.5), 0 12px 40px rgba(0, 0, 0, 0.4);
+}
+
+.card-glass {
+  /* Layer 2: Surface with backdrop blur */
+  background: hsl(var(--bg-surface));
+  backdrop-filter: blur(10px);
+  border: 1px solid hsl(var(--card-border));
+  border-radius: 1rem;
+  color: hsl(var(--foreground));
+  box-shadow: 0 1px 2px rgba(0, 0, 0, 0.04), 0 4px 12px rgba(0, 0, 0, 0.05);
+}
+
+.dark .card-glass {
+  background: hsl(var(--bg-surface));
+  border-color: hsl(var(--card-border));
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.4), 0 8px 24px rgba(0, 0, 0, 0.3);
+  color: hsl(var(--foreground));
+}
+
+.glass-modern-soft {
+  /* Layer 1: Subtle background with soft blur */
+  background: hsl(var(--bg-subtle));
+  backdrop-filter: blur(8px);
+  border: 1px solid hsl(var(--card-border) / 0.5);
+  border-radius: 1rem;
+  color: hsl(var(--foreground));
+  box-shadow: 0 1px 2px rgba(0, 0, 0, 0.03), 0 4px 8px rgba(0, 0, 0, 0.04);
+}
+
+.dark .glass-modern-soft {
+  background: hsl(var(--bg-subtle));
+  border-color: hsl(var(--card-border) / 0.5);
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.3), 0 4px 16px rgba(0, 0, 0, 0.2);
+  color: hsl(var(--foreground));
+}
+
+/* ========== 技术栈标签优化 ========== */
+.tech-stack-container {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.75rem;
+  justify-content: center;
+  align-items: center;
+  margin: 2rem 0;
+}
+
+.tech-tag {
+  display: inline-flex;
+  align-items: center;
+  padding: 0.75rem 1.25rem;
+  background: hsl(var(--bg-elevated));
+  backdrop-filter: blur(10px);
+  border: 1px solid hsl(var(--card-border));
+  border-radius: 1rem;
+  color: hsl(var(--foreground));
+  font-size: 1rem;
+  font-weight: 500;
+  transition: all 0.3s ease;
+}
+
+.dark .tech-tag {
+  background: hsl(var(--bg-elevated));
+  border-color: hsl(var(--card-border));
+  color: hsl(var(--foreground));
+}
+
+.tech-tag:hover {
+  border-color: hsl(var(--primary) / 0.4);
+  transform: translateY(-2px);
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.06), 0 8px 16px rgba(0, 0, 0, 0.08);
+}
+
+.dark .tech-tag:hover {
+  border-color: hsl(var(--primary) / 0.3);
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.4), 0 8px 16px rgba(0, 0, 0, 0.3);
+}
+
+/* ========== Footer优化 ========== */
+.footer-section {
+  margin-top: 4rem;
+  padding: 2rem 0;
+  border-top: 1px solid hsl(var(--card-border));
+}
+
+.footer-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+  gap: 1.5rem;
+  margin-bottom: 2rem;
+}
+
+.footer-card {
+  background: hsl(var(--bg-surface));
+  backdrop-filter: blur(10px);
+  border: 1px solid hsl(var(--card-border));
+  border-radius: 1rem;
+  padding: 1.5rem;
+  transition: all 0.3s ease;
+  color: hsl(var(--foreground));
+  box-shadow: 0 1px 2px rgba(0, 0, 0, 0.03), 0 4px 8px rgba(0, 0, 0, 0.04);
+}
+
+.dark .footer-card {
+  background: hsl(var(--bg-surface));
+  border-color: hsl(var(--card-border));
+  color: hsl(var(--foreground));
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.3), 0 8px 16px rgba(0, 0, 0, 0.2);
+}
+
+.footer-card:hover {
+  transform: translateY(-2px);
+  border-color: hsl(var(--primary) / 0.4);
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.06), 0 12px 24px rgba(0, 0, 0, 0.08);
+}
+
+.dark .footer-card:hover {
+  border-color: hsl(var(--primary) / 0.3);
+  box-shadow: 0 8px 16px rgba(0, 0, 0, 0.4), 0 16px 32px rgba(0, 0, 0, 0.3);
+}
+
+/* ========== 响应式优化 ========== */
+@media (max-width: 768px) {
+  .tech-stack-container {
+    gap: 0.5rem;
+    margin: 1.5rem 0;
+  }
+
+  .tech-tag {
+    padding: 0.375rem 0.75rem;
+    font-size: 0.8rem;
+  }
+
+  .footer-grid {
+    grid-template-columns: 1fr;
+    gap: 1rem;
+  }
+
+  .footer-card {
+    padding: 1rem;
+  }
+}
+
+/* ========== Masonry 瀑布流布局 ========== */
+.my-masonry-grid {
+  display: flex;
+  margin-left: -20px; /* gutter size offset */
+  width: auto;
+}
+
+.my-masonry-grid_column {
+  padding-left: 20px; /* gutter size */
+  background-clip: padding-box;
+}
+
+/* Style your items */
+.my-masonry-grid_column > div {
+  /* change div to reference your elements you put in <Masonry> */
+  margin-bottom: 20px;
+}
+
+/* 响应式间距调整 */
+@media (max-width: 640px) {
+  .my-masonry-grid {
+    margin-left: -10px;
+  }
+
+  .my-masonry-grid_column {
+    padding-left: 10px;
+  }
+
+  .my-masonry-grid_column > div {
+    margin-bottom: 10px;
+  }
+}

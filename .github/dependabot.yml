@@ -1,0 +1,74 @@
+# .github/dependabot.yml
+
+# Dependabot configuration file
+# See the documentation for all configuration options:
+# https://docs.github.com/code-security/dependabot/dependabot-version-updates/configuration-options-for-the-dependabot.yml-file
+
+version: 2
+updates:
+  # --- Configuration for npm dependencies ---
+  # Keep the npm dependencies for the Next.js frontend up to date
+  - package-ecosystem: "npm"
+    directory: "/"
+    schedule:
+      interval: "weekly"
+      day: "monday"
+      time: "09:00"
+    open-pull-requests-limit: 5
+    # Group minor and patch updates for dependencies together to reduce noise
+    # Major updates will still get their own PR
+    groups:
+      next-dependencies:
+        patterns:
+          - "next"
+          - "@next/*"
+          - "@vercel/*"
+      react-dependencies:
+        patterns:
+          - "react"
+          - "react-dom"
+          - "@types/react"
+          - "@types/react-dom"
+      framer-motion:
+        patterns:
+          - "framer-motion"
+      radix-dependencies:
+        patterns:
+          - "@radix-ui/*"
+      tailwind-dependencies:
+        patterns:
+          - "tailwindcss"
+          - "autoprefixer"
+          - "postcss"
+      cloudflare-dependencies:
+        patterns:
+          - "@cloudflare/*"
+          - "wrangler"
+          - "hono"
+    # Ignore major version updates for breaking changes
+    ignore:
+      - dependency-name: "next"
+        update-types: ["version-update:semver-major"]
+      - dependency-name: "react"
+        update-types: ["version-update:semver-major"]
+      - dependency-name: "react-dom"
+        update-types: ["version-update:semver-major"]
+
+  # --- Configuration for GitHub Actions ---
+  # Keep the GitHub Actions used in your workflows up to date
+  # This is a security best practice
+  - package-ecosystem: "github-actions"
+    directory: "/"
+    schedule:
+      interval: "weekly"
+      day: "monday"
+      time: "09:00"
+
+  # --- Configuration for Docker ---
+  # Keep Docker dependencies up to date
+  - package-ecosystem: "docker"
+    directory: "/"
+    schedule:
+      interval: "weekly"
+      day: "monday"
+      time: "09:00"

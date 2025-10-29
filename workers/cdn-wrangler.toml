@@ -1,0 +1,11 @@
+name = "cdn-worker-v2-prod"
+main = "cdn.ts"
+compatibility_date = "2024-01-01"
+
+[[r2_buckets]]
+binding = "IMAGES"
+bucket_name = "next-lambda-image-r2"
+
+[vars]
+ALLOWED_ORIGINS = "*"
+IMAGES_BUCKET_ID = "next-lambda-image-r2"

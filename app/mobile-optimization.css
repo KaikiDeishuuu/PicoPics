@@ -1,0 +1,376 @@
+/* ========== 移动端增强动画效果 ========== */
+
+/* 弹性弹跳动画 */
+@keyframes bounce-in {
+  0% {
+    transform: scale(0.3);
+    opacity: 0;
+  }
+  50% {
+    transform: scale(1.05);
+  }
+  70% {
+    transform: scale(0.9);
+  }
+  100% {
+    transform: scale(1);
+    opacity: 1;
+  }
+}
+
+/* 弹性弹跳入场 */
+.bounce-in {
+  animation: bounce-in 0.6s cubic-bezier(0.68, -0.55, 0.265, 1.55);
+}
+
+/* 脉冲呼吸动画 */
+@keyframes breathe {
+  0%,
+  100% {
+    transform: scale(1);
+    opacity: 1;
+  }
+  50% {
+    transform: scale(1.05);
+    opacity: 0.9;
+  }
+}
+
+.animate-breathe {
+  animation: breathe 2s ease-in-out infinite;
+}
+
+/* 滑入动画 */
+@keyframes slide-in-left {
+  from {
+    transform: translateX(-100%);
+    opacity: 0;
+  }
+  to {
+    transform: translateX(0);
+    opacity: 1;
+  }
+}
+
+@keyframes slide-in-right {
+  from {
+    transform: translateX(100%);
+    opacity: 0;
+  }
+  to {
+    transform: translateX(0);
+    opacity: 1;
+  }
+}
+
+.slide-in-left {
+  animation: slide-in-left 0.5s cubic-bezier(0.68, -0.55, 0.265, 1.55);
+}
+
+.slide-in-right {
+  animation: slide-in-right 0.5s cubic-bezier(0.68, -0.55, 0.265, 1.55);
+}
+
+/* 上升淡入动画 */
+@keyframes fade-up {
+  from {
+    transform: translateY(30px);
+    opacity: 0;
+  }
+  to {
+    transform: translateY(0);
+    opacity: 1;
+  }
+}
+
+.fade-up {
+  animation: fade-up 0.6s ease-out;
+}
+
+/* 旋转淡入动画 */
+@keyframes rotate-in {
+  from {
+    transform: rotate(-10deg) scale(0.8);
+    opacity: 0;
+  }
+  to {
+    transform: rotate(0deg) scale(1);
+    opacity: 1;
+  }
+}
+
+.rotate-in {
+  animation: rotate-in 0.5s cubic-bezier(0.68, -0.55, 0.265, 1.55);
+}
+
+/* 摇晃动画 */
+@keyframes shake {
+  0%,
+  100% {
+    transform: translateX(0);
+  }
+  10%,
+  30%,
+  50%,
+  70%,
+  90% {
+    transform: translateX(-5px);
+  }
+  20%,
+  40%,
+  60%,
+  80% {
+    transform: translateX(5px);
+  }
+}
+
+.shake {
+  animation: shake 0.5s;
+}
+
+/* 心跳动画 */
+@keyframes heartbeat {
+  0%,
+  50%,
+  100% {
+    transform: scale(1);
+  }
+  10%,
+  30% {
+    transform: scale(0.9);
+  }
+  20%,
+  40% {
+    transform: scale(1.1);
+  }
+}
+
+.animate-heartbeat {
+  animation: heartbeat 1.5s ease-in-out infinite;
+}
+
+/* 波浪动画 */
+@keyframes wave {
+  0%,
+  100% {
+    transform: translateY(0);
+  }
+  50% {
+    transform: translateY(-10px);
+  }
+}
+
+.animate-wave {
+  animation: wave 2s ease-in-out infinite;
+}
+
+/* 闪烁动画 */
+@keyframes blink {
+  0%,
+  50%,
+  100% {
+    opacity: 1;
+  }
+  25%,
+  75% {
+    opacity: 0.5;
+  }
+}
+
+.animate-blink {
+  animation: blink 2s ease-in-out infinite;
+}
+
+/* 打字机效果 */
+@keyframes typing {
+  from {
+    width: 0;
+  }
+  to {
+    width: 100%;
+  }
+}
+
+@keyframes blink-caret {
+  from,
+  to {
+    border-color: transparent;
+  }
+  50% {
+    border-color: currentColor;
+  }
+}
+
+/* 粒子动画 */
+@keyframes particle-fall {
+  0% {
+    transform: translateY(-100%) rotate(0deg);
+    opacity: 0;
+  }
+  10% {
+    opacity: 1;
+  }
+  90% {
+    opacity: 1;
+  }
+  100% {
+    transform: translateY(100vh) rotate(360deg);
+    opacity: 0;
+  }
+}
+
+.particle-fall {
+  animation: particle-fall 3s linear infinite;
+}
+
+/* 3D翻转效果 */
+@keyframes flip-in {
+  0% {
+    transform: perspective(400px) rotateY(90deg);
+    opacity: 0;
+  }
+  100% {
+    transform: perspective(400px) rotateY(0deg);
+    opacity: 1;
+  }
+}
+
+.flip-in {
+  animation: flip-in 0.6s ease-out;
+}
+
+/* 弹性缩放 */
+@keyframes elastic {
+  0% {
+    transform: scale(0);
+  }
+  50% {
+    transform: scale(1.2);
+  }
+  75% {
+    transform: scale(0.9);
+  }
+  100% {
+    transform: scale(1);
+  }
+}
+
+.elastic {
+  animation: elastic 0.6s ease-out;
+}
+
+/* 反弹效果 */
+@keyframes bounce-effect {
+  0%,
+  20%,
+  50%,
+  80%,
+  100% {
+    transform: translateY(0);
+  }
+  40% {
+    transform: translateY(-20px);
+  }
+  60% {
+    transform: translateY(-10px);
+  }
+}
+
+.bounce-effect {
+  animation: bounce-effect 1s ease-in-out;
+}
+
+/* 移动端特殊优化 */
+@media (max-width: 768px) {
+  /* 减少动画频率以节省性能 */
+  .animate-heartbeat {
+    animation-duration: 2s;
+  }
+
+  .animate-wave {
+    animation-duration: 3s;
+  }
+
+  /* 触摸反馈动画 */
+  .touch-feedback {
+    transition:
+      transform 0.1s,
+      opacity 0.1s;
+  }
+
+  .touch-feedback:active {
+    transform: scale(0.95);
+    opacity: 0.8;
+  }
+
+  /* 卡片悬停效果（移动端触摸） */
+  .card-touchable {
+    transition: all 0.3s ease;
+  }
+
+  .card-touchable:active {
+    transform: scale(0.98);
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.3);
+  }
+
+  /* 按钮按压效果 */
+  .btn-press {
+    transition: all 0.1s ease;
+  }
+
+  .btn-press:active {
+    transform: translateY(2px);
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
+  }
+
+  /* 列表项入场动画 - 错开时间 */
+  .list-item-enter:nth-child(1) {
+    animation: fade-up 0.5s ease-out;
+  }
+
+  .list-item-enter:nth-child(2) {
+    animation: fade-up 0.6s ease-out;
+  }
+
+  .list-item-enter:nth-child(3) {
+    animation: fade-up 0.7s ease-out;
+  }
+
+  .list-item-enter:nth-child(4) {
+    animation: fade-up 0.8s ease-out;
+  }
+
+  .list-item-enter:nth-child(5) {
+    animation: fade-up 0.9s ease-out;
+  }
+
+  .list-item-enter:nth-child(6) {
+    animation: fade-up 1s ease-out;
+  }
+
+  /* 网格项入场动画 */
+  .grid-item-enter {
+    animation: fade-up 0.6s ease-out backwards;
+  }
+
+  .grid-item-enter:nth-child(odd) {
+    animation: slide-in-left 0.6s ease-out backwards;
+  }
+
+  .grid-item-enter:nth-child(even) {
+    animation: slide-in-right 0.6s ease-out backwards;
+  }
+}
+
+/* 超小屏幕进一步优化 */
+@media (max-width: 480px) {
+  /* 简化动画以提升性能 */
+  .particle-fall {
+    display: none;
+  }
+
+  .animate-heartbeat,
+  .animate-wave {
+    animation-duration: 2s;
+  }
+}

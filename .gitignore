@@ -1,0 +1,142 @@
+# Dependencies
+node_modules/
+.npm
+
+# Build outputs
+dist/
+.next/
+out/
+build/
+
+# Environment files (IMPORTANT: Never commit these!)
+.env
+.env.local
+.env*.local
+.env.production
+.env.development
+.env.vercel
+
+# Cloudflare Workers configuration (contains sensitive account info)
+wrangler.toml
+workers/*/wrangler.toml
+
+# TypeScript
+*.tsbuildinfo
+
+# Wrangler
+.wrangler/
+.dev.vars
+
+# IDE
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
+.DS_Store
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Logs
+*.log
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+
+# Temporary files
+*.tmp
+.cache/
+
+# Test coverage
+coverage/
+
+# Vercel
+.vercel
+
+# Test files
+test-*.jpg
+test-*.png
+test-*.txt
+test-*.html
+
+# Backup files
+*.backup
+*-backup
+
+# Sensitive configuration files
+config.json
+secrets.json
+credentials.json
+*.key
+*.pem
+*.p12
+*.pfx
+
+# Database files
+*.db
+*.sqlite
+*.sqlite3
+
+# Log files with sensitive data
+*.log
+logs/
+log/
+
+# Temporary sensitive files
+temp/
+tmp/
+*.tmp
+
+# IDE specific sensitive files
+.vscode/settings.json
+.idea/workspace.xml
+.idea/tasks.xml
+
+# OS generated files
+.DS_Store
+.DS_Store?
+._*
+.Spotlight-V100
+.Trashes
+ehthumbs.db
+Thumbs.db
+
+# Agent specific sensitive files
+agent/data/
+agent/*.db
+agent/*.log
+agent/vps-deploy/
+agent/*.tar.gz
+
+# VPS deployment packages
+vps-deploy/
+*.tar.gz
+deploy-*.sh
+
+# Cloudflare Workers secrets
+.dev.vars
+wrangler.toml
+workers/*/wrangler.toml
+
+# Vercel sensitive files
+.vercel/project.json
+.vercel/.gitignore
+
+# Docker sensitive files
+docker-compose.override.yml
+.dockerignore.local
+
+# SSL certificates
+*.crt
+*.cert
+*.cer
+*.der
+ssl/
+certs/
+
+# API keys and tokens
+api-keys.txt
+tokens.txt
+secrets.txt
