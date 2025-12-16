@@ -597,7 +597,9 @@ app.post("/upload", async (c) => {
       console.log(
         `Uploading to R2: ${fileName}, size: ${file.size}, type: ${file.type}`
       );
-      await c.env.IMAGES.put(fileName, file as any, {
+      // Convert File to ArrayBuffer for R2
+      const fileBuffer = await file.arrayBuffer();
+      await c.env.IMAGES.put(fileName, fileBuffer, {
         httpMetadata: {
           contentType: file.type,
           cacheControl: "public, max-age=31536000", // 1 year
@@ -606,11 +608,16 @@ app.post("/upload", async (c) => {
       console.log(`Successfully uploaded to R2: ${fileName}`);
     } catch (r2Error) {
       console.error("R2 upload error:", r2Error);
+      console.error("R2 error details:", {
+        message: r2Error instanceof Error ? r2Error.message : String(r2Error),
+        stack: r2Error instanceof Error ? r2Error.stack : undefined,
+      });
       return c.json(
         {
           success: false,
           code: "R2_UPLOAD_ERROR",
           message: "Failed to upload file to storage",
+          error: r2Error instanceof Error ? r2Error.message : String(r2Error),
         },
         500
       );
