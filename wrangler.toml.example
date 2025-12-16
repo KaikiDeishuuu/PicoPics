@@ -37,6 +37,7 @@ ABUSE_DETECTION_ENABLED = "false"
 CONTENT_MODERATION_ENABLED = "true"
 IMAGES_BUCKET_ID = "your-bucket-name"
 ALLOWED_ORIGINS = "*"
+CDN_BASE_URL = "https://your-cdn-domain.example.com"
 
 # ⚠️ IMPORTANT: Never commit sensitive values!
 # Use wrangler secret put to set these values:

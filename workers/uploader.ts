@@ -25,6 +25,9 @@ interface Env {
   ADMIN_TOKEN: string;
   TELEGRAM_BOT_TOKEN?: string;
   TELEGRAM_CHAT_ID?: string;
+  CDN_BASE_URL?: string;
+  CLOUDFLARE_ACCOUNT_ID?: string;
+  CF_AI_API_TOKEN?: string;
 }
 
 interface UploadQuotaState {
@@ -568,7 +571,7 @@ app.post("/upload", async (c) => {
     // Content moderation (async - don't block upload)
     if (c.env.CONTENT_MODERATION_ENABLED === "true" && c.env.AI) {
       // Start content moderation in background
-      contentModeration(file)
+      contentModeration(file, c.env)
         .then((moderationResult) => {
           if (moderationResult.blocked) {
             // If content is blocked, we could delete the uploaded file
@@ -702,7 +705,7 @@ app.post("/upload", async (c) => {
 
     // Generate public URL using CDN worker
     const publicUrl = `${
-      env.CDN_BASE_URL || "https://your-cdn-worker.workers.dev"
+      c.env.CDN_BASE_URL || "https://your-cdn-worker.workers.dev"
     }/${fileName}`;
 
     // Get username for notification
@@ -1097,7 +1100,8 @@ async function checkContentSafety(
 
 // Content moderation function (async)
 async function contentModeration(
-  file: File
+  file: File,
+  env: Env
 ): Promise<{ blocked: boolean; label?: string }> {
   try {
     const imageBuffer = await file.arrayBuffer();
@@ -2113,9 +2117,9 @@ app.get("/api/admin/images", async (c) => {
       fileSize: row.file_size,
       mimeType: row.mime_type,
       username: row.username,
-      url: `${
-        env.CDN_BASE_URL || "https://your-cdn-worker.workers.dev"
-      }/${row.r2_object_key}`,
+      url: `${c.env.CDN_BASE_URL || "https://your-cdn-worker.workers.dev"}/${
+        row.r2_object_key
+      }`,
     }));
 
     return c.json({ success: true, data: images });

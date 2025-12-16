@@ -6,6 +6,7 @@ import { logger } from "hono/logger";
 interface Env {
   DB: D1Database;
   ALLOWED_ORIGINS: string;
+  CDN_BASE_URL: string;
 }
 
 interface ImageHistoryRecord {
@@ -134,10 +135,9 @@ app.get("/api/history", async (c) => {
       records.results?.map((record: any) => ({
         id: record.image_id || record.id,
         fileName: record.filename,
-        url: `${
-          env.CDN_BASE_URL ||
-          "https://your-cdn-worker.workers.dev"
-        }/${record.r2_object_key}`,
+        url: `${env.CDN_BASE_URL || "https://your-cdn-worker.workers.dev"}/${
+          record.r2_object_key
+        }`,
         size: record.file_size,
         type: record.mime_type,
         uploadedAt:

@@ -20,8 +20,8 @@ export const pageVariants = {
 };
 
 export const pageTransition = {
-  type: "tween",
-  ease: "anticipate",
+  type: "tween" as const,
+  ease: "anticipate" as const,
   duration: 0.4,
 };
 
@@ -35,10 +35,11 @@ export const cardHoverVariants = {
   hover: {
     scale: 1.02,
     y: -4,
-    boxShadow: "0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04)",
+    boxShadow:
+      "0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04)",
     transition: {
       duration: 0.2,
-      ease: "easeOut",
+      ease: "easeOut" as const,
     },
   },
 };
@@ -73,7 +74,7 @@ export const imageVariants = {
     scale: 1,
     transition: {
       duration: 0.5,
-      ease: "easeOut",
+      ease: "easeOut" as const,
     },
   },
 };
@@ -90,7 +91,7 @@ export const listItemVariants = {
     transition: {
       delay: i * 0.1,
       duration: 0.3,
-      ease: "easeOut",
+      ease: "easeOut" as const,
     },
   }),
 };
@@ -106,7 +107,7 @@ export const modalVariants = {
     scale: 1,
     transition: {
       duration: 0.3,
-      ease: "easeOut",
+      ease: "easeOut" as const,
     },
   },
   exit: {
@@ -114,7 +115,7 @@ export const modalVariants = {
     scale: 0.8,
     transition: {
       duration: 0.2,
-      ease: "easeIn",
+      ease: "easeIn" as const,
     },
   },
 };
@@ -147,7 +148,7 @@ export const progressVariants = {
     width: `${progress}%`,
     transition: {
       duration: 0.5,
-      ease: "easeOut",
+      ease: "easeOut" as const,
     },
   }),
 };
@@ -165,7 +166,7 @@ export const notificationVariants = {
     scale: 1,
     transition: {
       duration: 0.3,
-      ease: "easeOut",
+      ease: "easeOut" as const,
     },
   },
   exit: {
@@ -174,7 +175,7 @@ export const notificationVariants = {
     scale: 0.8,
     transition: {
       duration: 0.2,
-      ease: "easeIn",
+      ease: "easeIn" as const,
     },
   },
 };
@@ -186,7 +187,7 @@ export const pulseVariants = {
     transition: {
       duration: 2,
       repeat: Infinity,
-      ease: "easeInOut",
+      ease: "easeInOut" as const,
     },
   },
 };
@@ -198,7 +199,7 @@ export const rotateVariants = {
     transition: {
       duration: 1,
       repeat: Infinity,
-      ease: "linear",
+      ease: "linear" as const,
     },
   },
 };
@@ -233,7 +234,7 @@ export const slideVariants = {
     opacity: 1,
     transition: {
       duration: 0.4,
-      ease: "easeOut",
+      ease: "easeOut" as const,
     },
   },
   exit: {
@@ -241,7 +242,7 @@ export const slideVariants = {
     opacity: 0,
     transition: {
       duration: 0.3,
-      ease: "easeIn",
+      ease: "easeIn" as const,
     },
   },
 };
@@ -257,7 +258,7 @@ export const scaleVariants = {
     opacity: 1,
     transition: {
       duration: 0.3,
-      ease: "easeOut",
+      ease: "easeOut" as const,
     },
   },
   exit: {
@@ -265,7 +266,7 @@ export const scaleVariants = {
     opacity: 0,
     transition: {
       duration: 0.2,
-      ease: "easeIn",
+      ease: "easeIn" as const,
     },
   },
 };
@@ -355,7 +356,7 @@ export function Parallax({ children, offset = 50, className }: ParallaxProps) {
         y: offset,
         transition: {
           duration: 0.8,
-          ease: "easeOut",
+          ease: "easeOut" as const,
         },
       }}
       viewport={{ once: true }}
@@ -364,6 +365,3 @@ export function Parallax({ children, offset = 50, className }: ParallaxProps) {
     </motion.div>
   );
 }
-
-
-
