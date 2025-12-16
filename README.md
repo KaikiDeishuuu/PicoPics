@@ -1,23 +1,43 @@
-# PicoPics V2
+# PicoPics# PicoPics V2
 
-现代化图片托管平台 - 基于 Next.js 15 + Cloudflare Workers 的高性能图片分享解决方案
 
-> **AI-Assisted Development**
+
+Personal image hosting service.现代化图片托管平台 - 基于 Next.js 15 + Cloudflare Workers 的高性能图片分享解决方案
+
+
+
+## Setup> **AI-Assisted Development**
+
 >
-> This project is fully created with AI assistance. All code, design, and architecture decisions were made collaboratively with AI to deliver a modern, efficient, and maintainable codebase.
 
-[![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg?style=for-the-badge)](LICENSE)
-[![Built with Next.js](https://img.shields.io/badge/Built%20with-Next.js-000000?style=for-the-badge&logo=next.js&logoColor=white)](https://nextjs.org)
+```bash> This project is fully created with AI assistance. All code, design, and architecture decisions were made collaboratively with AI to deliver a modern, efficient, and maintainable codebase.
+
+npm install
+
+npm run dev[![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg?style=for-the-badge)](LICENSE)
+
+```[![Built with Next.js](https://img.shields.io/badge/Built%20with-Next.js-000000?style=for-the-badge&logo=next.js&logoColor=white)](https://nextjs.org)
+
 [![TypeScript](https://img.shields.io/badge/TypeScript-5.3.3-3178C6?style=for-the-badge&logo=typescript&logoColor=white)](https://www.typescriptlang.org/)
-[![Styled with Tailwind CSS](https://img.shields.io/badge/Styled%20with-Tailwind%20CSS-38B2AC?style=for-the-badge&logo=tailwind-css&logoColor=white)](https://tailwindcss.com)
+
+## Deploy[![Styled with Tailwind CSS](https://img.shields.io/badge/Styled%20with-Tailwind%20CSS-38B2AC?style=for-the-badge&logo=tailwind-css&logoColor=white)](https://tailwindcss.com)
+
 [![Deployed on Vercel](https://img.shields.io/badge/Deployed%20on-Vercel-000000?style=for-the-badge&logo=vercel&logoColor=white)](https://vercel.com)
-[![Powered by Cloudflare](https://img.shields.io/badge/Powered%20by-Cloudflare-orange?style=for-the-badge&logo=cloudflare&logoColor=white)](https://workers.cloudflare.com/)
 
-## 核心特性
+```bash[![Powered by Cloudflare](https://img.shields.io/badge/Powered%20by-Cloudflare-orange?style=for-the-badge&logo=cloudflare&logoColor=white)](https://workers.cloudflare.com/)
 
-- **高性能** - Cloudflare 边缘计算，毫秒级响应
+npm run build
+
+```## 核心特性
+
+
+
+## License- **高性能** - Cloudflare 边缘计算，毫秒级响应
+
 - **安全可靠** - GitHub OAuth + JWT 认证
-- **响应式设计** - 完美适配所有设备
+
+See LICENSE file.- **响应式设计** - 完美适配所有设备
+
 - **现代化 UI** - 流畅动画和暗色主题
 - **实时通知** - Telegram Bot 集成
 - **管理面板** - 完整的后台管理系统
