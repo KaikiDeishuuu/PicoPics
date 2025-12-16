@@ -38,7 +38,7 @@ export default function RootLayout({
   return (
     <html lang="zh-CN" suppressHydrationWarning>
       <body className={inter.className}>
-        <ThemeProvider defaultTheme="system" storageKey="picopics-theme">
+        <ThemeProvider defaultTheme="dark" storageKey="picopics-theme">
           {children}
         </ThemeProvider>
         <Analytics />

@@ -46,40 +46,40 @@
   }
 
   .dark {
-    /* Base colors */
-    --background: 222.2 84% 4.9%;
+    /* Base colors - 更深的背景 */
+    --background: 222.2 84% 3%;
     --foreground: 210 40% 98%;
 
-    /* Surface layers (Elevation system) */
-    --bg-base: 222.2 84% 4.9%;
-    --bg-subtle: 217.2 32.6% 12%;
-    --bg-surface: 217.2 32.6% 17.5%;
-    --bg-elevated: 220 28% 23%;
+    /* Surface layers (Elevation system) - 深色层次 */
+    --bg-base: 222.2 84% 3%;
+    --bg-subtle: 217.2 32.6% 8%;
+    --bg-surface: 217.2 32.6% 12%;
+    --bg-elevated: 220 28% 16%;
 
-    /* Card layers */
-    --card: 222.2 84% 4.9%;
+    /* Card layers - 深色卡片 */
+    --card: 217.2 32.6% 8%;
     --card-foreground: 210 40% 98%;
-    --card-border: 217.2 32.6% 30%;
+    --card-border: 217.2 32.6% 20%;
 
     /* Popover */
-    --popover: 222.2 84% 4.9%;
+    --popover: 217.2 32.6% 8%;
     --popover-foreground: 210 40% 98%;
 
     /* Interactive elements */
     --primary: 217.2 91.2% 59.8%;
-    --primary-foreground: 222.2 84% 4.9%;
-    --secondary: 217.2 32.6% 17.5%;
+    --primary-foreground: 222.2 84% 3%;
+    --secondary: 217.2 32.6% 12%;
     --secondary-foreground: 210 40% 98%;
-    --muted: 217.2 32.6% 17.5%;
+    --muted: 217.2 32.6% 12%;
     --muted-foreground: 215 20.2% 65.1%;
-    --accent: 217.2 32.6% 17.5%;
+    --accent: 217.2 32.6% 12%;
     --accent-foreground: 210 40% 98%;
     --destructive: 0 62.8% 30.6%;
     --destructive-foreground: 210 40% 98%;
 
     /* Borders and inputs */
-    --border: 217.2 32.6% 17.5%;
-    --input: 217.2 32.6% 17.5%;
+    --border: 217.2 32.6% 15%;
+    --input: 217.2 32.6% 15%;
     --ring: 224.3 76.3% 94.1%;
   }
 }
