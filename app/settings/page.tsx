@@ -1,6 +1,5 @@
 "use client";
 
-import { motion } from "framer-motion";
 import { ArrowLeft, Bell, BellOff, Check, Save, Settings } from "lucide-react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
@@ -133,7 +132,7 @@ export default function SettingsPage() {
 
   if (loading) {
     return (
-      <div className="min-h-screen bg-gradient-to-br from-purple-50 to-blue-50 dark:from-gray-900 dark:to-gray-800">
+      <div className="min-h-screen bg-background">
         <div className="container mx-auto px-4 py-8 flex items-center justify-center min-h-screen">
           <LoadingSpinner size="lg" />
         </div>
@@ -142,7 +141,7 @@ export default function SettingsPage() {
   }
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-purple-50 to-blue-50 dark:from-gray-900 dark:to-gray-800">
+    <div className="min-h-screen bg-background">
       {/* Header */}
       <header className="relative z-10 container mx-auto px-4 py-6">
         <div className="flex items-center justify-between">
@@ -159,11 +158,7 @@ export default function SettingsPage() {
 
       {/* Main Content */}
       <main className="container mx-auto px-4 py-8 max-w-2xl">
-        <motion.div
-          initial={{ opacity: 0, y: 20 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.5 }}
-        >
+        <div>
           <Card className="card-modern border-0 shadow-lg">
             <CardHeader>
               <CardTitle className="text-2xl md:text-3xl flex items-center space-x-2 text-foreground">
@@ -252,7 +247,7 @@ export default function SettingsPage() {
               </Button>
             </CardContent>
           </Card>
-        </motion.div>
+        </div>
       </main>
 
       <Footer />

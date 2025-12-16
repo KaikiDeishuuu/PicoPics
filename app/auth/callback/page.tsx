@@ -1,12 +1,10 @@
 "use client";
 
-import { motion } from "framer-motion";
 import { CheckCircle, Loader2, XCircle } from "lucide-react";
 import { useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { DynamicBackground } from "@/components/ui/dynamic-background";
 import { LoadingSpinner } from "@/components/ui/loading";
 
 // 强制动态渲染，避免静态化
@@ -94,18 +92,8 @@ export default function AuthCallback() {
 
   if (status === "loading") {
     return (
-      <DynamicBackground
-        variant="rainbow"
-        intensity="medium"
-        speed="slow"
-        className="min-h-screen"
-      >
-        <motion.div
-          initial={{ opacity: 0, y: 20 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.6 }}
-          className="min-h-screen flex items-center justify-center"
-        >
+      <div className="min-h-screen bg-background">
+        <div className="min-h-screen flex items-center justify-center">
           <Card className="card-modern max-w-md mx-4">
             <CardHeader className="text-center">
               <div className="flex justify-center mb-4">
@@ -121,25 +109,15 @@ export default function AuthCallback() {
               </p>
             </CardContent>
           </Card>
-        </motion.div>
-      </DynamicBackground>
+        </div>
+      </div>
     );
   }
 
   if (status === "error") {
     return (
-      <DynamicBackground
-        variant="sunset"
-        intensity="medium"
-        speed="slow"
-        className="min-h-screen"
-      >
-        <motion.div
-          initial={{ opacity: 0, y: 20 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.6 }}
-          className="min-h-screen flex items-center justify-center"
-        >
+      <div className="min-h-screen bg-background">
+        <div className="min-h-screen flex items-center justify-center">
           <Card className="card-modern max-w-md mx-4">
             <CardHeader className="text-center">
               <div className="flex justify-center mb-4">
@@ -160,24 +138,14 @@ export default function AuthCallback() {
               </Button>
             </CardContent>
           </Card>
-        </motion.div>
-      </DynamicBackground>
+        </div>
+      </div>
     );
   }
 
   return (
-    <DynamicBackground
-      variant="ocean"
-      intensity="medium"
-      speed="slow"
-      className="min-h-screen"
-    >
-      <motion.div
-        initial={{ opacity: 0, y: 20 }}
-        animate={{ opacity: 1, y: 0 }}
-        transition={{ duration: 0.6 }}
-        className="min-h-screen flex items-center justify-center"
-      >
+    <div className="min-h-screen bg-background">
+      <div className="min-h-screen flex items-center justify-center">
         <Card className="card-modern max-w-md mx-4">
           <CardHeader className="text-center">
             <div className="flex justify-center mb-4">
@@ -193,7 +161,7 @@ export default function AuthCallback() {
             </p>
           </CardContent>
         </Card>
-      </motion.div>
-    </DynamicBackground>
+      </div>
+    </div>
   );
 }

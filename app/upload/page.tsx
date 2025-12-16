@@ -1,8 +1,6 @@
 "use client";
 
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
-import { AnimatePresence, motion } from "framer-motion";
-import { AnimatedWelcome } from "@/components/ui/animated-welcome";
 import {
   AlertCircle,
   ArrowLeft,
@@ -23,15 +21,6 @@ import { QuotaBadge } from "@/components/QuotaBadge";
 import { ThemeToggle } from "@/components/ThemeToggle";
 import { ToastManager, useToast } from "@/components/Toast";
 import { UploadCard } from "@/components/UploadCard";
-import {
-  AnimatedDiv,
-  cardHoverVariants,
-  listItemVariants,
-  pageTransition,
-  pageVariants,
-  pulseVariants,
-  StaggerContainer,
-} from "@/components/ui/animations";
 import { Button } from "@/components/ui/button";
 import {
   Card,
@@ -40,7 +29,6 @@ import {
   CardHeader,
   CardTitle,
 } from "@/components/ui/card";
-import { DynamicBackground } from "@/components/ui/dynamic-background";
 import { Footer } from "@/components/ui/footer";
 import { LoadingSpinner } from "@/components/ui/loading";
 import { useNotifications } from "@/lib/hooks/use-notifications";
@@ -147,48 +135,26 @@ function UploadPageContent() {
 
   if (loading) {
     return (
-      <DynamicBackground
-        variant="aurora"
-        intensity="medium"
-        speed="slow"
-        className="min-h-screen"
-      >
+      <div className="min-h-screen bg-background">
         <div className="container mx-auto px-4 py-16">
           <div className="text-center">
             <div className="flex justify-center mb-6">
               <LoadingSpinner size="lg" />
             </div>
-            <h1 className="text-4xl font-bold bg-gradient-to-r from-yellow-600 to-orange-600 bg-clip-text text-transparent mb-6">
+            <h1 className="text-4xl font-bold text-foreground mb-6">
               Loading upload page...
             </h1>
           </div>
         </div>
-      </DynamicBackground>
+      </div>
     );
   }
 
   return (
-    <DynamicBackground
-      variant="aurora"
-      intensity="medium"
-      speed="slow"
-      className="min-h-screen"
-    >
-      <motion.div
-        initial="initial"
-        animate="in"
-        exit="out"
-        variants={pageVariants}
-        transition={pageTransition}
-        className="container mx-auto px-4 py-4 md:py-8"
-      >
+    <div className="min-h-screen bg-background">
+      <div className="container mx-auto px-4 py-4 md:py-8">
         {/* 头部导航 */}
-        <motion.div
-          variants={cardHoverVariants}
-          initial="rest"
-          whileHover="hover"
-          className="mb-4 md:mb-8"
-        >
+        <div className="mb-4 md:mb-8">
           <Card className="card-modern">
             <CardHeader>
               <div className="flex flex-col md:flex-row items-start md:items-center justify-between gap-4">
@@ -215,11 +181,8 @@ function UploadPageContent() {
                       <span>Image Upload</span>
                     </CardTitle>
                     <CardDescription className="text-sm md:text-base text-muted-foreground">
-                      <AnimatedWelcome
-                        username={user?.login || "User"}
-                        message="Welcome back, {username}! Start uploading your images"
-                        variant="slide"
-                      />
+                      Welcome back, {user?.login || "User"}! Start uploading
+                      your images
                     </CardDescription>
                   </div>
                 </div>
@@ -245,17 +208,12 @@ function UploadPageContent() {
               </div>
             </CardHeader>
           </Card>
-        </motion.div>
+        </div>
 
         {/* 上传状态指示器 */}
-        <AnimatePresence>
+        <div>
           {uploadStatus !== "idle" && (
-            <motion.div
-              initial={{ opacity: 0, y: -20 }}
-              animate={{ opacity: 1, y: 0 }}
-              exit={{ opacity: 0, y: -20 }}
-              className="mb-8 relative z-10"
-            >
+            <div className="mb-8 relative z-10">
               <Card
                 className={`card-modern border-0 shadow-lg ${
                   uploadStatus === "success"
@@ -268,13 +226,9 @@ function UploadPageContent() {
                 <CardContent className="p-6">
                   <div className="flex items-center space-x-4">
                     {uploadStatus === "uploading" && (
-                      <motion.div
-                        variants={pulseVariants}
-                        animate="pulse"
-                        className="flex-shrink-0"
-                      >
+                      <div className="flex-shrink-0">
                         <LoadingSpinner size="lg" />
-                      </motion.div>
+                      </div>
                     )}
                     {uploadStatus === "success" && (
                       <CheckCircle className="h-8 w-8 text-green-600 flex-shrink-0" />
@@ -297,12 +251,7 @@ function UploadPageContent() {
                       </p>
                       {uploadStatus === "uploading" && (
                         <div className="mt-2 w-full bg-gray-200 rounded-full h-2">
-                          <motion.div
-                            className="bg-blue-600 h-2 rounded-full"
-                            initial={{ width: 0 }}
-                            animate={{ width: `${uploadProgress}%` }}
-                            transition={{ duration: 0.3 }}
-                          />
+                          <div className="bg-blue-600 h-2 rounded-full" />
                         </div>
                       )}
                       {uploadStatus === "success" && (
@@ -340,20 +289,15 @@ function UploadPageContent() {
                   </div>
                 </CardContent>
               </Card>
-            </motion.div>
+            </div>
           )}
-        </AnimatePresence>
+        </div>
 
         {/* 主要内容区域 */}
         <div className="grid lg:grid-cols-3 gap-8">
           {/* 上传区域 */}
           <div className="lg:col-span-2">
-            <motion.div
-              variants={cardHoverVariants}
-              initial="rest"
-              whileHover="hover"
-              className="mb-8"
-            >
+            <div className="mb-8">
               <Card className="card-modern border-0 shadow-xl">
                 <CardHeader>
                   <CardTitle className="flex items-center space-x-2">
@@ -418,15 +362,10 @@ function UploadPageContent() {
                   />
                 </CardContent>
               </Card>
-            </motion.div>
+            </div>
 
             {/* 上传提示 */}
-            <motion.div
-              variants={cardHoverVariants}
-              initial="rest"
-              whileHover="hover"
-              className="mb-8"
-            >
+            <div className="mb-8">
               <Card className="card-modern border-0 shadow-lg">
                 <CardHeader>
                   <CardTitle className="flex items-center space-x-2">
@@ -466,19 +405,15 @@ function UploadPageContent() {
                   </div>
                 </CardContent>
               </Card>
-            </motion.div>
+            </div>
           </div>
 
           {/* 侧边栏 */}
           <div className="space-y-6">
             {/* 上传效率 */}
-            <motion.div
-              variants={cardHoverVariants}
-              initial="rest"
-              whileHover="hover"
-            >
+            <div>
               <Card className="card-modern border-0 shadow-lg overflow-hidden">
-                <CardHeader className="bg-gradient-to-r from-purple-500/10 to-pink-500/10 border-b border-border">
+                <CardHeader className="bg-card/50 border-b border-border">
                   <CardTitle className="flex items-center space-x-2 text-foreground">
                     <div className="p-2 bg-purple-500/20 rounded-lg">
                       <Clock className="h-5 w-5 text-purple-400" />
@@ -524,16 +459,12 @@ function UploadPageContent() {
                   </div>
                 </CardContent>
               </Card>
-            </motion.div>
+            </div>
 
             {/* 用户配额 */}
-            <motion.div
-              variants={cardHoverVariants}
-              initial="rest"
-              whileHover="hover"
-            >
+            <div>
               <Card className="card-modern border-0 shadow-lg overflow-hidden">
-                <CardHeader className="bg-gradient-to-r from-blue-500/10 to-cyan-500/10 border-b border-border">
+                <CardHeader className="bg-card/50 border-b border-border">
                   <CardTitle className="flex items-center space-x-2 text-foreground">
                     <div className="p-2 bg-blue-500/20 rounded-lg">
                       <Shield className="h-5 w-5 text-blue-400" />
@@ -559,16 +490,12 @@ function UploadPageContent() {
                   </div>
                 </CardContent>
               </Card>
-            </motion.div>
+            </div>
 
             {/* 功能特性 */}
-            <motion.div
-              variants={cardHoverVariants}
-              initial="rest"
-              whileHover="hover"
-            >
+            <div>
               <Card className="card-modern border-0 shadow-lg overflow-hidden">
-                <CardHeader className="bg-gradient-to-r from-yellow-500/10 to-orange-500/10 border-b border-border">
+                <CardHeader className="bg-card/50 border-b border-border">
                   <CardTitle className="flex items-center space-x-2 text-foreground">
                     <div className="p-2 bg-yellow-500/20 rounded-lg">
                       <Zap className="h-5 w-5 text-yellow-400" />
@@ -601,10 +528,8 @@ function UploadPageContent() {
                         bgColor: "bg-blue-400/10",
                       },
                     ].map((feature, index) => (
-                      <motion.div
+                      <div
                         key={index}
-                        variants={listItemVariants}
-                        custom={index}
                         className="flex items-start space-x-3 p-3 rounded-lg hover:bg-muted/30 transition-colors"
                       >
                         <div
@@ -622,21 +547,17 @@ function UploadPageContent() {
                             {feature.description}
                           </p>
                         </div>
-                      </motion.div>
+                      </div>
                     ))}
                   </div>
                 </CardContent>
               </Card>
-            </motion.div>
+            </div>
 
             {/* 快速操作 */}
-            <motion.div
-              variants={cardHoverVariants}
-              initial="rest"
-              whileHover="hover"
-            >
+            <div>
               <Card className="card-modern border-0 shadow-lg overflow-hidden">
-                <CardHeader className="bg-gradient-to-r from-purple-500/10 to-pink-500/10 border-b border-border">
+                <CardHeader className="bg-card/50 border-b border-border">
                   <CardTitle className="flex items-center space-x-2 text-foreground">
                     <div className="p-2 bg-purple-500/20 rounded-lg">
                       <FileText className="h-5 w-5 text-purple-400" />
@@ -665,14 +586,14 @@ function UploadPageContent() {
                   </Link>
                 </CardContent>
               </Card>
-            </motion.div>
+            </div>
           </div>
         </div>
 
         {/* Footer */}
         <Footer />
-      </motion.div>
-    </DynamicBackground>
+      </div>
+    </div>
   );
 }
 
