@@ -53,7 +53,6 @@ import {
   NotificationContainer,
   useNotifications,
 } from "@/components/ui/notification";
-import ResponsiveSystemMonitor from "@/components/ui/responsive-system-monitor";
 
 // 强制动态渲染
 export const dynamic = "force-dynamic";
@@ -93,12 +92,7 @@ function AdminContent() {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [activeTab, setActiveTab] = useState<
-    | "overview"
-    | "users"
-    | "analytics"
-    | "ip-management"
-    | "system-monitor"
-    | "data-management"
+    "overview" | "users" | "analytics" | "ip-management" | "data-management"
   >("overview");
   const [images, setImages] = useState<any[]>([]);
   const [selectedImages, setSelectedImages] = useState<Set<string>>(new Set());
@@ -662,7 +656,6 @@ function AdminContent() {
                   { id: "data-management", label: "数据管理", icon: Database },
                   { id: "analytics", label: "数据分析", icon: PieChart },
                   { id: "ip-management", label: "IP管理", icon: Shield },
-                  { id: "system-monitor", label: "系统监控", icon: Activity },
                 ].map((tab) => (
                   <Button
                     key={tab.id}
@@ -674,7 +667,6 @@ function AdminContent() {
                           | "users"
                           | "analytics"
                           | "ip-management"
-                          | "system-monitor"
                           | "data-management"
                       );
                       if (tab.id === "data-management") {
@@ -974,18 +966,6 @@ function AdminContent() {
                 accessToken={accessToken || ""}
                 adminToken={adminToken || ""}
               />
-            </motion.div>
-          )}
-
-          {activeTab === "system-monitor" && (
-            <motion.div
-              key="system-monitor"
-              initial={{ opacity: 0, y: 20 }}
-              animate={{ opacity: 1, y: 0 }}
-              exit={{ opacity: 0, y: -20 }}
-              transition={{ duration: 0.3 }}
-            >
-              <ResponsiveSystemMonitor />
             </motion.div>
           )}
 

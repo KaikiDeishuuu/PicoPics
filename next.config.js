@@ -57,14 +57,7 @@ const nextConfig = {
       process.env.NEXT_PUBLIC_HISTORY_API ||
       "https://your-history-worker.workers.dev",
     NEXT_PUBLIC_CDN_BASE:
-      process.env.NEXT_PUBLIC_CDN_BASE ||
-      "https://your-cdn-worker.workers.dev",
-    // Agent 监控配置
-    NEXT_PUBLIC_AGENT_API_URL:
-      process.env.NEXT_PUBLIC_AGENT_API_URL ||
-      "https://your-agent-api.com",
-    NEXT_PUBLIC_AGENT_API_KEY:
-      process.env.NEXT_PUBLIC_AGENT_API_KEY || "your_agent_api_key_here",
+      process.env.NEXT_PUBLIC_CDN_BASE || "https://your-cdn-worker.workers.dev",
   },
 
   // 图片优化配置

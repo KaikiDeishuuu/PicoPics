@@ -17,14 +17,6 @@
 #### 必需的环境变量：
 
 ```bash
-# Agent 监控 API 配置
-NEXT_PUBLIC_AGENT_PROXY_URL=https://your-agent-proxy.workers.dev
-NEXT_PUBLIC_AGENT_API_URL=https://your-agent-api.com
-NEXT_PUBLIC_AGENT_API_KEY=your_agent_api_key_here
-
-# Agent 数据库 Worker URL
-NEXT_PUBLIC_AGENT_DATABASE_WORKER_URL=https://your-agent-database.workers.dev
-
 # 图片上传相关 API
 NEXT_PUBLIC_UPLOAD_API=https://your-upload-worker.workers.dev
 NEXT_PUBLIC_HISTORY_API=https://your-history-worker.workers.dev
@@ -70,8 +62,6 @@ vercel --prod
 部署完成后，验证以下功能：
 
 - ✅ 图片上传功能
-- ✅ Agent 监控系统
-- ✅ Agent 名称自定义和持久化
 - ✅ 移动端响应式布局
 - ✅ 暗色模式切换
 - ✅ 管理员面板

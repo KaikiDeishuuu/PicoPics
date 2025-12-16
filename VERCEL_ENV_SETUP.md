@@ -24,14 +24,6 @@
 #### 2. 添加以下环境变量
 
 ```bash
-# Agent 监控 API 配置
-NEXT_PUBLIC_AGENT_PROXY_URL=https://your-agent-proxy.workers.dev
-NEXT_PUBLIC_AGENT_API_URL=https://your-agent-api.com
-NEXT_PUBLIC_AGENT_API_KEY=your_agent_api_key_here
-
-# Agent 数据库 Worker URL
-NEXT_PUBLIC_AGENT_DATABASE_WORKER_URL=https://your-agent-database.workers.dev
-
 # 图片上传相关 API
 NEXT_PUBLIC_UPLOAD_API=https://your-upload-worker.workers.dev
 NEXT_PUBLIC_HISTORY_API=https://your-history-worker.workers.dev
@@ -74,10 +66,8 @@ CF_API_TOKEN=your_cloudflare_api_token_here
 配置完成后，检查以下功能：
 
 1. ✅ 首页加载正常
-2. ✅ Agent 监控系统显示数据
-3. ✅ Agent 名称可以自定义和保存
-4. ✅ 图片上传功能正常
-5. ✅ 移动端布局正常
+2. ✅ 图片上传功能正常
+3. ✅ 移动端布局正常
 
 ### 故障排除
 
