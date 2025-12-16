@@ -705,7 +705,7 @@ app.post("/upload", async (c) => {
 
     // Generate public URL using CDN worker
     const publicUrl = `${
-      c.env.CDN_BASE_URL || "https://your-cdn-worker.workers.dev"
+      c.env.CDN_BASE_URL || "https://image.hiaplha.xyz"
     }/${fileName}`;
 
     // Get username for notification
@@ -2117,7 +2117,7 @@ app.get("/api/admin/images", async (c) => {
       fileSize: row.file_size,
       mimeType: row.mime_type,
       username: row.username,
-      url: `${c.env.CDN_BASE_URL || "https://your-cdn-worker.workers.dev"}/${
+      url: `${c.env.CDN_BASE_URL || "https://image.hiaplha.xyz"}/${
         row.r2_object_key
       }`,
     }));

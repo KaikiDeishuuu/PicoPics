@@ -8,7 +8,7 @@ export async function GET(request: NextRequest) {
     // For Cloudflare Pages Functions, we redirect to the actual history worker
     const historyApi =
       process.env.NEXT_PUBLIC_HISTORY_API ||
-      "https://your-history-worker.workers.dev";
+      "https://history-worker-v2-prod.haoweiw370.workers.dev";
     const historyUrl = historyApi + "/api/history";
 
     // Forward the request to the actual history worker
@@ -27,6 +27,9 @@ export async function GET(request: NextRequest) {
     return NextResponse.json(data, { status: response.status });
   } catch (error) {
     console.error("Uploads API error:", error);
-    return NextResponse.json({ error: "Failed to fetch uploads", uploads: [] }, { status: 500 });
+    return NextResponse.json(
+      { error: "Failed to fetch uploads", uploads: [] },
+      { status: 500 }
+    );
   }
 }

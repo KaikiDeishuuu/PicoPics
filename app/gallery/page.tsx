@@ -150,7 +150,10 @@ function GalleryContent() {
   // 测试API调用
   useEffect(() => {
     if (accessToken) {
-      fetch("https://your-history-worker.workers.dev/api/history", {
+      const historyApi =
+        process.env.NEXT_PUBLIC_HISTORY_API ||
+        "https://history-worker-v2-prod.haoweiw370.workers.dev";
+      fetch(`${historyApi}/api/history`, {
         method: "GET",
         headers: {
           Authorization: `Bearer ${accessToken}`,

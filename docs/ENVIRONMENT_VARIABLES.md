@@ -17,6 +17,7 @@
 ```bash
 # Vercel/生产环境
 NEXT_PUBLIC_UPLOAD_API=https://uploader-worker-v2-prod.haoweiw370.workers.dev
+NEXT_PUBLIC_HISTORY_API=https://history-worker-v2-prod.haoweiw370.workers.dev
 NEXT_PUBLIC_CDN_BASE=https://image.hiaplha.xyz
 NEXT_PUBLIC_MAX_UPLOAD_SIZE=10485760
 
@@ -39,6 +40,7 @@ GITHUB_CLIENT_SECRET=your_secret
 
 ```bash
 NEXT_PUBLIC_UPLOAD_API=https://uploader-worker-v2-prod.haoweiw370.workers.dev
+NEXT_PUBLIC_HISTORY_API=https://history-worker-v2-prod.haoweiw370.workers.dev
 NEXT_PUBLIC_CDN_BASE=https://image.hiaplha.xyz
 NEXT_PUBLIC_MAX_UPLOAD_SIZE=10485760
 NEXT_PUBLIC_GITHUB_CLIENT_ID=your_client_id
@@ -51,8 +53,8 @@ GITHUB_CLIENT_SECRET=your_secret
 
 ```typescript
 // 始终使用环境变量，提供合理的 fallback
-const apiUrl = 
-  process.env.NEXT_PUBLIC_UPLOAD_API || 
+const apiUrl =
+  process.env.NEXT_PUBLIC_UPLOAD_API ||
   "https://uploader-worker-v2-prod.haoweiw370.workers.dev";
 
 const response = await fetch(`${apiUrl}/api/endpoint`);
@@ -74,6 +76,7 @@ const response = await fetch(
 **A**: 因为代码中的硬编码是 fallback 值，只有当环境变量**完全未定义**时才会使用。如果环境变量已设置，应该会使用环境变量的值。
 
 检查方法：
+
 ```typescript
 console.log("API URL:", process.env.NEXT_PUBLIC_UPLOAD_API);
 ```
@@ -81,12 +84,14 @@ console.log("API URL:", process.env.NEXT_PUBLIC_UPLOAD_API);
 ### Q2: 环境变量不生效怎么办？
 
 **可能原因**：
+
 1. 变量名拼写错误
 2. 客户端代码没有使用 `NEXT_PUBLIC_` 前缀
 3. 修改环境变量后没有重新部署
 4. 环境变量没有应用到当前环境（Production/Preview）
 
 **解决方法**：
+
 1. 检查变量名是否正确
 2. 确保客户端代码使用 `NEXT_PUBLIC_` 前缀
 3. 在 Vercel 中修改环境变量后，重新部署项目
@@ -108,6 +113,7 @@ useEffect(() => {
 ## 相关文件
 
 需要使用环境变量的文件：
+
 - `lib/hooks/use-queries.ts` - React Query hooks
 - `lib/api.ts` - API 工具函数
 - `app/admin/page.tsx` - Admin 页面
@@ -128,11 +134,13 @@ useEffect(() => {
 ## 推荐配置流程
 
 1. **本地开发**：
+
    - 复制 `env.example` 到 `.env.local`
    - 填写正确的环境变量
    - 运行 `npm run dev`
 
 2. **Vercel 部署**：
+
    - 在 Vercel Dashboard 配置所有环境变量
    - 确保选择了正确的环境（Production）
    - 触发新的部署或手动重新部署

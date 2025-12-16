@@ -135,7 +135,7 @@ app.get("/api/history", async (c) => {
       records.results?.map((record: any) => ({
         id: record.image_id || record.id,
         fileName: record.filename,
-        url: `${env.CDN_BASE_URL || "https://your-cdn-worker.workers.dev"}/${
+        url: `${env.CDN_BASE_URL || "https://image.hiaplha.xyz"}/${
           record.r2_object_key
         }`,
         size: record.file_size,
