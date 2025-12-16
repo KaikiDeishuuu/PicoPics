@@ -387,7 +387,7 @@ app.get("/api/quota", async (c) => {
     const quotaId = c.env.UPLOAD_QUOTA.idFromName(userId);
     const quotaStub = c.env.UPLOAD_QUOTA.get(quotaId);
     const quotaResponse = await quotaStub.fetch(
-      new Request(`${c.req.url}?userId=${userId}`, { method: "GET" }) as any
+      new Request(`http://quota?userId=${userId}`, { method: "GET" }) as any
     );
     const quota = (await quotaResponse.json()) as UploadQuotaState;
 
@@ -464,7 +464,12 @@ app.post("/upload", async (c) => {
     if (c.env.ABUSE_DETECTION_ENABLED === "true") {
       const blacklistId = c.env.IP_BLACKLIST.idFromName(clientIP);
       const blacklistStub = c.env.IP_BLACKLIST.get(blacklistId);
-      const blacklistResponse = await blacklistStub.fetch(c.req.raw as any);
+      const blacklistResponse = await blacklistStub.fetch(
+        new Request(`http://blacklist`, {
+          method: "GET",
+          headers: { "CF-Connecting-IP": clientIP },
+        }) as any
+      );
       const { blocked } = (await blacklistResponse.json()) as {
         blocked: boolean;
       };
@@ -485,23 +490,38 @@ app.post("/upload", async (c) => {
     // Dynamic rate limiting based on user behavior and system load
     const quotaId = c.env.UPLOAD_QUOTA.idFromName(userId);
     const quotaStub = c.env.UPLOAD_QUOTA.get(quotaId);
+    console.log(`UPLOAD: Getting quota for user ${userId}`);
     const quotaResponse = await quotaStub.fetch(
-      new Request(`${c.req.url}?userId=${userId}`, { method: "GET" }) as any
+      new Request(`http://quota?userId=${userId}`, { method: "GET" }) as any
     );
-    const quota = (await quotaResponse.json()) as {
-      dailyBytes: number;
-      uploadCount: number;
-      lastUpload: number;
-    };
+    console.log(`UPLOAD: Quota response status: ${quotaResponse.status}`);
+    const quotaText = await quotaResponse.text();
+    console.log(`UPLOAD: Quota response text:`, quotaText);
+
+    let quota: UploadQuotaState;
+    try {
+      quota = JSON.parse(quotaText) as UploadQuotaState;
+    } catch (jsonError) {
+      console.error(`UPLOAD: Failed to parse quota JSON:`, jsonError);
+      console.error(`UPLOAD: Raw quota text was:`, quotaText);
+      throw new Error(
+        `Quota JSON parse failed: ${
+          jsonError instanceof Error ? jsonError.message : String(jsonError)
+        }`
+      );
+    }
+    console.log(`UPLOAD: Quota data:`, quota);
 
     // Dynamic quota calculation based on user activity
     const baseQuota = parseInt(c.env.DAILY_QUOTA_BYTES || "104857600"); // 100MB base
-    const timeSinceLastUpload = Date.now() - (quota.lastUpload || 0);
-    const hoursSinceLastUpload = timeSinceLastUpload / (1000 * 60 * 60);
 
     // Increase quota for active users (bonus system)
-    const activityBonus = Math.min(quota.uploadCount * 1048576, 52428800); // Max 50MB bonus
+    const activityBonus = Math.min(quota.dailyUploads * 1048576, 52428800); // Max 50MB bonus
     const dynamicQuota = baseQuota + activityBonus;
+
+    console.log(
+      `UPLOAD: Quota check - used: ${quota.dailyBytes}, limit: ${dynamicQuota}`
+    );
 
     // Only enforce quota for very high usage (prevent abuse)
     if (quota.dailyBytes > dynamicQuota * 2) {
@@ -516,6 +536,7 @@ app.post("/upload", async (c) => {
     }
 
     const contentType = c.req.header("Content-Type") || "";
+    console.log(`UPLOAD: Content-Type: ${contentType}`);
     if (!contentType.includes("multipart/form-data")) {
       return c.json(
         {
@@ -527,10 +548,13 @@ app.post("/upload", async (c) => {
       );
     }
 
+    console.log(`UPLOAD: Parsing form data...`);
     const formData = await c.req.formData();
+    console.log(`UPLOAD: Form data parsed, getting image file...`);
     const file = formData.get("image") as File;
 
     if (!file) {
+      console.log(`UPLOAD: No file found in form data`);
       return c.json(
         {
           success: false,
@@ -540,6 +564,10 @@ app.post("/upload", async (c) => {
         400
       );
     }
+
+    console.log(
+      `UPLOAD: File received - name: ${file.name}, size: ${file.size}, type: ${file.type}`
+    );
 
     // Validate file
     const allowedTypes = ["image/jpeg", "image/png", "image/gif", "image/webp"];
@@ -808,11 +836,17 @@ app.post("/upload", async (c) => {
     });
   } catch (error) {
     console.error("Upload error:", error);
+    console.error("Upload error details:", {
+      message: error instanceof Error ? error.message : String(error),
+      stack: error instanceof Error ? error.stack : undefined,
+      name: error instanceof Error ? error.name : undefined,
+    });
     return c.json(
       {
         success: false,
         code: "INTERNAL_ERROR",
         message: "Upload failed due to server error",
+        error: error instanceof Error ? error.message : String(error),
       },
       500
     );
