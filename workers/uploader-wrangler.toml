@@ -1,0 +1,25 @@
+name = "uploader-worker-v2-prod"
+main = "uploader.ts"
+compatibility_date = "2024-01-01"
+account_id = "fc590bfe34fc6df2312c469a5db04aa2"
+
+[[r2_buckets]]
+binding = "BUCKET"
+bucket_name = "next-lambda-image-r2"
+
+[[d1_databases]]
+binding = "DB"
+database_name = "v2-pico-pics-db1"
+database_id = "90ca5dd2-fc00-475b-99ac-99810d559356"
+
+[vars]
+CDN_BASE_URL = "https://image.hiaplha.xyz"
+ALLOWED_ORIGINS = "*"
+
+# 敏感信息需要通过 wrangler secret 设置：
+# wrangler secret put GITHUB_CLIENT_ID --config uploader-wrangler.toml
+# wrangler secret put GITHUB_CLIENT_SECRET --config uploader-wrangler.toml
+# wrangler secret put ADMIN_TOKEN --config uploader-wrangler.toml
+# wrangler secret put ADMIN_USERS --config uploader-wrangler.toml
+# wrangler secret put TELEGRAM_BOT_TOKEN --config uploader-wrangler.toml
+# wrangler secret put TELEGRAM_CHAT_ID --config uploader-wrangler.toml

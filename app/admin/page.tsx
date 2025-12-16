@@ -1,8 +1,6 @@
 "use client";
 
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
-import { AnimatePresence, motion } from "framer-motion";
-import { TypewriterBanner } from "@/components/ui/typewriter-banner";
 import {
   Activity,
   AlertTriangle,
@@ -28,15 +26,6 @@ import {
 } from "lucide-react";
 import Link from "next/link";
 import { useEffect, useState } from "react";
-import {
-  AnimatedDiv,
-  cardHoverVariants,
-  listItemVariants,
-  pageTransition,
-  pageVariants,
-  pulseVariants,
-  StaggerContainer,
-} from "@/components/ui/animations";
 import { Button } from "@/components/ui/button";
 import {
   Card,
@@ -45,7 +34,6 @@ import {
   CardHeader,
   CardTitle,
 } from "@/components/ui/card";
-import { DynamicBackground } from "@/components/ui/dynamic-background";
 import { Footer } from "@/components/ui/footer";
 import { IPManagement } from "@/components/ui/ip-management";
 import { LoadingSpinner } from "@/components/ui/loading";
@@ -476,20 +464,8 @@ function AdminContent() {
   // 如果没有认证，重定向到首页
   if (!isAuthenticated) {
     return (
-      <DynamicBackground
-        variant="sunset"
-        intensity="medium"
-        speed="slow"
-        className="min-h-screen"
-      >
-        <motion.div
-          initial="initial"
-          animate="in"
-          exit="out"
-          variants={pageVariants}
-          transition={pageTransition}
-          className="min-h-screen flex items-center justify-center"
-        >
+      <div className="min-h-screen bg-background">
+        <div className="min-h-screen flex items-center justify-center">
           <Card className="w-full max-w-md mx-4 card-modern">
             <CardHeader className="text-center">
               <CardTitle className="text-2xl">需要登录</CardTitle>
@@ -504,28 +480,16 @@ function AdminContent() {
               </Link>
             </CardContent>
           </Card>
-        </motion.div>
-      </DynamicBackground>
+        </div>
+      </div>
     );
   }
 
   // 如果没有管理员权限
   if (!isAdmin) {
     return (
-      <DynamicBackground
-        variant="sunset"
-        intensity="medium"
-        speed="slow"
-        className="min-h-screen"
-      >
-        <motion.div
-          initial="initial"
-          animate="in"
-          exit="out"
-          variants={pageVariants}
-          transition={pageTransition}
-          className="min-h-screen flex items-center justify-center"
-        >
+      <div className="min-h-screen bg-background">
+        <div className="min-h-screen flex items-center justify-center">
           <Card className="w-full max-w-md mx-4 card-modern">
             <CardHeader className="text-center">
               <div className="flex justify-center mb-4">
@@ -590,26 +554,14 @@ function AdminContent() {
               </div>
             </CardContent>
           </Card>
-        </motion.div>
-      </DynamicBackground>
+        </div>
+      </div>
     );
   }
 
   return (
-    <DynamicBackground
-      variant="sunset"
-      intensity="medium"
-      speed="slow"
-      className="min-h-screen"
-    >
-      <motion.div
-        initial="initial"
-        animate="in"
-        exit="out"
-        variants={pageVariants}
-        transition={pageTransition}
-        className="container mx-auto px-4 py-8"
-      >
+    <div className="min-h-screen bg-background">
+      <div className="container mx-auto px-4 py-8">
         {/* 头部导航 - 单行布局 */}
         <header className="flex items-center justify-between px-4 py-3 bg-card/80 backdrop-blur-md border border-border rounded-xl mb-8">
           <Link href="/">
@@ -635,18 +587,15 @@ function AdminContent() {
         <Card className="card-modern mb-8">
           <CardContent className="py-3 px-4 sm:py-4 sm:px-6">
             <div className="min-h-[3rem] flex items-center justify-center">
-              <TypewriterBanner username={user?.login || "User"} />
+              <h2 className="text-lg sm:text-xl font-medium text-muted-foreground">
+                Welcome back, {user?.login || "User"}! Your dashboard is online and ready.
+              </h2>
             </div>
           </CardContent>
         </Card>
 
-        {/* 标签页导航 */}
-        <motion.div
-          variants={cardHoverVariants}
-          initial="rest"
-          whileHover="hover"
-          className="mb-8"
-        >
+        {/* 标签页导航 */
+        <div className="mb-8">
           <Card className="card-modern">
             <CardContent className="p-4">
               <div className="flex overflow-x-auto space-x-1 scrollbar-hide">
@@ -686,19 +635,13 @@ function AdminContent() {
               </div>
             </CardContent>
           </Card>
-        </motion.div>
-
+        </div>
+      }
         {/* 内容区域 */}
-        <AnimatePresence mode="wait">
+        <div>
           {activeTab === "overview" && (
-            <motion.div
-              key="overview"
-              initial={{ opacity: 0, y: 20 }}
-              animate={{ opacity: 1, y: 0 }}
-              exit={{ opacity: 0, y: -20 }}
-              transition={{ duration: 0.3 }}
-            >
-              <StaggerContainer className="mb-8">
+            <div key="overview">
+              <div className="mb-8">
                 <div className="grid md:grid-cols-2 lg:grid-cols-4 gap-6">
                   {[
                     {
@@ -730,11 +673,7 @@ function AdminContent() {
                       change: "+15%",
                     },
                   ].map((stat, index) => (
-                    <motion.div
-                      key={index}
-                      variants={listItemVariants}
-                      custom={index}
-                    >
+                    <div key={index}>
                       <Card className="card-modern hover:shadow-xl transition-all duration-300 hover:-translate-y-1">
                         <CardContent className="p-6">
                           <div className="flex items-center justify-between">
@@ -757,18 +696,13 @@ function AdminContent() {
                           </div>
                         </CardContent>
                       </Card>
-                    </motion.div>
+                    </div>
                   ))}
                 </div>
-              </StaggerContainer>
+              </div>
 
               {/* 系统状态 */}
-              <motion.div
-                variants={cardHoverVariants}
-                initial="rest"
-                whileHover="hover"
-                className="mb-8"
-              >
+              <div className="mb-8">
                 <Card className="card-modern">
                   <CardHeader>
                     <CardTitle className="flex items-center space-x-2 text-foreground">
@@ -801,24 +735,13 @@ function AdminContent() {
                     </div>
                   </CardContent>
                 </Card>
-              </motion.div>
-            </motion.div>
+              </div>
+            </div>
           )}
 
           {activeTab === "users" && (
-            <motion.div
-              key="users"
-              initial={{ opacity: 0, y: 20 }}
-              animate={{ opacity: 1, y: 0 }}
-              exit={{ opacity: 0, y: -20 }}
-              transition={{ duration: 0.3 }}
-            >
-              <motion.div
-                variants={cardHoverVariants}
-                initial="rest"
-                whileHover="hover"
-                className="mb-8"
-              >
+            <div key="users">
+              <div className="mb-8">
                 <Card className="card-modern">
                   <CardHeader>
                     <CardTitle className="flex items-center space-x-2 text-foreground">
@@ -874,10 +797,8 @@ function AdminContent() {
                           </thead>
                           <tbody>
                             {users.map((user, index) => (
-                              <motion.tr
+                              <tr
                                 key={user.id}
-                                variants={listItemVariants}
-                                custom={index}
                                 className="border-b border-border hover:bg-muted/50 transition-colors"
                               >
                                 <td className="py-3 px-4 text-foreground">
@@ -902,7 +823,7 @@ function AdminContent() {
                                     </span>
                                   </div>
                                 </td>
-                              </motion.tr>
+                              </tr>
                             ))}
                           </tbody>
                         </table>
@@ -910,24 +831,13 @@ function AdminContent() {
                     )}
                   </CardContent>
                 </Card>
-              </motion.div>
-            </motion.div>
+              </div>
+            </div>
           )}
 
           {activeTab === "analytics" && (
-            <motion.div
-              key="analytics"
-              initial={{ opacity: 0, y: 20 }}
-              animate={{ opacity: 1, y: 0 }}
-              exit={{ opacity: 0, y: -20 }}
-              transition={{ duration: 0.3 }}
-            >
-              <motion.div
-                variants={cardHoverVariants}
-                initial="rest"
-                whileHover="hover"
-                className="mb-8"
-              >
+            <div key="analytics">
+              <div className="mb-8">
                 <Card className="card-modern">
                   <CardHeader>
                     <CardTitle className="flex items-center space-x-2 text-foreground">
@@ -950,39 +860,22 @@ function AdminContent() {
                     </div>
                   </CardContent>
                 </Card>
-              </motion.div>
-            </motion.div>
+              </div>
+            </div>
           )}
 
           {activeTab === "ip-management" && (
-            <motion.div
-              key="ip-management"
-              initial={{ opacity: 0, y: 20 }}
-              animate={{ opacity: 1, y: 0 }}
-              exit={{ opacity: 0, y: -20 }}
-              transition={{ duration: 0.3 }}
-            >
+            <div key="ip-management">
               <IPManagement
                 accessToken={accessToken || ""}
                 adminToken={adminToken || ""}
               />
-            </motion.div>
+            </div>
           )}
 
           {activeTab === "data-management" && (
-            <motion.div
-              key="data-management"
-              initial={{ opacity: 0, y: 20 }}
-              animate={{ opacity: 1, y: 0 }}
-              exit={{ opacity: 0, y: -20 }}
-              transition={{ duration: 0.3 }}
-            >
-              <motion.div
-                variants={cardHoverVariants}
-                initial="rest"
-                whileHover="hover"
-                className="mb-8"
-              >
+            <div key="data-management">
+              <div className="mb-8">
                 <Card className="card-modern">
                   <CardHeader>
                     <CardTitle className="flex items-center space-x-2 text-foreground">
@@ -1065,10 +958,8 @@ function AdminContent() {
 
                         {/* 图片列表 */}
                         {images.map((image, index) => (
-                          <motion.div
+                          <div
                             key={image.id}
-                            variants={listItemVariants}
-                            custom={index}
                             className="bg-card rounded-lg p-4 border border-border hover:border-border/80 transition-all"
                           >
                             <div className="space-y-3">
@@ -1146,20 +1037,20 @@ function AdminContent() {
                                 </Button>
                               </div>
                             </div>
-                          </motion.div>
+                          </div>
                         ))}
                       </div>
                     )}
                   </CardContent>
                 </Card>
-              </motion.div>
-            </motion.div>
+              </div>
+            </div>
           )}
-        </AnimatePresence>
+        </div>
 
         {/* Footer */}
         <Footer />
-      </motion.div>
+      </div>
 
       {/* 通知容器 */}
       <NotificationContainer
@@ -1167,7 +1058,7 @@ function AdminContent() {
         onClose={removeNotification}
         position="top-right"
       />
-    </DynamicBackground>
+    </div>
   );
 }
 

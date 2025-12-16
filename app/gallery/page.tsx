@@ -1,8 +1,6 @@
 "use client";
 
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
-import { AnimatePresence, motion } from "framer-motion";
-import { AnimatedWelcome } from "@/components/ui/animated-welcome";
 import {
   ArrowLeft,
   Download,
@@ -19,14 +17,6 @@ import {
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
-import {
-  AnimatedDiv,
-  cardHoverVariants,
-  listItemVariants,
-  pageTransition,
-  pageVariants,
-  StaggerContainer,
-} from "@/components/ui/animations";
 import { Button } from "@/components/ui/button";
 import {
   Card,
@@ -35,15 +25,10 @@ import {
   CardHeader,
   CardTitle,
 } from "@/components/ui/card";
-import { DynamicBackground } from "@/components/ui/dynamic-background";
 import { Footer } from "@/components/ui/footer";
 import { ImageGallery } from "@/components/ui/gallery";
 import { ImageBadge, SimpleImageBadge } from "@/components/ui/image-badge";
 import { LoadingSpinner } from "@/components/ui/loading";
-import {
-  ImageGridSkeleton,
-  ModernLoading,
-} from "@/components/ui/modern-loading";
 import {
   NotificationContainer,
   useNotifications,
@@ -165,16 +150,13 @@ function GalleryContent() {
   // 测试API调用
   useEffect(() => {
     if (accessToken) {
-      fetch(
-        "https://your-history-worker.workers.dev/api/history",
-        {
-          method: "GET",
-          headers: {
-            Authorization: `Bearer ${accessToken}`,
-            "Content-Type": "application/json",
-          },
-        }
-      )
+      fetch("https://your-history-worker.workers.dev/api/history", {
+        method: "GET",
+        headers: {
+          Authorization: `Bearer ${accessToken}`,
+          "Content-Type": "application/json",
+        },
+      })
         .then((response) => {
           return response.json();
         })
@@ -261,14 +243,7 @@ function GalleryContent() {
   // 如果没有认证，重定向到首页
   if (!isAuthenticated) {
     return (
-      <motion.div
-        initial="initial"
-        animate="in"
-        exit="out"
-        variants={pageVariants}
-        transition={pageTransition}
-        className="min-h-screen bg-gradient-to-br from-blue-50 via-white to-indigo-50 flex items-center justify-center"
-      >
+      <div className="min-h-screen bg-background flex items-center justify-center">
         <Card className="w-full max-w-md mx-4">
           <CardHeader className="text-center">
             <CardTitle className="text-2xl">需要登录</CardTitle>
@@ -283,33 +258,16 @@ function GalleryContent() {
             </Link>
           </CardContent>
         </Card>
-      </motion.div>
+      </div>
     );
   }
 
   return (
-    <DynamicBackground
-      variant="cosmic"
-      intensity="low"
-      speed="slow"
-      className="min-h-screen"
-    >
-      <motion.div
-        initial="initial"
-        animate="in"
-        exit="out"
-        variants={pageVariants}
-        transition={pageTransition}
-        className="min-h-screen"
-      >
+    <div className="min-h-screen bg-background">
+      <div className="min-h-screen">
         <div className="container mx-auto px-4 py-4 md:py-8">
           {/* 头部导航 */}
-          <motion.div
-            variants={cardHoverVariants}
-            initial="rest"
-            whileHover="hover"
-            className="mb-4 md:mb-8"
-          >
+          <div className="mb-4 md:mb-8">
             <Card className="card-modern">
               <CardHeader>
                 <div className="flex flex-col md:flex-row items-start md:items-center justify-between gap-4">
@@ -330,11 +288,8 @@ function GalleryContent() {
                         My Gallery
                       </CardTitle>
                       <CardDescription className="text-sm md:text-base text-muted-foreground">
-                        <AnimatedWelcome
-                          username={user?.login || "User"}
-                          message={`Welcome back, {username}! You have ${images.length} images`}
-                          variant="fade"
-                        />
+                        Welcome back, {user?.login || "User"}! You have{" "}
+                        {images.length} images
                       </CardDescription>
                     </div>
                   </div>
@@ -362,15 +317,10 @@ function GalleryContent() {
                 </div>
               </CardHeader>
             </Card>
-          </motion.div>
+          </div>
 
           {/* 搜索和筛选 */}
-          <motion.div
-            variants={cardHoverVariants}
-            initial="rest"
-            whileHover="hover"
-            className="mb-6"
-          >
+          <div className="mb-6">
             <Card className="card-modern">
               <CardContent className="pt-6">
                 <div className="flex flex-col md:flex-row gap-4">
@@ -442,17 +392,12 @@ function GalleryContent() {
                 </div>
               </CardContent>
             </Card>
-          </motion.div>
+          </div>
 
           {/* 批量操作栏 */}
-          <AnimatePresence>
+          <div>
             {isSelectMode && (
-              <motion.div
-                initial={{ opacity: 0, y: -20 }}
-                animate={{ opacity: 1, y: 0 }}
-                exit={{ opacity: 0, y: -20 }}
-                className="mb-6"
-              >
+              <div className="mb-6">
                 <Card className="card-modern border-blue-400">
                   <CardContent className="pt-6">
                     <div className="flex items-center justify-between">
@@ -483,21 +428,20 @@ function GalleryContent() {
                     </div>
                   </CardContent>
                 </Card>
-              </motion.div>
+              </div>
             )}
-          </AnimatePresence>
+          </div>
 
           {/* 图片网格 */}
-          <StaggerContainer className="mb-8">
+          <div className="mb-8">
             {isLoading ? (
               <div className="space-y-6">
-                <ModernLoading
-                  message="Loading your images..."
-                  variant="skeleton"
-                  size="lg"
-                  className="text-center"
-                />
-                <ImageGridSkeleton count={8} />
+                <div className="text-center py-8">
+                  <LoadingSpinner size="lg" />
+                  <p className="mt-4 text-muted-foreground">
+                    Loading your images...
+                  </p>
+                </div>
               </div>
             ) : error || (imagesResponse && !imagesResponse.success) ? (
               <Card className="card-modern">
@@ -553,7 +497,7 @@ function GalleryContent() {
                 className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4"
               />
             )}
-          </StaggerContainer>
+          </div>
         </div>
 
         {/* Footer */}
@@ -565,8 +509,8 @@ function GalleryContent() {
           onClose={removeNotification}
           position="top-right"
         />
-      </motion.div>
-    </DynamicBackground>
+      </div>
+    </div>
   );
 }
 

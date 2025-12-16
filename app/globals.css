@@ -46,40 +46,40 @@
   }
 
   .dark {
-    /* Base colors - 更深的背景 */
-    --background: 222.2 84% 3%;
+    /* Base colors - 更深的护眼背景 */
+    --background: 240 10% 8%;
     --foreground: 210 40% 98%;
 
     /* Surface layers (Elevation system) - 深色层次 */
-    --bg-base: 222.2 84% 3%;
-    --bg-subtle: 217.2 32.6% 8%;
-    --bg-surface: 217.2 32.6% 12%;
-    --bg-elevated: 220 28% 16%;
+    --bg-base: 240 10% 8%;
+    --bg-subtle: 240 10% 11%;
+    --bg-surface: 240 10% 14%;
+    --bg-elevated: 240 10% 17%;
 
     /* Card layers - 深色卡片 */
-    --card: 217.2 32.6% 8%;
+    --card: 240 10% 11%;
     --card-foreground: 210 40% 98%;
-    --card-border: 217.2 32.6% 20%;
+    --card-border: 240 10% 20%;
 
     /* Popover */
-    --popover: 217.2 32.6% 8%;
+    --popover: 240 10% 11%;
     --popover-foreground: 210 40% 98%;
 
     /* Interactive elements */
     --primary: 217.2 91.2% 59.8%;
-    --primary-foreground: 222.2 84% 3%;
-    --secondary: 217.2 32.6% 12%;
+    --primary-foreground: 222.2 84% 4.9%;
+    --secondary: 240 10% 14%;
     --secondary-foreground: 210 40% 98%;
-    --muted: 217.2 32.6% 12%;
+    --muted: 240 10% 14%;
     --muted-foreground: 215 20.2% 65.1%;
-    --accent: 217.2 32.6% 12%;
+    --accent: 240 10% 14%;
     --accent-foreground: 210 40% 98%;
     --destructive: 0 62.8% 30.6%;
     --destructive-foreground: 210 40% 98%;
 
-    /* Borders and inputs */
-    --border: 217.2 32.6% 15%;
-    --input: 217.2 32.6% 15%;
+    /* Borders and inputs - 更柔和的边框 */
+    --border: 240 10% 20%;
+    --input: 240 10% 20%;
     --ring: 224.3 76.3% 94.1%;
   }
 }
@@ -101,24 +101,6 @@
   html.dark body {
     color: #f1f5f9 !important;
   }
-}
-
-/* 渐变背景动画 */
-@keyframes gradient-shift {
-  0% {
-    background-position: 0% 50%;
-  }
-  50% {
-    background-position: 100% 50%;
-  }
-  100% {
-    background-position: 0% 50%;
-  }
-}
-
-.animate-gradient-shift {
-  background-size: 200% 200%;
-  animation: gradient-shift 15s ease infinite;
 }
 
 /* 隐藏滚动条 */
