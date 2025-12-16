@@ -4,7 +4,7 @@ compatibility_date = "2024-01-01"
 account_id = "fc590bfe34fc6df2312c469a5db04aa2"
 
 [[r2_buckets]]
-binding = "BUCKET"
+binding = "IMAGES"
 bucket_name = "next-lambda-image-r2"
 
 [[d1_databases]]
@@ -12,9 +12,23 @@ binding = "DB"
 database_name = "v2-pico-pics-db1"
 database_id = "90ca5dd2-fc00-475b-99ac-99810d559356"
 
+[[durable_objects.bindings]]
+name = "UPLOAD_QUOTA"
+class_name = "UploadQuota"
+script_name = "uploader-worker-v2-prod"
+
+[[durable_objects.bindings]]
+name = "IP_BLACKLIST"
+class_name = "IPBlacklist"
+script_name = "uploader-worker-v2-prod"
+
 [vars]
 CDN_BASE_URL = "https://image.hiaplha.xyz"
 ALLOWED_ORIGINS = "*"
+MAX_FILE_SIZE = "10485760"
+DAILY_QUOTA_BYTES = "104857600"
+ABUSE_DETECTION_ENABLED = "true"
+CONTENT_MODERATION_ENABLED = "false"
 
 # 敏感信息需要通过 wrangler secret 设置：
 # wrangler secret put GITHUB_CLIENT_ID --config uploader-wrangler.toml
