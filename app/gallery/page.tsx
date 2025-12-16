@@ -91,8 +91,11 @@ function GalleryContent() {
     if (typeof window === "undefined") return;
 
     const authData = localStorage.getItem("auth");
-    console.log("Gallery: Checking auth data:", authData ? "Found" : "Not found");
-    
+    console.log(
+      "Gallery: Checking auth data:",
+      authData ? "Found" : "Not found"
+    );
+
     if (authData) {
       try {
         const auth = JSON.parse(authData);
@@ -102,7 +105,7 @@ function GalleryContent() {
           userId: auth.user?.id,
           username: auth.user?.login,
         });
-        
+
         if (auth.user && auth.accessToken) {
           setIsAuthenticated(true);
           setUser(auth.user);
