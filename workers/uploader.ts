@@ -241,6 +241,56 @@ app.use(
 app.use("*", logger());
 app.use("*", prettyJSON());
 
+// Origin 验证中间件 - 防止未授权访问
+app.use("*", async (c, next) => {
+  const path = c.req.path;
+
+  // 健康检查不需要验证
+  if (path === "/health") {
+    await next();
+    return;
+  }
+
+  const origin = c.req.header("Origin");
+  const referer = c.req.header("Referer");
+  const allowedOrigins = c.env.ALLOWED_ORIGINS?.split(",") || [];
+
+  // 检查 Origin 或 Referer
+  const source = origin || referer;
+
+  if (source) {
+    const isAllowed = allowedOrigins.some(
+      (allowed) =>
+        source.includes(allowed) ||
+        source.includes("localhost") ||
+        source.includes("127.0.0.1")
+    );
+
+    if (
+      !isAllowed &&
+      allowedOrigins.length > 0 &&
+      !allowedOrigins.includes("*")
+    ) {
+      console.warn("Blocked request from unauthorized origin:", {
+        origin,
+        referer,
+        path,
+        ip: c.req.header("CF-Connecting-IP"),
+      });
+      return c.json(
+        {
+          success: false,
+          error: "Unauthorized origin",
+          code: "ORIGIN_NOT_ALLOWED",
+        },
+        403
+      );
+    }
+  }
+
+  await next();
+});
+
 // Health check
 app.get("/health", (c) => {
   return c.json({

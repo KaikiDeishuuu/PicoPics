@@ -7,12 +7,57 @@ interface Env {
   IMAGES: R2Bucket;
   IMAGES_BUCKET_ID: string;
   ALLOWED_ORIGINS: string;
+  ALLOWED_REFERERS?: string; // 允许的 Referer 白名单
 }
 
 const app = new Hono<{ Bindings: Env }>();
 
 // 中间件
 app.use("*", logger());
+
+// Referer 防盗链检查
+app.use("*", async (c, next) => {
+  const path = c.req.path;
+
+  // 健康检查和根路径不检查
+  if (path === "/health" || path === "/") {
+    await next();
+    return;
+  }
+
+  const referer = c.req.header("Referer");
+  const allowedReferers = c.env.ALLOWED_REFERERS?.split(",") || [
+    "https://image.hiaplha.xyz", // CDN 自身
+    "localhost", // 本地开发
+  ];
+
+  // 检查 Referer
+  if (referer) {
+    const isAllowed = allowedReferers.some((allowed) =>
+      referer.includes(allowed)
+    );
+
+    if (!isAllowed) {
+      console.warn("Blocked request from unauthorized referer:", {
+        referer,
+        path,
+        ip: c.req.header("CF-Connecting-IP"),
+      });
+      return c.text("403 Forbidden: Unauthorized referer", 403);
+    }
+  } else {
+    // 无 Referer 的请求（直接访问、API调用、部分浏览器）
+    // 可以选择允许或拒绝
+    console.log("Request without referer:", {
+      path,
+      userAgent: c.req.header("User-Agent"),
+      ip: c.req.header("CF-Connecting-IP"),
+    });
+  }
+
+  await next();
+});
+
 app.use(
   "*",
   cors({
@@ -27,7 +72,10 @@ function getCorsHeaders(env: Env, request: Request): Record<string, string> {
   const origin = request.headers.get("Origin");
   const allowedOrigins = env.ALLOWED_ORIGINS?.split(",") || ["*"];
 
-  if (allowedOrigins.includes("*") || (origin && allowedOrigins.includes(origin))) {
+  if (
+    allowedOrigins.includes("*") ||
+    (origin && allowedOrigins.includes(origin))
+  ) {
     return {
       "Access-Control-Allow-Origin": origin || "*",
       "Access-Control-Allow-Methods": "GET, HEAD, OPTIONS",
@@ -71,7 +119,9 @@ app.get("/:key", async (c) => {
 
     // 如果请求缩略图，使用 Cloudflare Image Resizing
     if (width || height) {
-      const resizeUrl = new URL(`https://imagedelivery.net/${env.IMAGES_BUCKET_ID}/${key}`);
+      const resizeUrl = new URL(
+        `https://imagedelivery.net/${env.IMAGES_BUCKET_ID}/${key}`
+      );
       if (width) resizeUrl.searchParams.set("width", width);
       if (height) resizeUrl.searchParams.set("height", height);
       resizeUrl.searchParams.set("quality", quality);
