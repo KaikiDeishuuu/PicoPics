@@ -91,20 +91,38 @@ function GalleryContent() {
     if (typeof window === "undefined") return;
 
     const authData = localStorage.getItem("auth");
+    console.log("Gallery: Checking auth data:", authData ? "Found" : "Not found");
+    
     if (authData) {
       try {
         const auth = JSON.parse(authData);
+        console.log("Gallery: Parsed auth:", {
+          hasUser: !!auth.user,
+          hasToken: !!auth.accessToken,
+          userId: auth.user?.id,
+          username: auth.user?.login,
+        });
+        
         if (auth.user && auth.accessToken) {
           setIsAuthenticated(true);
           setUser(auth.user);
           setAccessToken(auth.accessToken);
+          console.log("Gallery: Authentication successful, token set");
+        } else {
+          console.error("Gallery: Invalid auth data structure");
+          localStorage.removeItem("auth");
+          router.push("/");
         }
       } catch (error) {
-        console.error("Failed to parse auth data:", error);
+        console.error("Gallery: Failed to parse auth data:", error);
         localStorage.removeItem("auth");
+        router.push("/");
       }
+    } else {
+      console.log("Gallery: No auth data, redirecting to home");
+      router.push("/");
     }
-  }, []);
+  }, [router]);
 
   // 检查 URL 参数中的 refresh 标志
   useEffect(() => {
