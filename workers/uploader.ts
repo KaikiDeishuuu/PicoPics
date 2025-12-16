@@ -423,41 +423,63 @@ app.post("/upload", async (c) => {
   try {
     const clientIP = c.req.header("CF-Connecting-IP") || "unknown";
 
-    // Get user ID from authentication
-    let userId = "anonymous";
+    // 强制要求 GitHub 认证
     const authHeader = c.req.header("Authorization");
-    if (authHeader && authHeader.startsWith("Bearer ")) {
-      const token = authHeader.substring(7);
+    if (!authHeader || !authHeader.startsWith("Bearer ")) {
+      return c.json(
+        {
+          success: false,
+          code: "UNAUTHORIZED",
+          message: "需要 GitHub 认证才能上传图片",
+        },
+        401
+      );
+    }
 
-      // 获取真实的 GitHub user ID
-      try {
-        const githubResponse = await fetch("https://api.github.com/user", {
-          headers: {
-            Authorization: `Bearer ${token}`,
-            "User-Agent": "PicoPics-v2/1.0.0",
+    const token = authHeader.substring(7);
+
+    // 验证 GitHub token 并获取用户信息
+    let githubUser: any;
+    let userId: string;
+    let username: string;
+
+    try {
+      const githubResponse = await fetch("https://api.github.com/user", {
+        headers: {
+          Authorization: `Bearer ${token}`,
+          "User-Agent": "PicoPics-v2/1.0.0",
+        },
+      });
+
+      if (!githubResponse.ok) {
+        console.log("GitHub token validation failed:", githubResponse.status);
+        return c.json(
+          {
+            success: false,
+            code: "INVALID_TOKEN",
+            message: "无效的 GitHub 访问令牌",
           },
-        });
-
-        if (githubResponse.ok) {
-          const githubUser = await githubResponse.json();
-          userId = githubUser.id.toString();
-          console.log("Using GitHub user ID:", userId);
-        } else {
-          // Fallback to token substring if GitHub verification fails
-          userId = token.substring(0, 8);
-          console.log(
-            "GitHub verification failed, using token as userId:",
-            userId
-          );
-        }
-      } catch (error) {
-        // Fallback to token substring on error
-        userId = token.substring(0, 8);
-        console.log(
-          "Error verifying GitHub token, using token as userId:",
-          userId
+          403
         );
       }
+
+      githubUser = await githubResponse.json();
+      userId = githubUser.id.toString();
+      username = githubUser.login;
+
+      console.log(
+        `UPLOAD: Authenticated user - ID: ${userId}, Username: ${username}`
+      );
+    } catch (error) {
+      console.error("GitHub authentication error:", error);
+      return c.json(
+        {
+          success: false,
+          code: "AUTH_ERROR",
+          message: "GitHub 认证失败，请重新登录",
+        },
+        500
+      );
     }
 
     // Check IP blacklist
@@ -669,24 +691,6 @@ app.post("/upload", async (c) => {
     // Save to database
     const r2ObjectKey = fileName;
 
-    // Get GitHub user info if available
-    let githubUser = null;
-    if (authHeader && authHeader.startsWith("Bearer ")) {
-      try {
-        const githubResponse = await fetch("https://api.github.com/user", {
-          headers: {
-            Authorization: authHeader,
-            "User-Agent": "PicoPics-v2/1.0.0",
-          },
-        });
-        if (githubResponse.ok) {
-          githubUser = await githubResponse.json();
-        }
-      } catch (error) {
-        console.error("Failed to fetch GitHub user info:", error);
-      }
-    }
-
     try {
       await c.env.DB.prepare(
         `INSERT INTO user_images (image_id, user_id, r2_object_key, filename, upload_date, file_size, mime_type)
@@ -703,35 +707,32 @@ app.post("/upload", async (c) => {
         )
         .run();
 
-      console.log(`Saved image to database: ${r2ObjectKey} for user ${userId}`);
+      console.log(
+        `Saved image to database: ${r2ObjectKey} for user ${userId} (${username})`
+      );
 
-      // Save/update user profile if GitHub user info is available
-      if (
-        githubUser &&
-        typeof githubUser === "object" &&
-        "login" in githubUser
-      ) {
-        try {
-          await c.env.DB.prepare(
-            `INSERT INTO user_profiles (user_id, username, email, avatar_url, updated_at)
-             VALUES (?, ?, ?, ?, ?)
-             ON CONFLICT(user_id) DO UPDATE SET
-               username = excluded.username,
-               email = excluded.email,
-               avatar_url = excluded.avatar_url,
-               updated_at = excluded.updated_at`
+      // Save/update user profile
+      try {
+        await c.env.DB.prepare(
+          `INSERT INTO user_profiles (user_id, username, email, avatar_url, updated_at)
+           VALUES (?, ?, ?, ?, ?)
+           ON CONFLICT(user_id) DO UPDATE SET
+             username = excluded.username,
+             email = excluded.email,
+             avatar_url = excluded.avatar_url,
+             updated_at = excluded.updated_at`
+        )
+          .bind(
+            userId,
+            username,
+            githubUser.email || null,
+            githubUser.avatar_url || null,
+            new Date().toISOString()
           )
-            .bind(
-              userId,
-              (githubUser as any).login,
-              (githubUser as any).email || null,
-              (githubUser as any).avatar_url || null,
-              new Date().toISOString()
-            )
-            .run();
-        } catch (profileError) {
-          console.error("Failed to save user profile:", profileError);
-        }
+          .run();
+        console.log(`Updated user profile for ${username}`);
+      } catch (profileError) {
+        console.error("Failed to save user profile:", profileError);
       }
     } catch (dbError) {
       console.error("Database save error:", dbError);
@@ -742,12 +743,6 @@ app.post("/upload", async (c) => {
     const publicUrl = `${
       c.env.CDN_BASE_URL || "https://image.hiaplha.xyz"
     }/${fileName}`;
-
-    // Get username for notification
-    const username =
-      githubUser && typeof githubUser === "object" && "login" in githubUser
-        ? (githubUser as any).login
-        : `User_${userId}`;
 
     // Get file type
     const fileType = file.type || "unknown";
