@@ -14,5 +14,5 @@ bucket_name = "next-lambda-image-r2"
 [vars]
 ALLOWED_ORIGINS = "*"
 IMAGES_BUCKET_ID = "next-lambda-image-r2"
-# 防盗链：允许所有 Referer（如需启用防盗链，请修改此配置）
-ALLOWED_REFERERS = "*"
+# 防盗链：只允许 nodeseek.com 引用图片
+ALLOWED_REFERERS = "nodeseek.com,localhost,127.0.0.1"
