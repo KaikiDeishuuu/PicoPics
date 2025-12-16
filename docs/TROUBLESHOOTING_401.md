@@ -40,8 +40,9 @@ Gallery: Authentication successful, token set
 ### 2. Token 已过期
 
 GitHub access token 默认不会过期，除非：
+
 - 你手动撤销了授权
-- GitHub检测到安全问题
+- GitHub 检测到安全问题
 
 **解决方案**: 重新登录
 
@@ -51,20 +52,20 @@ GitHub access token 默认不会过期，除非：
 
 ### 3. Token 权限不足
 
-**检查Token权限**:
+**检查 Token 权限**:
 
 ```javascript
 // 在浏览器控制台执行
-const auth = JSON.parse(localStorage.getItem('auth'));
-fetch('https://api.github.com/user', {
+const auth = JSON.parse(localStorage.getItem("auth"));
+fetch("https://api.github.com/user", {
   headers: {
-    'Authorization': `Bearer ${auth.accessToken}`,
-    'User-Agent': 'PicoPics'
-  }
+    Authorization: `Bearer ${auth.accessToken}`,
+    "User-Agent": "PicoPics",
+  },
 })
-.then(r => r.json())
-.then(console.log)
-.catch(console.error);
+  .then((r) => r.json())
+  .then(console.log)
+  .catch(console.error);
 ```
 
 如果返回 401，说明 token 无效。
@@ -96,6 +97,7 @@ curl -H "Authorization: Bearer $TOKEN" \
 ```
 
 预期结果：
+
 - ✅ 200 OK + 图片列表数据
 - ❌ 401 → Worker 验证逻辑有问题
 - ❌ 403 → Token 无效
@@ -109,52 +111,55 @@ curl -H "Authorization: Bearer $TOKEN" \
 ```javascript
 // 复制这段代码到控制台
 (async () => {
-  const auth = JSON.parse(localStorage.getItem('auth') || '{}');
-  
-  console.log('=== Token 验证 ===');
-  console.log('Access Token:', auth.accessToken ? auth.accessToken.substring(0, 20) + '...' : '不存在');
-  
+  const auth = JSON.parse(localStorage.getItem("auth") || "{}");
+
+  console.log("=== Token 验证 ===");
+  console.log(
+    "Access Token:",
+    auth.accessToken ? auth.accessToken.substring(0, 20) + "..." : "不存在"
+  );
+
   if (!auth.accessToken) {
-    console.error('❌ 未找到 Access Token');
+    console.error("❌ 未找到 Access Token");
     return;
   }
-  
-  console.log('测试 GitHub API...');
-  const githubRes = await fetch('https://api.github.com/user', {
+
+  console.log("测试 GitHub API...");
+  const githubRes = await fetch("https://api.github.com/user", {
     headers: {
-      'Authorization': `Bearer ${auth.accessToken}`,
-      'User-Agent': 'PicoPics'
-    }
+      Authorization: `Bearer ${auth.accessToken}`,
+      "User-Agent": "PicoPics",
+    },
   });
-  
-  console.log('GitHub API 状态:', githubRes.status);
+
+  console.log("GitHub API 状态:", githubRes.status);
   if (githubRes.ok) {
     const user = await githubRes.json();
-    console.log('✅ GitHub Token 有效');
-    console.log('用户:', user.login, `(ID: ${user.id})`);
+    console.log("✅ GitHub Token 有效");
+    console.log("用户:", user.login, `(ID: ${user.id})`);
   } else {
-    console.error('❌ GitHub Token 无效');
+    console.error("❌ GitHub Token 无效");
   }
-  
-  console.log('\\n测试 History Worker...');
+
+  console.log("\\n测试 History Worker...");
   const historyRes = await fetch(
-    'https://history-worker-v2-prod.haoweiw370.workers.dev/api/history',
+    "https://history-worker-v2-prod.haoweiw370.workers.dev/api/history",
     {
       headers: {
-        'Authorization': `Bearer ${auth.accessToken}`,
-        'Content-Type': 'application/json'
-      }
+        Authorization: `Bearer ${auth.accessToken}`,
+        "Content-Type": "application/json",
+      },
     }
   );
-  
-  console.log('History Worker 状态:', historyRes.status);
+
+  console.log("History Worker 状态:", historyRes.status);
   const historyData = await historyRes.json();
-  console.log('History Worker 响应:', historyData);
-  
+  console.log("History Worker 响应:", historyData);
+
   if (historyRes.ok) {
-    console.log('✅ History Worker 正常');
+    console.log("✅ History Worker 正常");
   } else {
-    console.error('❌ History Worker 返回错误:', historyData);
+    console.error("❌ History Worker 返回错误:", historyData);
   }
 })();
 ```
@@ -164,10 +169,10 @@ curl -H "Authorization: Bearer $TOKEN" \
 ```javascript
 // 监控所有 API 请求
 const originalFetch = window.fetch;
-window.fetch = function(...args) {
+window.fetch = function (...args) {
   const [url, options] = args;
-  console.log('📡 Fetch:', url);
-  console.log('Headers:', options?.headers);
+  console.log("📡 Fetch:", url);
+  console.log("Headers:", options?.headers);
   return originalFetch.apply(this, args);
 };
 ```
@@ -190,16 +195,19 @@ location.reload();
 
 ```javascript
 // 替换为你的 GitHub user 信息和 token
-localStorage.setItem('auth', JSON.stringify({
-  user: {
-    id: 你的用户ID,
-    login: "你的用户名",
-    email: "你的邮箱",
-    avatar_url: "头像URL"
-  },
-  accessToken: "gho_你的token",
-  timestamp: Date.now()
-}));
+localStorage.setItem(
+  "auth",
+  JSON.stringify({
+    user: {
+      id: 你的用户ID,
+      login: "你的用户名",
+      email: "你的邮箱",
+      avatar_url: "头像URL",
+    },
+    accessToken: "gho_你的token",
+    timestamp: Date.now(),
+  })
+);
 
 location.reload();
 ```
@@ -222,9 +230,9 @@ npx wrangler secret list --config history-wrangler.toml
 ```typescript
 if (!response.ok && response.status === 401) {
   // Token 可能已过期
-  localStorage.removeItem('auth');
-  window.location.href = '/';
-  throw new Error('认证失败，请重新登录');
+  localStorage.removeItem("auth");
+  window.location.href = "/";
+  throw new Error("认证失败，请重新登录");
 }
 ```
 
@@ -236,7 +244,7 @@ if (!response.ok && response.status === 401) {
 retry: (failureCount, error) => {
   if (error.status === 401) return false; // 不重试认证错误
   return failureCount < 3;
-}
+};
 ```
 
 ### 3. Token 刷新

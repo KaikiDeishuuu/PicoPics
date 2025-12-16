@@ -256,8 +256,7 @@ export function createApiClient(accessToken?: string): ApiClient {
   const uploadApi =
     process.env.NODE_ENV === "development"
       ? "" // 使用相对路径，会调用本地的 /api/upload
-      : process.env.NEXT_PUBLIC_UPLOAD_API ||
-        "https://uploader-worker-v2-prod.haoweiw370.workers.dev";
+      : process.env.NEXT_PUBLIC_UPLOAD_API || "https://api.hiaplha.xyz";
   const baseUrl = uploadApi;
 
   console.log("API Base URL:", baseUrl);
@@ -270,8 +269,7 @@ export function createApiClient(accessToken?: string): ApiClient {
 export function createHistoryApiClient(accessToken?: string): ApiClient {
   // History API uses a different worker
   const historyApi =
-    process.env.NEXT_PUBLIC_HISTORY_API ||
-    "https://history-worker-v2-prod.haoweiw370.workers.dev";
+    process.env.NEXT_PUBLIC_HISTORY_API || "https://history.hiaplha.xyz";
 
   // Use the history API base URL directly
   const baseUrl = historyApi;

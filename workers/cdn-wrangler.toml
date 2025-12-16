@@ -14,6 +14,5 @@ bucket_name = "next-lambda-image-r2"
 [vars]
 ALLOWED_ORIGINS = "*"
 IMAGES_BUCKET_ID = "next-lambda-image-r2"
-# 防盗链：允许的 Referer 白名单（逗号分隔）
-# 请根据你的实际域名修改
-ALLOWED_REFERERS = "https://image.hiaplha.xyz,localhost,127.0.0.1,vercel.app"
+# 防盗链：允许所有 Referer（如需启用防盗链，请修改此配置）
+ALLOWED_REFERERS = "*"

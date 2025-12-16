@@ -24,9 +24,8 @@ script_name = "uploader-worker-v2-prod"
 
 [vars]
 CDN_BASE_URL = "https://image.hiaplha.xyz"
-# 允许的来源（逗号分隔）- 请根据你的实际域名修改
-# 使用 * 允许所有来源（不安全），或指定具体域名
-ALLOWED_ORIGINS = "vercel.app,localhost,127.0.0.1"
+# 允许所有来源访问
+ALLOWED_ORIGINS = "*"
 MAX_FILE_SIZE = "10485760"
 DAILY_QUOTA_BYTES = "104857600"
 ABUSE_DETECTION_ENABLED = "true"

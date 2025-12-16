@@ -3,13 +3,13 @@
 echo "======================================"
 echo "测试 1: Health Check"
 echo "======================================"
-curl -s https://uploader-worker-v2-prod.haoweiw370.workers.dev/health | jq
+curl -s https://api.hiaplha.xyz/health | jq
 echo ""
 
 echo "======================================"
 echo "测试 2: Quota API (无 token - 匿名用户)"
 echo "======================================"
-curl -s "https://uploader-worker-v2-prod.haoweiw370.workers.dev/api/quota" | jq
+curl -s "https://api.hiaplha.xyz/api/quota" | jq
 echo ""
 
 echo "======================================"
@@ -24,7 +24,7 @@ echo ""
 echo "======================================"
 echo "测试 4: 上传图片 (无认证)"
 echo "======================================"
-curl -v -X POST https://uploader-worker-v2-prod.haoweiw370.workers.dev/upload \
+curl -v -X POST https://api.hiaplha.xyz/upload \
   -F "image=@/tmp/test.png" \
   2>&1 | tee /tmp/upload-test-output.txt
 

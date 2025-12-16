@@ -173,7 +173,7 @@ function GalleryContent() {
     if (accessToken) {
       const historyApi =
         process.env.NEXT_PUBLIC_HISTORY_API ||
-        "https://history-worker-v2-prod.haoweiw370.workers.dev";
+        "https://history.hiaplha.xyz";
       fetch(`${historyApi}/api/history`, {
         method: "GET",
         headers: {

@@ -51,13 +51,11 @@ const nextConfig = {
   // 环境变量配置
   env: {
     NEXT_PUBLIC_UPLOAD_API:
-      process.env.NEXT_PUBLIC_UPLOAD_API ||
-      "https://uploader-worker-v2-prod.haoweiw370.workers.dev",
+      process.env.NEXT_PUBLIC_UPLOAD_API || "https://api.hiaplha.xyz",
     NEXT_PUBLIC_HISTORY_API:
-      process.env.NEXT_PUBLIC_HISTORY_API ||
-      "https://your-history-worker.workers.dev",
+      process.env.NEXT_PUBLIC_HISTORY_API || "https://history.hiaplha.xyz",
     NEXT_PUBLIC_CDN_BASE:
-      process.env.NEXT_PUBLIC_CDN_BASE || "https://your-cdn-worker.workers.dev",
+      process.env.NEXT_PUBLIC_CDN_BASE || "https://image.hiaplha.xyz",
   },
 
   // 图片优化配置
@@ -66,9 +64,10 @@ const nextConfig = {
     domains: [
       "pic.lambdax.me",
       "localhost",
-      "uploader-worker-v2-prod.haoweiw370.workers.dev",
-      "your-history-worker.workers.dev",
-      "your-cdn-worker.workers.dev",
+      "api.hiaplha.xyz",
+      "history.hiaplha.xyz",
+      "image.hiaplha.xyz",
+      "r2browser.hiaplha.xyz",
     ],
     formats: ["image/avif", "image/webp"],
   },

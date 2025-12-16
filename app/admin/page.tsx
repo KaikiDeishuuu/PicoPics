@@ -115,7 +115,7 @@ function AdminContent() {
       try {
         const adminApi =
           process.env.NEXT_PUBLIC_UPLOAD_API ||
-          "https://uploader-worker-v2-prod.haoweiw370.workers.dev";
+          "https://api.hiaplha.xyz";
 
         const response = await fetch(`${adminApi}/api/admin/stats`, {
           method: "GET",
@@ -176,7 +176,7 @@ function AdminContent() {
     try {
       const adminApi =
         process.env.NEXT_PUBLIC_UPLOAD_API ||
-        "https://uploader-worker-v2-prod.haoweiw370.workers.dev";
+        "https://api.hiaplha.xyz";
 
       const response = await fetch(`${adminApi}/api/admin/stats`, {
         method: "GET",
@@ -215,7 +215,7 @@ function AdminContent() {
       setLoading(true);
       const adminApi =
         process.env.NEXT_PUBLIC_UPLOAD_API ||
-        "https://uploader-worker-v2-prod.haoweiw370.workers.dev";
+        "https://api.hiaplha.xyz";
 
       const response = await fetch(`${adminApi}/api/admin/stats`, {
         method: "GET",
@@ -253,7 +253,7 @@ function AdminContent() {
     try {
       const adminApi =
         process.env.NEXT_PUBLIC_UPLOAD_API ||
-        "https://uploader-worker-v2-prod.haoweiw370.workers.dev";
+        "https://api.hiaplha.xyz";
 
       const response = await fetch(`${adminApi}/api/admin/users`, {
         method: "GET",
@@ -287,7 +287,7 @@ function AdminContent() {
     try {
       const adminApi =
         process.env.NEXT_PUBLIC_UPLOAD_API ||
-        "https://uploader-worker-v2-prod.haoweiw370.workers.dev";
+        "https://api.hiaplha.xyz";
 
       const response = await fetch(`${adminApi}/api/admin/images`, {
         method: "GET",
@@ -317,7 +317,7 @@ function AdminContent() {
     try {
       const adminApi =
         process.env.NEXT_PUBLIC_UPLOAD_API ||
-        "https://uploader-worker-v2-prod.haoweiw370.workers.dev";
+        "https://api.hiaplha.xyz";
 
       const response = await fetch(
         `${adminApi}/api/admin/images/${encodeURIComponent(key)}`,
@@ -383,7 +383,7 @@ function AdminContent() {
     try {
       const adminApi =
         process.env.NEXT_PUBLIC_UPLOAD_API ||
-        "https://uploader-worker-v2-prod.haoweiw370.workers.dev";
+        "https://api.hiaplha.xyz";
 
       const response = await fetch(
         `${adminApi}/api/admin/images/batch-delete`,

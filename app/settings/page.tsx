@@ -60,7 +60,7 @@ export default function SettingsPage() {
       const response = await fetch(
         `${
           process.env.NEXT_PUBLIC_UPLOAD_API ||
-          "https://uploader-worker-v2-prod.haoweiw370.workers.dev"
+          "https://api.hiaplha.xyz"
         }/api/user/settings`,
         {
           headers: {
@@ -95,7 +95,7 @@ export default function SettingsPage() {
       const response = await fetch(
         `${
           process.env.NEXT_PUBLIC_UPLOAD_API ||
-          "https://uploader-worker-v2-prod.haoweiw370.workers.dev"
+          "https://api.hiaplha.xyz"
         }/api/user/settings`,
         {
           method: "PUT",

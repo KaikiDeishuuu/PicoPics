@@ -39,7 +39,7 @@ export default function AuthCallback() {
 
         // 调用后端 API 交换访问令牌
         const response = await fetch(
-          "https://uploader-worker-v2-prod.haoweiw370.workers.dev/auth/callback",
+          "https://api.hiaplha.xyz/auth/callback",
           {
             method: "POST",
             headers: {
