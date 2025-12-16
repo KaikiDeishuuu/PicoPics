@@ -3,6 +3,11 @@ main = "uploader.ts"
 compatibility_date = "2024-01-01"
 account_id = "fc590bfe34fc6df2312c469a5db04aa2"
 
+# 自定义域名路由配置
+routes = [
+  { pattern = "api.hiaplha.xyz/*", zone_name = "hiaplha.xyz" }
+]
+
 [[r2_buckets]]
 binding = "IMAGES"
 bucket_name = "next-lambda-image-r2"

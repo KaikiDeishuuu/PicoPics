@@ -2,6 +2,11 @@ name = "history-worker-v2-prod"
 main = "history.ts"
 compatibility_date = "2024-01-01"
 
+# 自定义域名路由配置
+routes = [
+  { pattern = "history.hiaplha.xyz/*", zone_name = "hiaplha.xyz" }
+]
+
 [[d1_databases]]
 binding = "DB"
 database_name = "v2-pico-pics-db1"
