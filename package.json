@@ -81,7 +81,7 @@
     "typescript": "^5.3.3",
     "vite": "^7.1.12",
     "vitest": "^4.0.1",
-    "wrangler": "^4.55.0"
+    "wrangler": "^4.59.1"
   },
   "overrides": {
     "inflight": "^1.0.6",
