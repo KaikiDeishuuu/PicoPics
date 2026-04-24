@@ -32,7 +32,7 @@ app.use(
 );
 
 // 获取 CORS 头部
-function getCorsHeaders(env: Env, request: Request): Record<string, string> {
+function _getCorsHeaders(env: Env, request: Request): Record<string, string> {
   const origin = request.headers.get("Origin");
   const allowedOrigins = env.ALLOWED_ORIGINS?.split(",") || ["*"];
 

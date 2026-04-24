@@ -1,7 +1,7 @@
 "use client";
 
 import { motion } from "framer-motion";
-import { Check, Copy, Download, ExternalLink, Share2 } from "lucide-react";
+import { Check, Copy, Download, ExternalLink } from "lucide-react";
 import { useState } from "react";
 
 interface ImageBadgeProps {
@@ -20,23 +20,13 @@ interface UrlFormatItemProps {
   copied: boolean;
 }
 
-function UrlFormatItem({
-  label,
-  description,
-  code,
-  onCopy,
-  copied,
-}: UrlFormatItemProps) {
+function UrlFormatItem({ label, description, code, onCopy, copied }: UrlFormatItemProps) {
   return (
     <div className="space-y-1">
       <div className="flex items-center justify-between">
         <div>
-          <span className="text-foreground/80 text-xs font-medium">
-            {label}
-          </span>
-          <span className="text-muted-foreground text-xs ml-2">
-            {description}
-          </span>
+          <span className="text-foreground/80 text-xs font-medium">{label}</span>
+          <span className="text-muted-foreground text-xs ml-2">{description}</span>
         </div>
         <motion.button
           whileHover={{ scale: 1.05 }}
@@ -52,21 +42,13 @@ function UrlFormatItem({
         </motion.button>
       </div>
       <div className="bg-muted/50 rounded p-2 border border-border/50">
-        <code className="text-foreground/70 text-xs font-mono break-all">
-          {code}
-        </code>
+        <code className="text-foreground/70 text-xs font-mono break-all">{code}</code>
       </div>
     </div>
   );
 }
 
-export function ImageBadge({
-  url,
-  filename,
-  size,
-  uploadedAt,
-  className = "",
-}: ImageBadgeProps) {
+export function ImageBadge({ url, filename, size, uploadedAt, className = "" }: ImageBadgeProps) {
   const [copied, setCopied] = useState(false);
   const [showDetails, setShowDetails] = useState(false);
 
@@ -75,7 +57,7 @@ export function ImageBadge({
     const k = 1024;
     const sizes = ["Bytes", "KB", "MB", "GB"];
     const i = Math.floor(Math.log(bytes) / Math.log(k));
-    return parseFloat((bytes / k ** i).toFixed(2)) + " " + sizes[i];
+    return `${parseFloat((bytes / k ** i).toFixed(2))} ${sizes[i]}`;
   };
 
   const formatDate = (dateString: string) => {
@@ -164,9 +146,7 @@ export function ImageBadge({
       {/* 多格式URL显示区域 */}
       <div className="space-y-2">
         <div className="flex items-center justify-between">
-          <span className="text-foreground/80 text-sm font-medium">
-            Link Formats:
-          </span>
+          <span className="text-foreground/80 text-sm font-medium">Link Formats:</span>
           <motion.button
             whileHover={{ scale: 1.05 }}
             whileTap={{ scale: 0.95 }}
@@ -197,9 +177,7 @@ export function ImageBadge({
               description="HTML img tag with alt"
               code={`<img src="${url}" alt="${filename}">`}
               onCopy={() => {
-                navigator.clipboard.writeText(
-                  `<img src="${url}" alt="${filename}">`
-                );
+                navigator.clipboard.writeText(`<img src="${url}" alt="${filename}">`);
                 setCopied(true);
                 setTimeout(() => setCopied(false), 2000);
               }}
@@ -235,9 +213,7 @@ export function ImageBadge({
               description="(Link)"
               code={`[![${filename}](${url})](${url})`}
               onCopy={() => {
-                navigator.clipboard.writeText(
-                  `[![${filename}](${url})](${url})`
-                );
+                navigator.clipboard.writeText(`[![${filename}](${url})](${url})`);
                 setCopied(true);
                 setTimeout(() => setCopied(false), 2000);
               }}
@@ -308,7 +284,7 @@ export function SimpleImageBadge({
     const k = 1024;
     const sizes = ["Bytes", "KB", "MB", "GB"];
     const i = Math.floor(Math.log(bytes) / Math.log(k));
-    return parseFloat((bytes / k ** i).toFixed(2)) + " " + sizes[i];
+    return `${parseFloat((bytes / k ** i).toFixed(2))} ${sizes[i]}`;
   };
 
   const copyToClipboard = async () => {
@@ -329,12 +305,8 @@ export function SimpleImageBadge({
     >
       <div className="flex items-center justify-between">
         <div className="flex-1 min-w-0">
-          <p className="text-foreground font-medium text-sm truncate">
-            {filename}
-          </p>
-          <p className="text-muted-foreground text-xs">
-            {formatFileSize(size)}
-          </p>
+          <p className="text-foreground font-medium text-sm truncate">{filename}</p>
+          <p className="text-muted-foreground text-xs">{formatFileSize(size)}</p>
         </div>
         <motion.button
           whileHover={{ scale: 1.05 }}

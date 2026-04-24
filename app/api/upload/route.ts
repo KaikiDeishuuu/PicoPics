@@ -3,61 +3,102 @@ import { type NextRequest, NextResponse } from "next/server";
 export const runtime = "edge";
 export const dynamic = "force-dynamic";
 
+const corsHeaders = {
+  "Access-Control-Allow-Origin": "*",
+  "Access-Control-Allow-Methods": "POST, OPTIONS",
+  "Access-Control-Allow-Headers": "Content-Type, Authorization, CF-Turnstile-Token",
+};
+
+function toJsonResponse(payload: unknown, status: number) {
+  return NextResponse.json(payload, {
+    status,
+    headers: corsHeaders,
+  });
+}
+
+function getUploadApiBaseUrl() {
+  return process.env.UPLOAD_API || process.env.NEXT_PUBLIC_UPLOAD_API;
+}
+
+export async function OPTIONS() {
+  return new NextResponse(null, {
+    status: 204,
+    headers: corsHeaders,
+  });
+}
+
 export async function POST(request: NextRequest) {
-  try {
-    // Get the upload URL from environment
-    const uploadApi =
-      process.env.NEXT_PUBLIC_UPLOAD_API ||
-      "https://uploader-worker-v2-prod.haoweiw370.workers.dev";
-    const uploadUrl = uploadApi + "/upload";
+  const uploadApiBase = getUploadApiBaseUrl();
 
-    console.log("Proxying upload request to:", uploadUrl);
-
-    // Get the form data from the request
-    const formData = await request.formData();
-
-    // Forward the request to the actual upload worker
-    const response = await fetch(uploadUrl, {
-      method: "POST",
-      body: formData,
-      headers: {
-        // Forward authorization header if present
-        ...(request.headers.get("authorization") && {
-          Authorization: request.headers.get("authorization")!,
-        }),
-        ...(request.headers.get("cf-turnstile-token") && {
-          "CF-Turnstile-Token": request.headers.get("cf-turnstile-token")!,
-        }),
-        // Add CORS headers
-        "Access-Control-Allow-Origin": "*",
-        "Access-Control-Allow-Methods": "POST, OPTIONS",
-        "Access-Control-Allow-Headers": "Content-Type, Authorization",
+  if (!uploadApiBase) {
+    return toJsonResponse(
+      {
+        success: false,
+        error: "UPLOAD_API is not configured.",
+        code: "UPLOAD_API_NOT_CONFIGURED",
+        message: "Please configure UPLOAD_API in the server environment.",
       },
-    });
+      500
+    );
+  }
 
-    console.log("Upload worker response status:", response.status);
+  const uploadUrl = `${uploadApiBase.replace(/\/$/, "")}/upload`;
 
-    if (!response.ok) {
-      const errorText = await response.text();
-      console.error("Upload worker error:", errorText);
-      return NextResponse.json(
-        { error: `Upload worker error: ${response.status}`, success: false },
-        { status: response.status }
-      );
+  try {
+    const formData = await request.formData();
+    const upstreamHeaders = new Headers();
+    const authorization = request.headers.get("authorization");
+    const turnstileToken = request.headers.get("cf-turnstile-token");
+
+    if (authorization) {
+      upstreamHeaders.set("Authorization", authorization);
+    }
+    if (turnstileToken) {
+      upstreamHeaders.set("CF-Turnstile-Token", turnstileToken);
     }
 
-    const data = await response.json();
-    console.log("Upload successful:", data);
+    const upstreamResponse = await fetch(uploadUrl, {
+      method: "POST",
+      body: formData,
+      headers: upstreamHeaders,
+    });
 
-    return NextResponse.json(data, { status: response.status });
-  } catch (error) {
-    console.error("Upload API error:", error);
-    return NextResponse.json(
+    const text = await upstreamResponse.text();
+    let jsonPayload: unknown = null;
+    if (text) {
+      try {
+        jsonPayload = JSON.parse(text);
+      } catch {
+        jsonPayload = null;
+      }
+    }
+
+    if (jsonPayload) {
+      return toJsonResponse(jsonPayload, upstreamResponse.status);
+    }
+
+    return toJsonResponse(
       {
-        error: `Upload failed: ${error instanceof Error ? error.message : "Unknown error"}`,
-        success: false,
+        success: upstreamResponse.ok,
+        error: upstreamResponse.ok
+          ? undefined
+          : `Upload failed with status ${upstreamResponse.status}.`,
+        code: upstreamResponse.ok ? undefined : "UPSTREAM_UPLOAD_ERROR",
+        message: upstreamResponse.ok
+          ? "Upload completed."
+          : "Upload service returned an empty response.",
       },
-      { status: 500 }
+      upstreamResponse.status
+    );
+  } catch (error) {
+    return toJsonResponse(
+      {
+        success: false,
+        error: "Upload proxy failed.",
+        code: "UPLOAD_PROXY_ERROR",
+        message: error instanceof Error ? error.message : "Unknown error",
+      },
+      500
     );
   }
 }

@@ -6,17 +6,18 @@ export const dynamic = "force-dynamic";
 export async function GET(request: NextRequest) {
   try {
     // For Cloudflare Pages Functions, we redirect to the actual history worker
-    const historyApi =
-      process.env.NEXT_PUBLIC_HISTORY_API || "https://history.hiaplha.xyz";
-    const historyUrl = historyApi + "/api/history";
+    const historyApi = process.env.NEXT_PUBLIC_HISTORY_API || "https://history.hiaplha.xyz";
+    const historyUrl = `${historyApi}/api/history`;
+
+    const authorization = request.headers.get("authorization");
 
     // Forward the request to the actual history worker
     const response = await fetch(historyUrl, {
       method: "GET",
       headers: {
         // Forward authorization header if present
-        ...(request.headers.get("authorization") && {
-          Authorization: request.headers.get("authorization")!,
+        ...(authorization && {
+          Authorization: authorization,
         }),
       },
     });
@@ -26,9 +27,6 @@ export async function GET(request: NextRequest) {
     return NextResponse.json(data, { status: response.status });
   } catch (error) {
     console.error("Uploads API error:", error);
-    return NextResponse.json(
-      { error: "Failed to fetch uploads", uploads: [] },
-      { status: 500 }
-    );
+    return NextResponse.json({ error: "Failed to fetch uploads", uploads: [] }, { status: 500 });
   }
 }

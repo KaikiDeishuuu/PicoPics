@@ -27,21 +27,20 @@ export function useUploadImage(accessToken?: string) {
   const apiClient = useApiClient(accessToken);
 
   return useMutation({
-    mutationFn: ({
-      file,
-      onProgress,
-    }: {
-      file: File;
-      onProgress?: (progress: number) => void;
-    }) => apiClient.uploadFile(file, onProgress),
+    mutationFn: ({ file, onProgress }: { file: File; onProgress?: (progress: number) => void }) =>
+      apiClient.uploadFile(file, onProgress).then((response) => {
+        if (!response.success) {
+          throw new Error(response.error || response.message || "Upload failed");
+        }
+        return response;
+      }),
     onSuccess: (data) => {
       // Invalidate and refetch user images and quota
       queryClient.invalidateQueries({ queryKey: queryKeys.userImages });
       queryClient.invalidateQueries({ queryKey: queryKeys.quota });
 
       // Show success notification
-      const filename =
-        data?.data?.filename || data?.data?.r2ObjectKey || "图片";
+      const filename = data?.data?.filename || data?.data?.r2ObjectKey || "图片";
       NotificationService.show(Notifications.upload.success(filename));
     },
     onError: (error: unknown) => {
@@ -89,21 +88,16 @@ export function useCleanInvalidRecords(accessToken?: string) {
 
 // Quota Query
 export function useQuota(accessToken?: string) {
-  const apiClient = useApiClient(accessToken);
-
   return useQuery({
     queryKey: [...queryKeys.quota, accessToken],
     queryFn: async () => {
-      console.log("QUOTA: Fetching quota data...");
-      const apiUrl =
-        process.env.NEXT_PUBLIC_UPLOAD_API || "https://api.hiaplha.xyz";
+      const apiUrl = process.env.NEXT_PUBLIC_UPLOAD_API || "https://api.hiaplha.xyz";
       const response = await fetch(`${apiUrl}/api/quota`, {
         headers: {
           Authorization: `Bearer ${accessToken}`,
         },
       });
       const data = await response.json();
-      console.log("QUOTA: Received quota data:", data.data);
       return data.data;
     },
     enabled: !!accessToken,

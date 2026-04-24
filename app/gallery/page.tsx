@@ -3,14 +3,11 @@
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import {
   ArrowLeft,
-  Download,
-  Filter,
   Grid,
   Image as ImageIcon,
   List,
   RefreshCw,
   Search,
-  Share2,
   Trash2,
   Upload,
 } from "lucide-react";
@@ -18,21 +15,12 @@ import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
 import { Button } from "@/components/ui/button";
-import {
-  Card,
-  CardContent,
-  CardDescription,
-  CardHeader,
-  CardTitle,
-} from "@/components/ui/card";
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Footer } from "@/components/ui/footer";
 import { ImageGallery } from "@/components/ui/gallery";
-import { ImageBadge, SimpleImageBadge } from "@/components/ui/image-badge";
 import { LoadingSpinner } from "@/components/ui/loading";
-import {
-  NotificationContainer,
-  useNotifications,
-} from "@/components/ui/notification";
+import { NotificationContainer, useNotifications } from "@/components/ui/notification";
+import type { ImageHistoryRecord } from "@/lib/api";
 import { useDeleteImage, useUserImages } from "@/lib/hooks/use-queries";
 
 // 强制动态渲染
@@ -46,15 +34,6 @@ interface User {
   avatar_url?: string;
 }
 
-interface ImageRecord {
-  id: string;
-  url: string;
-  filename: string;
-  uploadDate: string;
-  size: number;
-  mimeType: string;
-}
-
 function GalleryContent() {
   const [isAuthenticated, setIsAuthenticated] = useState(false);
   const [user, setUser] = useState<User | null>(null);
@@ -66,8 +45,7 @@ function GalleryContent() {
   const [selectedImages, setSelectedImages] = useState<string[]>([]);
   const [isSelectMode, setIsSelectMode] = useState(false);
   const router = useRouter();
-  const { notifications, addNotification, removeNotification } =
-    useNotifications();
+  const { notifications, addNotification, removeNotification } = useNotifications();
 
   // React Query hooks
   const {
@@ -79,9 +57,7 @@ function GalleryContent() {
 
   // 处理API响应数据
   const images =
-    imagesResponse?.success && Array.isArray(imagesResponse.data)
-      ? imagesResponse.data
-      : [];
+    imagesResponse?.success && Array.isArray(imagesResponse.data) ? imagesResponse.data : [];
   const deleteMutation = useDeleteImage(accessToken || undefined);
 
   // 调试信息
@@ -91,38 +67,24 @@ function GalleryContent() {
     if (typeof window === "undefined") return;
 
     const authData = localStorage.getItem("auth");
-    console.log(
-      "Gallery: Checking auth data:",
-      authData ? "Found" : "Not found"
-    );
-
     if (authData) {
       try {
         const auth = JSON.parse(authData);
-        console.log("Gallery: Parsed auth:", {
-          hasUser: !!auth.user,
-          hasToken: !!auth.accessToken,
-          userId: auth.user?.id,
-          username: auth.user?.login,
-        });
 
         if (auth.user && auth.accessToken) {
           setIsAuthenticated(true);
           setUser(auth.user);
           setAccessToken(auth.accessToken);
-          console.log("Gallery: Authentication successful, token set");
         } else {
-          console.error("Gallery: Invalid auth data structure");
           localStorage.removeItem("auth");
           router.push("/");
         }
       } catch (error) {
-        console.error("Gallery: Failed to parse auth data:", error);
+        console.error("Failed to parse auth data:", error);
         localStorage.removeItem("auth");
         router.push("/");
       }
     } else {
-      console.log("Gallery: No auth data, redirecting to home");
       router.push("/");
     }
   }, [router]);
@@ -142,7 +104,7 @@ function GalleryContent() {
 
   // 过滤和排序图片
   const filteredImages = images
-    .filter((image: any) => {
+    .filter((image: ImageHistoryRecord) => {
       const matchesSearch = image.fileName
         ? image.fileName.toLowerCase().includes(searchTerm.toLowerCase())
         : true;
@@ -152,17 +114,14 @@ function GalleryContent() {
         (filterBy === "videos" && image.type?.startsWith("video/"));
       return matchesSearch && matchesFilter;
     })
-    .sort((a: any, b: any) => {
+    .sort((a: ImageHistoryRecord, b: ImageHistoryRecord) => {
       switch (sortBy) {
         case "name":
           return (a.fileName || "").localeCompare(b.fileName || "");
         case "size":
           return (b.size || 0) - (a.size || 0);
         default:
-          return (
-            new Date(b.uploadedAt || 0).getTime() -
-            new Date(a.uploadedAt || 0).getTime()
-          );
+          return new Date(b.uploadedAt || 0).getTime() - new Date(a.uploadedAt || 0).getTime();
       }
     });
 
@@ -171,9 +130,7 @@ function GalleryContent() {
   // 测试API调用
   useEffect(() => {
     if (accessToken) {
-      const historyApi =
-        process.env.NEXT_PUBLIC_HISTORY_API ||
-        "https://history.hiaplha.xyz";
+      const historyApi = process.env.NEXT_PUBLIC_HISTORY_API || "https://history.hiaplha.xyz";
       fetch(`${historyApi}/api/history`, {
         method: "GET",
         headers: {
@@ -184,7 +141,7 @@ function GalleryContent() {
         .then((response) => {
           return response.json();
         })
-        .then((data) => {})
+        .then((_data) => {})
         .catch((error) => {
           console.error("API Call Error:", error);
         });
@@ -193,11 +150,7 @@ function GalleryContent() {
 
   // 处理图片删除
   const handleDeleteImage = async (imageId: string) => {
-    if (
-      !confirm(
-        "Are you sure you want to delete this image? This action cannot be undone."
-      )
-    ) {
+    if (!confirm("Are you sure you want to delete this image? This action cannot be undone.")) {
       return;
     }
 
@@ -209,7 +162,7 @@ function GalleryContent() {
         message: "Image has been successfully deleted",
         duration: 3000,
       });
-    } catch (error) {
+    } catch (_error) {
       addNotification({
         type: "error",
         title: "Delete Failed",
@@ -232,9 +185,7 @@ function GalleryContent() {
     }
 
     try {
-      await Promise.all(
-        selectedImages.map((imageId) => deleteMutation.mutateAsync(imageId))
-      );
+      await Promise.all(selectedImages.map((imageId) => deleteMutation.mutateAsync(imageId)));
       setSelectedImages([]);
       setIsSelectMode(false);
       addNotification({
@@ -243,7 +194,7 @@ function GalleryContent() {
         message: `Deleted ${selectedImages.length} images`,
         duration: 3000,
       });
-    } catch (error) {
+    } catch (_error) {
       addNotification({
         type: "error",
         title: "Batch Delete Failed",
@@ -312,8 +263,7 @@ function GalleryContent() {
                         My Gallery
                       </CardTitle>
                       <CardDescription className="text-sm md:text-base text-muted-foreground">
-                        Welcome back, {user?.login || "User"}! You have{" "}
-                        {images.length} images
+                        Welcome back, {user?.login || "User"}! You have {images.length} images
                       </CardDescription>
                     </div>
                   </div>
@@ -324,11 +274,7 @@ function GalleryContent() {
                       onClick={handleRefresh}
                       disabled={isLoading}
                     >
-                      <RefreshCw
-                        className={`h-4 w-4 mr-2 ${
-                          isLoading ? "animate-spin" : ""
-                        }`}
-                      />
+                      <RefreshCw className={`h-4 w-4 mr-2 ${isLoading ? "animate-spin" : ""}`} />
                       Refresh
                     </Button>
                     <Link href="/upload">
@@ -366,11 +312,7 @@ function GalleryContent() {
                   <div className="flex gap-2">
                     <select
                       value={filterBy}
-                      onChange={(e) =>
-                        setFilterBy(
-                          e.target.value as "all" | "images" | "videos"
-                        )
-                      }
+                      onChange={(e) => setFilterBy(e.target.value as "all" | "images" | "videos")}
                       className="px-4 py-2 border border-border rounded-lg focus:ring-2 focus:ring-blue-500 bg-card text-foreground text-sm font-medium shadow-sm hover:border-blue-400/50 transition-all cursor-pointer appearance-none bg-[url('data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iMTIiIGhlaWdodD0iMTIiIHZpZXdCb3g9IjAgMCAxMiAxMiIgZmlsbD0ibm9uZSIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj48cGF0aCBkPSJNNiA5TDkgNkgzTDYgOVoiIGZpbGw9ImN1cnJlbnRDb2xvciIvPjwvc3ZnPg==')] bg-no-repeat bg-right-2 bg-[length:14px] pr-9"
                     >
                       <option value="all">All Files</option>
@@ -380,9 +322,7 @@ function GalleryContent() {
 
                     <select
                       value={sortBy}
-                      onChange={(e) =>
-                        setSortBy(e.target.value as "date" | "name" | "size")
-                      }
+                      onChange={(e) => setSortBy(e.target.value as "date" | "name" | "size")}
                       className="px-4 py-2 border border-border rounded-lg focus:ring-2 focus:ring-blue-500 bg-card text-foreground text-sm font-medium shadow-sm hover:border-blue-400/50 transition-all cursor-pointer appearance-none bg-[url('data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iMTIiIGhlaWdodD0iMTIiIHZpZXdCb3g9IjAgMCAxMiAxMiIgZmlsbD0ibm9uZSIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj48cGF0aCBkPSJNNiA5TDkgNkgzTDYgOVoiIGZpbGw9ImN1cnJlbnRDb2xvciIvPjwvc3ZnPg==')] bg-no-repeat bg-right-2 bg-[length:14px] pr-9"
                     >
                       <option value="date">By Date</option>
@@ -398,6 +338,7 @@ function GalleryContent() {
                             ? "bg-blue-500 text-foreground"
                             : "bg-muted text-muted-foreground hover:bg-muted/80"
                         }`}
+                        type="button"
                       >
                         <Grid className="h-4 w-4" />
                       </button>
@@ -408,6 +349,7 @@ function GalleryContent() {
                             ? "bg-blue-500 text-foreground"
                             : "bg-muted text-muted-foreground hover:bg-muted/80"
                         }`}
+                        type="button"
                       >
                         <List className="h-4 w-4" />
                       </button>
@@ -462,9 +404,7 @@ function GalleryContent() {
               <div className="space-y-6">
                 <div className="text-center py-8">
                   <LoadingSpinner size="lg" />
-                  <p className="mt-4 text-muted-foreground">
-                    Loading your images...
-                  </p>
+                  <p className="mt-4 text-muted-foreground">Loading your images...</p>
                 </div>
               </div>
             ) : error || (imagesResponse && !imagesResponse.success) ? (
@@ -472,9 +412,7 @@ function GalleryContent() {
                 <CardContent className="text-center py-12">
                   <div className="mb-4">
                     <ImageIcon className="h-12 w-12 mx-auto mb-4 text-red-400" />
-                    <h3 className="text-lg font-medium text-foreground">
-                      加载失败
-                    </h3>
+                    <h3 className="text-lg font-medium text-foreground">加载失败</h3>
                     <p className="text-sm text-muted-foreground mt-2">
                       {error?.message ||
                         imagesResponse?.error ||
@@ -494,9 +432,7 @@ function GalleryContent() {
                     <ImageIcon className="h-12 w-12 mx-auto mb-4" />
                     <h3 className="text-lg font-medium">暂无图片</h3>
                     <p className="text-sm text-gray-500 mt-2">
-                      {searchTerm
-                        ? "没有找到匹配的图片"
-                        : "开始上传您的第一张图片吧"}
+                      {searchTerm ? "没有找到匹配的图片" : "开始上传您的第一张图片吧"}
                     </p>
                   </div>
                   <Link href="/upload">
@@ -509,7 +445,7 @@ function GalleryContent() {
               </Card>
             ) : (
               <ImageGallery
-                images={filteredImages.map((image: any) => ({
+                images={filteredImages.map((image: ImageHistoryRecord) => ({
                   id: image.id || "",
                   src: image.url || "",
                   alt: image.fileName || "Image",

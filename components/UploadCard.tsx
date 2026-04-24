@@ -10,15 +10,21 @@ import { cn } from "@/lib/utils";
 
 interface UploadCardProps {
   onUpload: (file: File, onProgress: (progress: number) => void) => Promise<void>;
+  onFilesSelected?: (files: File[]) => void;
+  onRejected?: (message: string) => void;
   maxSize?: number;
   acceptedTypes?: string[];
+  multiple?: boolean;
   className?: string;
 }
 
 export function UploadCard({
   onUpload,
+  onFilesSelected,
+  onRejected,
   maxSize = 10 * 1024 * 1024, // 10MB
   acceptedTypes = ["image/jpeg", "image/png", "image/gif", "image/webp"],
+  multiple = false,
   className,
 }: UploadCardProps) {
   const [uploading, setUploading] = useState(false);
@@ -30,19 +36,38 @@ export function UploadCard({
     async (acceptedFiles: File[]) => {
       if (acceptedFiles.length === 0) return;
 
-      const file = acceptedFiles[0];
+      const validFiles: File[] = [];
 
-      // 验证文件大小
-      if (file.size > maxSize) {
-        setError(`文件大小超过限制 (${Math.round(maxSize / 1024 / 1024)}MB)`);
+      for (const file of acceptedFiles) {
+        if (file.size > maxSize) {
+          const message = `文件大小超过限制 (${Math.round(maxSize / 1024 / 1024)}MB): ${file.name}`;
+          setError(message);
+          onRejected?.(message);
+          continue;
+        }
+
+        if (!acceptedTypes.includes(file.type)) {
+          const message = `不支持的文件类型: ${file.name}。允许格式: JPG / PNG / GIF / WebP`;
+          setError(message);
+          onRejected?.(message);
+          continue;
+        }
+
+        validFiles.push(file);
+      }
+
+      if (!validFiles.length) {
         return;
       }
 
-      // 验证文件类型
-      if (!acceptedTypes.includes(file.type)) {
-        setError(`不支持的文件类型。允许的类型: ${acceptedTypes.join(", ")}`);
+      if (onFilesSelected) {
+        onFilesSelected(validFiles);
+        setSuccess(true);
+        setTimeout(() => setSuccess(false), 1000);
         return;
       }
+
+      const file = validFiles[0];
 
       try {
         setUploading(true);
@@ -57,18 +82,20 @@ export function UploadCard({
         setSuccess(true);
         setProgress(100);
       } catch (err) {
-        setError(err instanceof Error ? err.message : "上传失败");
+        const message = err instanceof Error ? err.message : "上传失败";
+        setError(message);
+        onRejected?.(message);
       } finally {
         setUploading(false);
       }
     },
-    [onUpload, maxSize, acceptedTypes]
+    [onFilesSelected, onRejected, onUpload, maxSize, acceptedTypes]
   );
 
   const { getRootProps, getInputProps, isDragActive } = useDropzone({
     onDrop,
-    accept: acceptedTypes.reduce((acc, type) => ({ ...acc, [type]: [] }), {}),
-    multiple: false,
+    accept: Object.fromEntries(acceptedTypes.map((type) => [type, []])),
+    multiple,
     disabled: uploading,
   });
 
@@ -98,13 +125,14 @@ export function UploadCard({
 
           <div>
             <p className="text-lg font-medium">
-              {isDragActive ? "释放文件以上传" : "拖拽文件到这里"}
+              {isDragActive ? "释放图片以上传" : "拖拽图片到这里"}
             </p>
-            <p className="text-sm text-muted-foreground">或点击选择文件</p>
+            <p className="text-sm text-muted-foreground">或点击选择图片</p>
+            <p className="text-xs text-muted-foreground mt-1">或按 Ctrl+V / Cmd+V 粘贴截图或图片</p>
           </div>
 
           <div className="text-xs text-muted-foreground">
-            支持 {acceptedTypes.join(", ")}，最大 {Math.round(maxSize / 1024 / 1024)}MB
+            支持 JPG / PNG / GIF / WebP，最大 {Math.round(maxSize / 1024 / 1024)}MB
           </div>
         </motion.div>
       </div>
