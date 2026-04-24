@@ -64,6 +64,65 @@ export const UserSchema = z.object({
 
 export type User = z.infer<typeof UserSchema>;
 
+const DEFAULT_UPLOAD_API_BASE = "https://api.hiaplha.xyz";
+const DEFAULT_HISTORY_API_BASE = "https://history.hiaplha.xyz";
+
+function parseJsonSafely(payload: string): unknown {
+  if (!payload) {
+    return undefined;
+  }
+  try {
+    return JSON.parse(payload);
+  } catch {
+    return undefined;
+  }
+}
+
+function extractErrorText(payload: unknown): string | undefined {
+  if (!payload || typeof payload !== "object") {
+    return undefined;
+  }
+  const candidate = payload as { error?: unknown; message?: unknown };
+  if (typeof candidate.error === "string") {
+    return candidate.error;
+  }
+  if (typeof candidate.message === "string") {
+    return candidate.message;
+  }
+  return undefined;
+}
+
+function normalizeUploadError(status: number, payload?: unknown): ApiResponse<never> {
+  const fallbackByStatus: Record<number, string> = {
+    401: "Authentication required. Please log in again.",
+    403: "You do not have permission to upload this file.",
+    413: "File too large. Maximum upload size is 10MB.",
+    415: "Unsupported file type. Please upload JPG, PNG, GIF, or WebP.",
+    429: "Too many upload attempts. Please try again later.",
+    500: "Server error while uploading. Please retry in a moment.",
+  };
+  const payloadError = extractErrorText(payload);
+  const payloadCode =
+    typeof payload === "object" &&
+    payload !== null &&
+    typeof (payload as { code?: unknown }).code === "string"
+      ? (payload as { code: string }).code
+      : undefined;
+  const payloadMessage =
+    typeof payload === "object" &&
+    payload !== null &&
+    typeof (payload as { message?: unknown }).message === "string"
+      ? (payload as { message: string }).message
+      : undefined;
+
+  return {
+    success: false,
+    error: payloadError || fallbackByStatus[status] || `Upload failed (HTTP ${status})`,
+    code: payloadCode,
+    message: payloadMessage,
+  };
+}
+
 // API Client with type safety
 export class ApiClient {
   private baseUrl: string;
@@ -74,24 +133,17 @@ export class ApiClient {
     this.accessToken = accessToken;
   }
 
-  private async request<T>(
-    endpoint: string,
-    options: RequestInit = {}
-  ): Promise<ApiResponse<T>> {
+  private async request<T>(endpoint: string, options: RequestInit = {}): Promise<ApiResponse<T>> {
     const url = `${this.baseUrl}${endpoint}`;
-    const headers: Record<string, string> = {
-      "Content-Type": "application/json",
-      ...(options.headers as Record<string, string>),
-    };
+    const headers = new Headers(options.headers);
 
-    if (this.accessToken) {
-      headers.Authorization = `Bearer ${this.accessToken}`;
+    if (!headers.has("Content-Type")) {
+      headers.set("Content-Type", "application/json");
     }
 
-    console.log("API Request Debug:");
-    console.log("URL:", url);
-    console.log("Headers:", headers);
-    console.log("Options:", options);
+    if (this.accessToken) {
+      headers.set("Authorization", `Bearer ${this.accessToken}`);
+    }
 
     try {
       const response = await fetch(url, {
@@ -99,13 +151,7 @@ export class ApiClient {
         headers,
       });
 
-      console.log("API Response Debug:");
-      console.log("Status:", response.status);
-      console.log("Status Text:", response.statusText);
-      console.log("Headers:", Object.fromEntries(response.headers.entries()));
-
       const data = await response.json();
-      console.log("Response Data:", data);
 
       if (!response.ok) {
         return {
@@ -120,7 +166,6 @@ export class ApiClient {
         data: data.data || data,
       };
     } catch (error) {
-      console.error("API Request Error:", error);
       return {
         success: false,
         error: error instanceof Error ? error.message : "Network error",
@@ -140,11 +185,7 @@ export class ApiClient {
 
       // 在开发环境中使用本地API路由
       const uploadUrl =
-        process.env.NODE_ENV === "development"
-          ? "/api/upload"
-          : `${this.baseUrl}/upload`;
-
-      console.log("Upload URL:", uploadUrl);
+        process.env.NODE_ENV === "development" ? "/api/upload" : `${this.baseUrl}/upload`;
 
       // 设置超时时间
       xhr.timeout = 60000; // 60秒超时
@@ -157,46 +198,28 @@ export class ApiClient {
       });
 
       xhr.addEventListener("load", () => {
-        console.log("Upload response status:", xhr.status);
-        console.log("Upload response text:", xhr.responseText);
+        const payload = parseJsonSafely(xhr.responseText);
+
         if (xhr.status >= 200 && xhr.status < 300) {
-          try {
-            const response = JSON.parse(xhr.responseText);
-            console.log("Parsed upload response:", response);
+          if (payload && typeof payload === "object") {
+            const response = payload as { data?: UploadResult } & UploadResult;
             resolve({
               success: true,
               data: response.data || response,
             });
-          } catch (error) {
-            console.error("Upload response parse error:", error);
-            console.error("Response text:", xhr.responseText);
-            resolve({
-              success: false,
-              error: "Invalid response format",
-            });
+            return;
           }
+          resolve({
+            success: false,
+            error: "Upload succeeded but returned an invalid response.",
+          });
+          return;
         } else {
-          try {
-            const errorResponse = JSON.parse(xhr.responseText);
-            resolve({
-              success: false,
-              error:
-                errorResponse.error ||
-                errorResponse.message ||
-                `HTTP ${xhr.status}`,
-              code: errorResponse.code,
-            });
-          } catch {
-            resolve({
-              success: false,
-              error: `HTTP ${xhr.status}: ${xhr.statusText}`,
-            });
-          }
+          resolve(normalizeUploadError(xhr.status, payload));
         }
       });
 
-      xhr.addEventListener("error", (event) => {
-        console.error("Upload network error:", event);
+      xhr.addEventListener("error", () => {
         resolve({
           success: false,
           error: "Network error",
@@ -256,11 +279,8 @@ export function createApiClient(accessToken?: string): ApiClient {
   const uploadApi =
     process.env.NODE_ENV === "development"
       ? "" // 使用相对路径，会调用本地的 /api/upload
-      : process.env.NEXT_PUBLIC_UPLOAD_API || "https://api.hiaplha.xyz";
+      : process.env.NEXT_PUBLIC_UPLOAD_API || DEFAULT_UPLOAD_API_BASE;
   const baseUrl = uploadApi;
-
-  console.log("API Base URL:", baseUrl);
-  console.log("Access Token:", accessToken ? "Present" : "Missing");
 
   return new ApiClient(baseUrl, accessToken);
 }
@@ -268,14 +288,10 @@ export function createApiClient(accessToken?: string): ApiClient {
 // Create history-specific API client
 export function createHistoryApiClient(accessToken?: string): ApiClient {
   // History API uses a different worker
-  const historyApi =
-    process.env.NEXT_PUBLIC_HISTORY_API || "https://history.hiaplha.xyz";
+  const historyApi = process.env.NEXT_PUBLIC_HISTORY_API || DEFAULT_HISTORY_API_BASE;
 
   // Use the history API base URL directly
   const baseUrl = historyApi;
-
-  console.log("History API Base URL:", baseUrl);
-  console.log("Access Token:", accessToken ? "Present" : "Missing");
 
   return new ApiClient(baseUrl, accessToken);
 }

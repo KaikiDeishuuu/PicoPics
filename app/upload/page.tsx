@@ -22,15 +22,10 @@ import { ThemeToggle } from "@/components/ThemeToggle";
 import { ToastManager, useToast } from "@/components/Toast";
 import { UploadCard } from "@/components/UploadCard";
 import { Button } from "@/components/ui/button";
-import {
-  Card,
-  CardContent,
-  CardDescription,
-  CardHeader,
-  CardTitle,
-} from "@/components/ui/card";
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Footer } from "@/components/ui/footer";
 import { LoadingSpinner } from "@/components/ui/loading";
+import { useClipboardUpload } from "@/lib/hooks/use-clipboard-upload";
 import { useNotifications } from "@/lib/hooks/use-notifications";
 import { useUploadImage, useQuota } from "@/lib/hooks/use-queries";
 
@@ -50,9 +45,9 @@ function UploadPageContent() {
   const [accessToken, setAccessToken] = useState<string | null>(null);
   const [loading, setLoading] = useState(true);
   const [uploadProgress, setUploadProgress] = useState(0);
-  const [uploadStatus, setUploadStatus] = useState<
-    "idle" | "uploading" | "success" | "error"
-  >("idle");
+  const [uploadStatus, setUploadStatus] = useState<"idle" | "uploading" | "success" | "error">(
+    "idle"
+  );
   const [isNavigating, setIsNavigating] = useState(false);
   const [uploadMetrics, setUploadMetrics] = useState<{
     startTime: number | null;
@@ -73,6 +68,77 @@ function UploadPageContent() {
 
   const uploadMutation = useUploadImage(accessToken || undefined);
   const { data: quotaData } = useQuota(accessToken || undefined);
+
+  const handleUploadFile = async (
+    file: File,
+    onProgress?: (progress: number) => void
+  ): Promise<void> => {
+    setUploadStatus("uploading");
+    setUploadProgress(0);
+
+    const startTime = Date.now();
+    setUploadMetrics({
+      startTime,
+      endTime: null,
+      fileSize: file.size,
+      speed: "-",
+      duration: "-",
+    });
+
+    try {
+      await uploadMutation.mutateAsync({
+        file,
+        onProgress: (progress) => {
+          setUploadProgress(progress);
+          onProgress?.(progress);
+        },
+      });
+
+      const endTime = Date.now();
+      const duration = endTime - startTime;
+      const fileSizeMB = file.size / (1024 * 1024);
+      const speedMBps = duration > 0 ? fileSizeMB / (duration / 1000) : 0;
+
+      setUploadMetrics({
+        startTime,
+        endTime,
+        fileSize: file.size,
+        speed: `${speedMBps.toFixed(2)} MB/s`,
+        duration: `${(duration / 1000).toFixed(2)}s`,
+      });
+    } catch (error) {
+      setUploadStatus("error");
+      toast.error("Upload Failed", "Failed to upload image");
+      setUploadMetrics({
+        startTime: null,
+        endTime: null,
+        fileSize: null,
+        speed: "-",
+        duration: "-",
+      });
+      throw error;
+    }
+  };
+
+  useClipboardUpload({
+    enabled: !loading && !!accessToken,
+    acceptedTypes: ["image/jpeg", "image/png", "image/gif", "image/webp"],
+    maxSize: 10 * 1024 * 1024,
+    onFiles: async (files) => {
+      const [firstFile] = files;
+      if (!firstFile) {
+        return;
+      }
+      await handleUploadFile(firstFile);
+    },
+    onRejected: (reason) => {
+      if (reason.includes("already in progress")) {
+        toast.info("Upload in Progress", "Please wait for the current upload.");
+        return;
+      }
+      toast.error("Paste Upload Rejected", reason);
+    },
+  });
 
   // 认证检查
   useEffect(() => {
@@ -112,7 +178,7 @@ function UploadPageContent() {
       // 延迟跳转，给用户时间看到成功消息
       const timer = setTimeout(() => {
         setIsNavigating(true);
-        router.push("/gallery?refresh=" + Date.now());
+        router.push(`/gallery?refresh=${Date.now()}`);
       }, 2000);
 
       return () => clearTimeout(timer);
@@ -141,9 +207,7 @@ function UploadPageContent() {
             <div className="flex justify-center mb-6">
               <LoadingSpinner size="lg" />
             </div>
-            <h1 className="text-4xl font-bold text-foreground mb-6">
-              Loading upload page...
-            </h1>
+            <h1 className="text-4xl font-bold text-foreground mb-6">Loading upload page...</h1>
           </div>
         </div>
       </div>
@@ -181,8 +245,7 @@ function UploadPageContent() {
                       <span>Image Upload</span>
                     </CardTitle>
                     <CardDescription className="text-sm md:text-base text-muted-foreground">
-                      Welcome back, {user?.login || "User"}! Start uploading
-                      your images
+                      Welcome back, {user?.login || "User"}! Start uploading your images
                     </CardDescription>
                   </div>
                 </div>
@@ -195,7 +258,7 @@ function UploadPageContent() {
                     onClick={() => {
                       if (!isNavigating) {
                         setIsNavigating(true);
-                        router.push("/gallery?refresh=" + Date.now());
+                        router.push(`/gallery?refresh=${Date.now()}`);
                       }
                     }}
                     disabled={isNavigating}
@@ -219,8 +282,8 @@ function UploadPageContent() {
                   uploadStatus === "success"
                     ? "border-green-200 bg-green-50/50"
                     : uploadStatus === "error"
-                    ? "border-red-200 bg-red-50/50"
-                    : "border-blue-200 bg-blue-50/50"
+                      ? "border-red-200 bg-red-50/50"
+                      : "border-blue-200 bg-blue-50/50"
                 }`}
               >
                 <CardContent className="p-6">
@@ -243,15 +306,16 @@ function UploadPageContent() {
                         {uploadStatus === "error" && "上传失败"}
                       </h3>
                       <p className="text-sm text-gray-600">
-                        {uploadStatus === "uploading" &&
-                          "请稍候，正在处理您的图片"}
+                        {uploadStatus === "uploading" && "请稍候，正在处理您的图片"}
                         {uploadStatus === "success" && "图片已成功上传到云端"}
-                        {uploadStatus === "error" &&
-                          "上传过程中出现错误，请重试"}
+                        {uploadStatus === "error" && "上传过程中出现错误，请重试"}
                       </p>
                       {uploadStatus === "uploading" && (
                         <div className="mt-2 w-full bg-gray-200 rounded-full h-2">
-                          <div className="bg-blue-600 h-2 rounded-full" />
+                          <div
+                            className="bg-blue-600 h-2 rounded-full transition-all"
+                            style={{ width: `${uploadProgress}%` }}
+                          />
                         </div>
                       )}
                       {uploadStatus === "success" && (
@@ -262,7 +326,7 @@ function UploadPageContent() {
                             onClick={() => {
                               if (!isNavigating) {
                                 setIsNavigating(true);
-                                router.push("/gallery?refresh=" + Date.now());
+                                router.push(`/gallery?refresh=${Date.now()}`);
                               }
                             }}
                             disabled={isNavigating}
@@ -302,63 +366,14 @@ function UploadPageContent() {
                 <CardHeader>
                   <CardTitle className="flex items-center space-x-2">
                     <Upload className="h-5 w-5 text-blue-600" />
-                    <span>拖拽上传</span>
+                    <span>拖拽 / 点击 / 粘贴上传</span>
                   </CardTitle>
-                  <CardDescription>支持多种图片格式，最大 10MB</CardDescription>
+                  <CardDescription>单图上传，支持 Ctrl+V / Cmd+V，最大 10MB</CardDescription>
                 </CardHeader>
                 <CardContent>
                   <UploadCard
-                    onUpload={async (file, onProgress) => {
-                      setUploadStatus("uploading");
-                      setUploadProgress(0);
-
-                      // 记录开始时间和文件大小
-                      const startTime = Date.now();
-                      setUploadMetrics({
-                        startTime,
-                        endTime: null,
-                        fileSize: file.size,
-                        speed: "-",
-                        duration: "-",
-                      });
-
-                      try {
-                        // 调用实际的上传API
-                        const result = await uploadMutation.mutateAsync({
-                          file,
-                          onProgress,
-                        });
-
-                        // 计算上传效率和速度
-                        const endTime = Date.now();
-                        const duration = endTime - startTime;
-                        const fileSizeMB = file.size / (1024 * 1024);
-                        const speedMBps =
-                          duration > 0 ? fileSizeMB / (duration / 1000) : 0;
-
-                        setUploadMetrics({
-                          startTime,
-                          endTime,
-                          fileSize: file.size,
-                          speed: `${speedMBps.toFixed(2)} MB/s`,
-                          duration: `${(duration / 1000).toFixed(2)}s`,
-                        });
-
-                        // 成功状态由useEffect处理，这里不需要重复设置
-                      } catch (error) {
-                        setUploadStatus("error");
-                        toast.error("Upload Failed", "Failed to upload image");
-
-                        // 重置指标
-                        setUploadMetrics({
-                          startTime: null,
-                          endTime: null,
-                          fileSize: null,
-                          speed: "-",
-                          duration: "-",
-                        });
-                      }
-                    }}
+                    onUpload={handleUploadFile}
+                    onRejected={(reason) => toast.error("Upload Failed", reason)}
                   />
                 </CardContent>
               </Card>
@@ -380,7 +395,7 @@ function UploadPageContent() {
                       <div>
                         <h4 className="font-medium">支持的格式</h4>
                         <p className="text-sm text-gray-600">
-                          JPG, PNG, GIF, WebP, SVG
+                          JPG, PNG, GIF, WebP（默认不支持 SVG）
                         </p>
                       </div>
                     </div>
@@ -388,19 +403,20 @@ function UploadPageContent() {
                       <CheckCircle className="h-5 w-5 text-green-600 mt-0.5 flex-shrink-0" />
                       <div>
                         <h4 className="font-medium">文件大小</h4>
-                        <p className="text-sm text-gray-600">
-                          单个文件最大 10MB
-                        </p>
+                        <p className="text-sm text-gray-600">单个文件最大 10MB</p>
                       </div>
                     </div>
                     <div className="flex items-start space-x-3">
                       <CheckCircle className="h-5 w-5 text-green-600 mt-0.5 flex-shrink-0" />
                       <div>
-                        <h4 className="font-medium">批量上传</h4>
+                        <h4 className="font-medium">上传方式</h4>
                         <p className="text-sm text-gray-600">
-                          支持同时选择多个文件
+                          单图上传（拖拽 / 点击 / Ctrl+V / Cmd+V）
                         </p>
                       </div>
+                    </div>
+                    <div className="text-xs text-muted-foreground pt-2 border-t border-border">
+                      TODO: 后续可增加上传队列与批量上传能力。
                     </div>
                   </div>
                 </CardContent>
@@ -425,17 +441,13 @@ function UploadPageContent() {
                   <div className="space-y-4">
                     <div className="grid grid-cols-2 gap-3">
                       <div className="p-3 rounded-lg bg-muted/30 border border-border">
-                        <div className="text-xs text-muted-foreground mb-1">
-                          上传速度
-                        </div>
+                        <div className="text-xs text-muted-foreground mb-1">上传速度</div>
                         <div className="text-lg font-semibold text-foreground">
                           {uploadMetrics.speed}
                         </div>
                       </div>
                       <div className="p-3 rounded-lg bg-muted/30 border border-border">
-                        <div className="text-xs text-muted-foreground mb-1">
-                          上传时长
-                        </div>
+                        <div className="text-xs text-muted-foreground mb-1">上传时长</div>
                         <div className="text-lg font-semibold text-foreground">
                           {uploadMetrics.duration}
                         </div>
@@ -444,14 +456,9 @@ function UploadPageContent() {
                     {uploadMetrics.fileSize && (
                       <div className="pt-2 border-t border-border">
                         <div className="flex items-center justify-between text-sm">
-                          <span className="text-muted-foreground">
-                            文件大小
-                          </span>
+                          <span className="text-muted-foreground">文件大小</span>
                           <span className="font-medium text-foreground">
-                            {(uploadMetrics.fileSize / (1024 * 1024)).toFixed(
-                              2
-                            )}{" "}
-                            MB
+                            {(uploadMetrics.fileSize / (1024 * 1024)).toFixed(2)} MB
                           </span>
                         </div>
                       </div>
@@ -474,10 +481,7 @@ function UploadPageContent() {
                 </CardHeader>
                 <CardContent className="p-6">
                   <div className="space-y-4">
-                    <QuotaBadge
-                      used={quotaData?.used || 0}
-                      limit={quotaData?.limit || 100000000}
-                    />
+                    <QuotaBadge used={quotaData?.used || 0} limit={quotaData?.limit || 100000000} />
                     <div className="flex items-center justify-between text-sm text-muted-foreground pt-2 border-t border-border">
                       <span>已使用</span>
                       <span className="font-medium text-foreground">
@@ -527,25 +531,17 @@ function UploadPageContent() {
                         color: "text-blue-400",
                         bgColor: "bg-blue-400/10",
                       },
-                    ].map((feature, index) => (
+                    ].map((feature) => (
                       <div
-                        key={index}
+                        key={feature.title}
                         className="flex items-start space-x-3 p-3 rounded-lg hover:bg-muted/30 transition-colors"
                       >
-                        <div
-                          className={`p-2 ${feature.bgColor} rounded-lg flex-shrink-0`}
-                        >
-                          <feature.icon
-                            className={`h-4 w-4 ${feature.color}`}
-                          />
+                        <div className={`p-2 ${feature.bgColor} rounded-lg flex-shrink-0`}>
+                          <feature.icon className={`h-4 w-4 ${feature.color}`} />
                         </div>
                         <div className="flex-1">
-                          <h4 className="font-medium text-foreground mb-0.5">
-                            {feature.title}
-                          </h4>
-                          <p className="text-sm text-muted-foreground">
-                            {feature.description}
-                          </p>
+                          <h4 className="font-medium text-foreground mb-0.5">{feature.title}</h4>
+                          <p className="text-sm text-muted-foreground">{feature.description}</p>
                         </div>
                       </div>
                     ))}
