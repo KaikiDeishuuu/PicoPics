@@ -10,17 +10,21 @@ import { cn } from "@/lib/utils";
 
 interface UploadCardProps {
   onUpload: (file: File, onProgress: (progress: number) => void) => Promise<void>;
+  onFilesSelected?: (files: File[]) => void;
   onRejected?: (message: string) => void;
   maxSize?: number;
   acceptedTypes?: string[];
+  multiple?: boolean;
   className?: string;
 }
 
 export function UploadCard({
   onUpload,
+  onFilesSelected,
   onRejected,
   maxSize = 10 * 1024 * 1024, // 10MB
   acceptedTypes = ["image/jpeg", "image/png", "image/gif", "image/webp"],
+  multiple = false,
   className,
 }: UploadCardProps) {
   const [uploading, setUploading] = useState(false);
@@ -32,23 +36,38 @@ export function UploadCard({
     async (acceptedFiles: File[]) => {
       if (acceptedFiles.length === 0) return;
 
-      const file = acceptedFiles[0];
+      const validFiles: File[] = [];
 
-      // 验证文件大小
-      if (file.size > maxSize) {
-        const message = `文件大小超过限制 (${Math.round(maxSize / 1024 / 1024)}MB)`;
-        setError(message);
-        onRejected?.(message);
+      for (const file of acceptedFiles) {
+        if (file.size > maxSize) {
+          const message = `文件大小超过限制 (${Math.round(maxSize / 1024 / 1024)}MB): ${file.name}`;
+          setError(message);
+          onRejected?.(message);
+          continue;
+        }
+
+        if (!acceptedTypes.includes(file.type)) {
+          const message = `不支持的文件类型: ${file.name}。允许格式: JPG / PNG / GIF / WebP`;
+          setError(message);
+          onRejected?.(message);
+          continue;
+        }
+
+        validFiles.push(file);
+      }
+
+      if (!validFiles.length) {
         return;
       }
 
-      // 验证文件类型
-      if (!acceptedTypes.includes(file.type)) {
-        const message = "不支持的文件类型。允许格式: JPG / PNG / GIF / WebP";
-        setError(message);
-        onRejected?.(message);
+      if (onFilesSelected) {
+        onFilesSelected(validFiles);
+        setSuccess(true);
+        setTimeout(() => setSuccess(false), 1000);
         return;
       }
+
+      const file = validFiles[0];
 
       try {
         setUploading(true);
@@ -70,13 +89,13 @@ export function UploadCard({
         setUploading(false);
       }
     },
-    [onRejected, onUpload, maxSize, acceptedTypes]
+    [onFilesSelected, onRejected, onUpload, maxSize, acceptedTypes]
   );
 
   const { getRootProps, getInputProps, isDragActive } = useDropzone({
     onDrop,
     accept: Object.fromEntries(acceptedTypes.map((type) => [type, []])),
-    multiple: false,
+    multiple,
     disabled: uploading,
   });
 

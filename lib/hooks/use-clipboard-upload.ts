@@ -150,8 +150,8 @@ export function useClipboardUpload(options: ClipboardUploadOptions): void {
       });
 
       if (files.length === 0) {
-        if (rejected[0] && onRejectedRef.current) {
-          onRejectedRef.current(rejected[0]);
+        if (rejected.length > 0 && onRejectedRef.current) {
+          onRejectedRef.current(rejected.join("; "));
         }
         return;
       }
@@ -164,7 +164,11 @@ export function useClipboardUpload(options: ClipboardUploadOptions): void {
       event.preventDefault();
       isUploadingRef.current = true;
 
-      Promise.resolve(onFilesRef.current(files.slice(0, 1)))
+      if (rejected.length > 0 && onRejectedRef.current) {
+        onRejectedRef.current(rejected.join("; "));
+      }
+
+      Promise.resolve(onFilesRef.current(files))
         .catch((error: unknown) => {
           const message = error instanceof Error ? error.message : "Paste upload failed";
           onRejectedRef.current?.(message);

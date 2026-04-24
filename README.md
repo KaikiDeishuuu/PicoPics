@@ -8,6 +8,7 @@ PicoPics is an authenticated image hosting app built with Next.js and Cloudflare
 - Drag-and-drop upload
 - Click-to-select upload
 - Clipboard paste upload (`Ctrl+V` on Windows/Linux, `Cmd+V` on macOS)
+- Upload queue with retry/remove controls
 - Upload progress and status feedback
 - Personal gallery/history view
 - Quota display
@@ -66,6 +67,15 @@ When pasting:
 - Non-image clipboard content is ignored.
 - Unsupported or oversized files are rejected with clear feedback.
 - Upload progress and success/error state use the same upload pipeline as drag/click uploads.
+- If multiple images are pasted, all valid images are enqueued.
+
+## Upload Queue Behavior
+
+- Files from drag/drop, click selection, and clipboard paste are all added to one queue.
+- Default concurrency is **2 uploads at a time**.
+- Each item tracks filename, size, progress, status (`queued`, `uploading`, `success`, `error`), and error details.
+- Failed items can be retried individually.
+- Queued/error items can be removed.
 
 ## Health Check Commands
 
@@ -90,6 +100,20 @@ npm run build
 
 Configure runtime variables in your deployment platform (Cloudflare/Vercel) instead of hardcoding endpoints.
 
+## Worker Validation & Response Format
+
+- Worker verifies MIME allowlist: JPG/PNG/GIF/WebP.
+- Worker validates image magic bytes before storage.
+- Worker generates secure object keys using date prefixes + UUID (not user filename).
+- SVG is disabled by default because it can carry active content/XSS risks without strict sanitization.
+
+Upload API response contract:
+
+- Success: `{ success: true, data: { id, url, filename, size, type, uploadedAt, r2ObjectKey } }`
+- Error: `{ success: false, error, code, message }`
+
+See `docs/upload-worker-hardening.md` for additional hardening guidance.
+
 ## Manual Test: Clipboard Upload
 
 1. Log in to PicoPics.
@@ -97,6 +121,11 @@ Configure runtime variables in your deployment platform (Cloudflare/Vercel) inst
 3. Copy an image (or take a screenshot and copy it).
 4. Press `Ctrl+V` / `Cmd+V`.
 5. Confirm upload status/progress updates and redirect to gallery on success.
+6. Paste multiple images and verify queueing + concurrency behavior.
+
+## E2E Coverage Plan
+
+A practical E2E test plan is documented in `docs/e2e-paste-upload-test-plan.md`.
 
 ## License
 

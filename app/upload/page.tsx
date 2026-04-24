@@ -28,6 +28,7 @@ import { LoadingSpinner } from "@/components/ui/loading";
 import { useClipboardUpload } from "@/lib/hooks/use-clipboard-upload";
 import { useNotifications } from "@/lib/hooks/use-notifications";
 import { useUploadImage, useQuota } from "@/lib/hooks/use-queries";
+import { useUploadQueue } from "@/lib/hooks/use-upload-queue";
 
 // 强制动态渲染，避免静态化
 export const dynamic = "force-dynamic";
@@ -73,9 +74,6 @@ function UploadPageContent() {
     file: File,
     onProgress?: (progress: number) => void
   ): Promise<void> => {
-    setUploadStatus("uploading");
-    setUploadProgress(0);
-
     const startTime = Date.now();
     setUploadMetrics({
       startTime,
@@ -86,13 +84,17 @@ function UploadPageContent() {
     });
 
     try {
-      await uploadMutation.mutateAsync({
+      const result = await uploadMutation.mutateAsync({
         file,
         onProgress: (progress) => {
           setUploadProgress(progress);
           onProgress?.(progress);
         },
       });
+
+      if (!result.success) {
+        throw new Error(result.error || result.message || "Upload failed");
+      }
 
       const endTime = Date.now();
       const duration = endTime - startTime;
@@ -107,8 +109,6 @@ function UploadPageContent() {
         duration: `${(duration / 1000).toFixed(2)}s`,
       });
     } catch (error) {
-      setUploadStatus("error");
-      toast.error("Upload Failed", "Failed to upload image");
       setUploadMetrics({
         startTime: null,
         endTime: null,
@@ -120,23 +120,27 @@ function UploadPageContent() {
     }
   };
 
+  const uploadQueue = useUploadQueue({
+    concurrency: 2,
+    uploadFile: handleUploadFile,
+  });
+
+  const queueStats = {
+    queued: uploadQueue.items.filter((item) => item.status === "queued").length,
+    uploading: uploadQueue.items.filter((item) => item.status === "uploading").length,
+    success: uploadQueue.items.filter((item) => item.status === "success").length,
+    error: uploadQueue.items.filter((item) => item.status === "error").length,
+  };
+
   useClipboardUpload({
     enabled: !loading && !!accessToken,
     acceptedTypes: ["image/jpeg", "image/png", "image/gif", "image/webp"],
     maxSize: 10 * 1024 * 1024,
     onFiles: async (files) => {
-      const [firstFile] = files;
-      if (!firstFile) {
-        return;
-      }
-      await handleUploadFile(firstFile);
+      uploadQueue.enqueueFiles(files);
     },
     onRejected: (reason) => {
-      if (reason.includes("already in progress")) {
-        toast.info("Upload in Progress", "Please wait for the current upload.");
-        return;
-      }
-      toast.error("Paste Upload Rejected", reason);
+      toast.warning("Paste Upload Warning", reason);
     },
   });
 
@@ -168,14 +172,39 @@ function UploadPageContent() {
     }
   }, [router]);
 
-  // 处理上传成功
   useEffect(() => {
-    if (uploadMutation.isSuccess && !isNavigating) {
+    const activeUploads = uploadQueue.items.filter((item) => item.status === "uploading");
+    if (activeUploads.length > 0) {
+      setUploadStatus("uploading");
+      const totalProgress = activeUploads.reduce((sum, item) => sum + item.progress, 0);
+      setUploadProgress(Math.round(totalProgress / activeUploads.length));
+      return;
+    }
+
+    if (queueStats.error > 0) {
+      setUploadStatus("error");
+      return;
+    }
+
+    if (queueStats.success > 0) {
       setUploadStatus("success");
       setUploadProgress(100);
-      toast.success("上传成功", "图片已成功上传到云端");
+      return;
+    }
 
-      // 延迟跳转，给用户时间看到成功消息
+    setUploadStatus("idle");
+    setUploadProgress(0);
+  }, [queueStats.error, queueStats.success, uploadQueue.items]);
+
+  // 处理上传成功
+  useEffect(() => {
+    if (
+      queueStats.success > 0 &&
+      queueStats.uploading === 0 &&
+      queueStats.queued === 0 &&
+      !isNavigating
+    ) {
+      toast.success("上传成功", `成功上传 ${queueStats.success} 张图片`);
       const timer = setTimeout(() => {
         setIsNavigating(true);
         router.push(`/gallery?refresh=${Date.now()}`);
@@ -183,21 +212,14 @@ function UploadPageContent() {
 
       return () => clearTimeout(timer);
     }
-  }, [uploadMutation.isSuccess, isNavigating, toast, router]);
+  }, [queueStats.queued, queueStats.uploading, queueStats.success, isNavigating, toast, router]);
 
   // 处理上传错误
   useEffect(() => {
-    if (uploadMutation.isError) {
-      setUploadStatus("error");
-      toast.error("上传失败", "图片上传失败，请重试");
-
-      // 2.5秒后重置状态
-      setTimeout(() => {
-        setUploadStatus("idle");
-        setUploadProgress(0);
-      }, 2500);
+    if (queueStats.error > 0 && queueStats.uploading === 0) {
+      toast.error("部分上传失败", `${queueStats.error} 个文件上传失败，可在队列中重试`);
     }
-  }, [uploadMutation.isError, toast]);
+  }, [queueStats.error, queueStats.uploading, toast]);
 
   if (loading) {
     return (
@@ -373,8 +395,59 @@ function UploadPageContent() {
                 <CardContent>
                   <UploadCard
                     onUpload={handleUploadFile}
+                    onFilesSelected={uploadQueue.enqueueFiles}
+                    multiple
                     onRejected={(reason) => toast.error("Upload Failed", reason)}
                   />
+                </CardContent>
+              </Card>
+            </div>
+
+            <div className="mb-8">
+              <Card className="card-modern border-0 shadow-lg">
+                <CardHeader>
+                  <CardTitle>上传队列</CardTitle>
+                  <CardDescription>并发 2 个上传任务，支持失败重试与移除</CardDescription>
+                </CardHeader>
+                <CardContent className="space-y-3">
+                  {uploadQueue.items.length === 0 && (
+                    <p className="text-sm text-muted-foreground">当前队列为空。</p>
+                  )}
+                  {uploadQueue.items.map((item) => (
+                    <div
+                      key={item.id}
+                      className="rounded-md border border-border p-3 flex flex-col gap-2 md:flex-row md:items-center md:justify-between"
+                    >
+                      <div className="min-w-0">
+                        <p className="text-sm font-medium truncate">{item.file.name}</p>
+                        <p className="text-xs text-muted-foreground">
+                          {(item.file.size / (1024 * 1024)).toFixed(2)} MB · {item.status} ·{" "}
+                          {Math.round(item.progress)}%
+                        </p>
+                        {item.error && <p className="text-xs text-red-500 mt-1">{item.error}</p>}
+                      </div>
+                      <div className="flex gap-2">
+                        {item.status === "error" && (
+                          <Button
+                            size="sm"
+                            variant="outline"
+                            onClick={() => uploadQueue.retryItem(item.id)}
+                          >
+                            重试
+                          </Button>
+                        )}
+                        {(item.status === "queued" || item.status === "error") && (
+                          <Button
+                            size="sm"
+                            variant="ghost"
+                            onClick={() => uploadQueue.removeItem(item.id)}
+                          >
+                            移除
+                          </Button>
+                        )}
+                      </div>
+                    </div>
+                  ))}
                 </CardContent>
               </Card>
             </div>
@@ -416,7 +489,7 @@ function UploadPageContent() {
                       </div>
                     </div>
                     <div className="text-xs text-muted-foreground pt-2 border-t border-border">
-                      TODO: 后续可增加上传队列与批量上传能力。
+                      已实现基础上传队列；后续可继续增强暂停/恢复能力。
                     </div>
                   </div>
                 </CardContent>

@@ -28,7 +28,12 @@ export function useUploadImage(accessToken?: string) {
 
   return useMutation({
     mutationFn: ({ file, onProgress }: { file: File; onProgress?: (progress: number) => void }) =>
-      apiClient.uploadFile(file, onProgress),
+      apiClient.uploadFile(file, onProgress).then((response) => {
+        if (!response.success) {
+          throw new Error(response.error || response.message || "Upload failed");
+        }
+        return response;
+      }),
     onSuccess: (data) => {
       // Invalidate and refetch user images and quota
       queryClient.invalidateQueries({ queryKey: queryKeys.userImages });

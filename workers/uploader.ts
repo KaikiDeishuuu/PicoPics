@@ -79,9 +79,7 @@ class UploadQuota {
       }
 
       const { bytes } = await request.json();
-      console.log(
-        `QUOTA: Updating quota for user ${userId}, adding ${bytes} bytes`
-      );
+      console.log(`QUOTA: Updating quota for user ${userId}, adding ${bytes} bytes`);
       await this.incrementUsage(userId, bytes);
       console.log(`QUOTA: Quota updated successfully for user ${userId}`);
       return new Response("OK");
@@ -91,21 +89,16 @@ class UploadQuota {
   }
 
   async getQuota(userId: string): Promise<UploadQuotaState> {
-    const dailyUploads =
-      (await this.state.storage.get<number>(`uploads:${userId}`)) || 0;
-    const dailyBytes =
-      (await this.state.storage.get<number>(`bytes:${userId}`)) || 0;
-    const lastReset =
-      (await this.state.storage.get<number>("lastReset")) || Date.now();
+    const dailyUploads = (await this.state.storage.get<number>(`uploads:${userId}`)) || 0;
+    const dailyBytes = (await this.state.storage.get<number>(`bytes:${userId}`)) || 0;
+    const lastReset = (await this.state.storage.get<number>("lastReset")) || Date.now();
 
     return { dailyUploads, dailyBytes, lastReset };
   }
 
   async incrementUsage(userId: string, bytes: number): Promise<void> {
-    const currentUploads =
-      (await this.state.storage.get<number>(`uploads:${userId}`)) || 0;
-    const currentBytes =
-      (await this.state.storage.get<number>(`bytes:${userId}`)) || 0;
+    const currentUploads = (await this.state.storage.get<number>(`uploads:${userId}`)) || 0;
+    const currentBytes = (await this.state.storage.get<number>(`bytes:${userId}`)) || 0;
 
     await this.state.storage.put(`uploads:${userId}`, currentUploads + 1);
     await this.state.storage.put(`bytes:${userId}`, currentBytes + bytes);
@@ -169,13 +162,9 @@ class IPBlacklist {
 
     for (const [key, blockedUntil] of keys) {
       const ip = key.replace("blocked:", "");
-      const reason =
-        (await this.state.storage.get(`reason:${ip}`)) || "No reason provided";
-      const addedBy =
-        (await this.state.storage.get(`addedBy:${ip}`)) || "system";
-      const addedAt =
-        (await this.state.storage.get(`addedAt:${ip}`)) ||
-        new Date().toISOString();
+      const reason = (await this.state.storage.get(`reason:${ip}`)) || "No reason provided";
+      const addedBy = (await this.state.storage.get(`addedBy:${ip}`)) || "system";
+      const addedAt = (await this.state.storage.get(`addedAt:${ip}`)) || new Date().toISOString();
 
       const isActive = Date.now() < (blockedUntil as number);
 
@@ -213,6 +202,89 @@ class IPBlacklist {
 
 const app = new Hono<{ Bindings: Env }>();
 
+const SUPPORTED_MIME_TYPES = ["image/jpeg", "image/png", "image/gif", "image/webp"] as const;
+
+type SupportedMimeType = (typeof SUPPORTED_MIME_TYPES)[number];
+type SupportedImageExtension = "jpg" | "png" | "gif" | "webp";
+
+const MIME_TO_EXTENSION: Record<SupportedMimeType, SupportedImageExtension> = {
+  "image/jpeg": "jpg",
+  "image/png": "png",
+  "image/gif": "gif",
+  "image/webp": "webp",
+};
+
+function createErrorResponse(error: string, code: string, message: string, status: number) {
+  return Response.json(
+    {
+      success: false,
+      error,
+      code,
+      message,
+    },
+    { status }
+  );
+}
+
+function createUploadSuccessResponse(data: {
+  id: string;
+  url: string;
+  filename: string;
+  size: number;
+  type: string;
+  uploadedAt: string;
+  r2ObjectKey: string;
+}) {
+  return Response.json({
+    success: true,
+    data,
+  });
+}
+
+async function detectImageType(file: File): Promise<SupportedImageExtension | null> {
+  const buffer = await file.slice(0, 16).arrayBuffer();
+  const bytes = new Uint8Array(buffer);
+
+  const isPng =
+    bytes.length >= 8 &&
+    bytes[0] === 0x89 &&
+    bytes[1] === 0x50 &&
+    bytes[2] === 0x4e &&
+    bytes[3] === 0x47;
+
+  const isJpeg = bytes.length >= 3 && bytes[0] === 0xff && bytes[1] === 0xd8 && bytes[2] === 0xff;
+
+  const isGif =
+    bytes.length >= 4 &&
+    bytes[0] === 0x47 &&
+    bytes[1] === 0x49 &&
+    bytes[2] === 0x46 &&
+    bytes[3] === 0x38;
+
+  const isWebp =
+    bytes.length >= 12 &&
+    bytes[0] === 0x52 &&
+    bytes[1] === 0x49 &&
+    bytes[2] === 0x46 &&
+    bytes[3] === 0x46 &&
+    bytes[8] === 0x57 &&
+    bytes[9] === 0x45 &&
+    bytes[10] === 0x42 &&
+    bytes[11] === 0x50;
+
+  if (isPng) return "png";
+  if (isJpeg) return "jpg";
+  if (isGif) return "gif";
+  if (isWebp) return "webp";
+
+  return null;
+}
+
+function createSecureObjectKey(ext: SupportedImageExtension) {
+  const datePrefix = new Date().toISOString().slice(0, 10);
+  return `images/${datePrefix}/${crypto.randomUUID()}.${ext}`;
+}
+
 // 格式化字节数
 function formatBytes(bytes: number): string {
   if (bytes === 0) return "0 B";
@@ -227,12 +299,7 @@ app.use(
   "*",
   cors({
     origin: "*", // Will be validated in the route handler
-    allowHeaders: [
-      "Content-Type",
-      "Authorization",
-      "X-Admin-Token",
-      "CF-Turnstile-Token",
-    ],
+    allowHeaders: ["Content-Type", "Authorization", "X-Admin-Token", "CF-Turnstile-Token"],
     allowMethods: ["GET", "POST", "PUT", "DELETE", "OPTIONS"],
     maxAge: 86400,
   })
@@ -261,16 +328,10 @@ app.use("*", async (c, next) => {
   if (source) {
     const isAllowed = allowedOrigins.some(
       (allowed) =>
-        source.includes(allowed) ||
-        source.includes("localhost") ||
-        source.includes("127.0.0.1")
+        source.includes(allowed) || source.includes("localhost") || source.includes("127.0.0.1")
     );
 
-    if (
-      !isAllowed &&
-      allowedOrigins.length > 0 &&
-      !allowedOrigins.includes("*")
-    ) {
+    if (!isAllowed && allowedOrigins.length > 0 && !allowedOrigins.includes("*")) {
       console.warn("Blocked request from unauthorized origin:", {
         origin,
         referer,
@@ -313,10 +374,7 @@ app.post("/auth/callback", async (c) => {
 
     if (!code) {
       console.log("Missing authorization code");
-      return c.json(
-        { success: false, error: "Missing authorization code" },
-        400
-      );
+      return c.json({ success: false, error: "Missing authorization code" }, 400);
     }
 
     // 交换访问令牌
@@ -326,37 +384,28 @@ app.post("/auth/callback", async (c) => {
 
     if (!c.env.GITHUB_CLIENT_ID || !c.env.GITHUB_CLIENT_SECRET) {
       console.log("Missing GitHub OAuth credentials");
-      return c.json(
-        { success: false, error: "GitHub OAuth credentials not configured" },
-        500
-      );
+      return c.json({ success: false, error: "GitHub OAuth credentials not configured" }, 500);
     }
 
-    const tokenResponse = await fetch(
-      "https://github.com/login/oauth/access_token",
-      {
-        method: "POST",
-        headers: {
-          Accept: "application/json",
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify({
-          client_id: c.env.GITHUB_CLIENT_ID,
-          client_secret: c.env.GITHUB_CLIENT_SECRET,
-          code,
-        }),
-      }
-    );
+    const tokenResponse = await fetch("https://github.com/login/oauth/access_token", {
+      method: "POST",
+      headers: {
+        Accept: "application/json",
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify({
+        client_id: c.env.GITHUB_CLIENT_ID,
+        client_secret: c.env.GITHUB_CLIENT_SECRET,
+        code,
+      }),
+    });
 
     console.log("Token response status:", tokenResponse.status);
 
     if (!tokenResponse.ok) {
       const errorText = await tokenResponse.text();
       console.log("Token exchange failed:", errorText);
-      return c.json(
-        { success: false, error: "Failed to exchange code for token" },
-        400
-      );
+      return c.json({ success: false, error: "Failed to exchange code for token" }, 400);
     }
 
     const tokenData = await tokenResponse.json();
@@ -391,10 +440,7 @@ app.post("/auth/callback", async (c) => {
     if (!userResponse.ok) {
       const errorText = await userResponse.text();
       console.log("User fetch failed:", errorText);
-      return c.json(
-        { success: false, error: "Failed to fetch user info" },
-        400
-      );
+      return c.json({ success: false, error: "Failed to fetch user info" }, 400);
     }
 
     const user = await userResponse.json();
@@ -467,21 +513,16 @@ app.get("/api/quota", async (c) => {
 
 // Upload endpoint
 app.post("/upload", async (c) => {
-  console.log("UPLOAD: Starting upload request");
-  console.log("UPLOAD: TELEGRAM_BOT_TOKEN exists:", !!c.env.TELEGRAM_BOT_TOKEN);
-  console.log("UPLOAD: TELEGRAM_CHAT_ID exists:", !!c.env.TELEGRAM_CHAT_ID);
   try {
     const clientIP = c.req.header("CF-Connecting-IP") || "unknown";
 
     // 强制要求 GitHub 认证
     const authHeader = c.req.header("Authorization");
     if (!authHeader || !authHeader.startsWith("Bearer ")) {
-      return c.json(
-        {
-          success: false,
-          code: "UNAUTHORIZED",
-          message: "需要 GitHub 认证才能上传图片",
-        },
+      return createErrorResponse(
+        "Unauthorized",
+        "UNAUTHORIZED",
+        "Valid GitHub authentication is required for upload.",
         401
       );
     }
@@ -502,32 +543,18 @@ app.post("/upload", async (c) => {
       });
 
       if (!githubResponse.ok) {
-        console.log("GitHub token validation failed:", githubResponse.status);
-        return c.json(
-          {
-            success: false,
-            code: "INVALID_TOKEN",
-            message: "无效的 GitHub 访问令牌",
-          },
-          403
-        );
+        return createErrorResponse("Forbidden", "FORBIDDEN", "Invalid GitHub access token.", 403);
       }
 
       githubUser = await githubResponse.json();
       userId = githubUser.id.toString();
       username = githubUser.login;
-
-      console.log(
-        `UPLOAD: Authenticated user - ID: ${userId}, Username: ${username}`
-      );
     } catch (error) {
       console.error("GitHub authentication error:", error);
-      return c.json(
-        {
-          success: false,
-          code: "AUTH_ERROR",
-          message: "GitHub 认证失败，请重新登录",
-        },
+      return createErrorResponse(
+        "Authentication failed",
+        "INTERNAL_ERROR",
+        "GitHub authentication failed. Please sign in again.",
         500
       );
     }
@@ -547,13 +574,10 @@ app.post("/upload", async (c) => {
       };
 
       if (blocked) {
-        return c.json(
-          {
-            success: false,
-            code: "IP_BLOCKED",
-            message:
-              "Your IP has been temporarily blocked due to suspicious activity",
-          },
+        return createErrorResponse(
+          "Forbidden",
+          "RATE_LIMITED",
+          "Your IP has been temporarily blocked due to suspicious activity.",
           403
         );
       }
@@ -562,27 +586,21 @@ app.post("/upload", async (c) => {
     // Dynamic rate limiting based on user behavior and system load
     const quotaId = c.env.UPLOAD_QUOTA.idFromName(userId);
     const quotaStub = c.env.UPLOAD_QUOTA.get(quotaId);
-    console.log(`UPLOAD: Getting quota for user ${userId}`);
     const quotaResponse = await quotaStub.fetch(
       new Request(`http://quota?userId=${userId}`, { method: "GET" }) as any
     );
-    console.log(`UPLOAD: Quota response status: ${quotaResponse.status}`);
     const quotaText = await quotaResponse.text();
-    console.log(`UPLOAD: Quota response text:`, quotaText);
 
     let quota: UploadQuotaState;
     try {
       quota = JSON.parse(quotaText) as UploadQuotaState;
     } catch (jsonError) {
-      console.error(`UPLOAD: Failed to parse quota JSON:`, jsonError);
-      console.error(`UPLOAD: Raw quota text was:`, quotaText);
       throw new Error(
         `Quota JSON parse failed: ${
           jsonError instanceof Error ? jsonError.message : String(jsonError)
         }`
       );
     }
-    console.log(`UPLOAD: Quota data:`, quota);
 
     // Dynamic quota calculation based on user activity
     const baseQuota = parseInt(c.env.DAILY_QUOTA_BYTES || "104857600"); // 100MB base
@@ -591,82 +609,74 @@ app.post("/upload", async (c) => {
     const activityBonus = Math.min(quota.dailyUploads * 1048576, 52428800); // Max 50MB bonus
     const dynamicQuota = baseQuota + activityBonus;
 
-    console.log(
-      `UPLOAD: Quota check - used: ${quota.dailyBytes}, limit: ${dynamicQuota}`
-    );
-
     // Only enforce quota for very high usage (prevent abuse)
     if (quota.dailyBytes > dynamicQuota * 2) {
-      return c.json(
-        {
-          success: false,
-          code: "QUOTA_EXCEEDED",
-          message: "Upload limit exceeded. Please try again later.",
-        },
+      return createErrorResponse(
+        "Quota exceeded",
+        "QUOTA_EXCEEDED",
+        "Upload limit exceeded. Please try again later.",
         429
       );
     }
 
     const contentType = c.req.header("Content-Type") || "";
-    console.log(`UPLOAD: Content-Type: ${contentType}`);
     if (!contentType.includes("multipart/form-data")) {
-      return c.json(
-        {
-          success: false,
-          code: "INVALID_CONTENT_TYPE",
-          message: "Content-Type must be multipart/form-data",
-        },
+      return createErrorResponse(
+        "Invalid request",
+        "INVALID_IMAGE",
+        "Content-Type must be multipart/form-data.",
         400
       );
     }
 
-    console.log(`UPLOAD: Parsing form data...`);
     const formData = await c.req.formData();
-    console.log(`UPLOAD: Form data parsed, getting image file...`);
     const file = formData.get("image") as File;
 
     if (!file) {
-      console.log(`UPLOAD: No file found in form data`);
-      return c.json(
-        {
-          success: false,
-          code: "NO_FILE",
-          message: "No file provided",
-        },
-        400
-      );
+      return createErrorResponse("Invalid request", "INVALID_IMAGE", "No file provided.", 400);
     }
 
-    console.log(
-      `UPLOAD: File received - name: ${file.name}, size: ${file.size}, type: ${file.type}`
-    );
-
-    // Validate file
-    const allowedTypes = ["image/jpeg", "image/png", "image/gif", "image/webp"];
-    if (!allowedTypes.includes(file.type)) {
-      return c.json(
-        {
-          success: false,
-          code: "INVALID_FILE_TYPE",
-          message: `Unsupported file type. Allowed: ${allowedTypes.join(", ")}`,
-        },
+    if (!SUPPORTED_MIME_TYPES.includes(file.type as SupportedMimeType)) {
+      return createErrorResponse(
+        "Unsupported file type",
+        "UNSUPPORTED_FILE_TYPE",
+        "Only JPG, PNG, GIF, and WebP images are allowed.",
         415
       );
     }
 
     const maxFileSize = parseInt(c.env.MAX_FILE_SIZE || "10485760"); // 10MB default
     if (file.size > maxFileSize) {
-      return c.json(
-        {
-          success: false,
-          code: "FILE_TOO_LARGE",
-          message: `File too large. Maximum size: ${
-            maxFileSize / (1024 * 1024)
-          }MB`,
-        },
+      return createErrorResponse(
+        "File too large",
+        "FILE_TOO_LARGE",
+        `File size exceeds ${Math.round(maxFileSize / (1024 * 1024))}MB.`,
         413
       );
     }
+
+    const detectedType = await detectImageType(file);
+    if (!detectedType) {
+      return createErrorResponse(
+        "Unsupported file type",
+        "UNSUPPORTED_FILE_TYPE",
+        "Only JPG, PNG, GIF, and WebP images are allowed.",
+        415
+      );
+    }
+
+    const expectedExt = MIME_TO_EXTENSION[file.type as SupportedMimeType];
+    if (detectedType !== expectedExt) {
+      return createErrorResponse(
+        "Invalid image",
+        "INVALID_IMAGE",
+        "Uploaded file content does not match declared image type.",
+        415
+      );
+    }
+
+    const objectKey = createSecureObjectKey(detectedType);
+    const uploadTime = new Date().toISOString();
 
     // Content moderation (async - don't block upload)
     if (c.env.CONTENT_MODERATION_ENABLED === "true" && c.env.AI) {
@@ -674,11 +684,11 @@ app.post("/upload", async (c) => {
       contentModeration(file, c.env)
         .then((moderationResult) => {
           if (moderationResult.blocked) {
-            // If content is blocked, we could delete the uploaded file
-            // For now, just log it
-            console.warn(
-              `Content moderation blocked upload: ${moderationResult.label} for file ${fileName}`
-            );
+            console.warn("upload moderated", {
+              userId,
+              label: moderationResult.label,
+              key: objectKey,
+            });
           }
         })
         .catch((error) => {
@@ -686,60 +696,47 @@ app.post("/upload", async (c) => {
         });
     }
 
-    // Generate unique filename
-    const fileExt = file.type.split("/")[1];
-    const fileName = `${Date.now()}-${Math.random()
-      .toString(36)
-      .substr(2, 9)}.${fileExt}`;
-
     // Upload to R2
     try {
-      console.log(
-        `Uploading to R2: ${fileName}, size: ${file.size}, type: ${file.type}`
-      );
       // Convert File to ArrayBuffer for R2
       const fileBuffer = await file.arrayBuffer();
-      await c.env.IMAGES.put(fileName, fileBuffer, {
+      await c.env.IMAGES.put(objectKey, fileBuffer, {
         httpMetadata: {
-          contentType: file.type,
+          contentType: `image/${detectedType === "jpg" ? "jpeg" : detectedType}`,
           cacheControl: "public, max-age=31536000", // 1 year
         },
       });
-      console.log(`Successfully uploaded to R2: ${fileName}`);
-    } catch (r2Error) {
-      console.error("R2 upload error:", r2Error);
-      console.error("R2 error details:", {
-        message: r2Error instanceof Error ? r2Error.message : String(r2Error),
-        stack: r2Error instanceof Error ? r2Error.stack : undefined,
+      console.info("upload success", {
+        userId,
+        key: objectKey,
+        size: file.size,
+        type: detectedType,
       });
-      return c.json(
-        {
-          success: false,
-          code: "R2_UPLOAD_ERROR",
-          message: "Failed to upload file to storage",
-          error: r2Error instanceof Error ? r2Error.message : String(r2Error),
-        },
+    } catch (r2Error) {
+      console.error("upload failed", {
+        code: "UPLOAD_FAILED",
+        key: objectKey,
+        message: r2Error instanceof Error ? r2Error.message : String(r2Error),
+      });
+      return createErrorResponse(
+        "Upload failed",
+        "UPLOAD_FAILED",
+        "Failed to upload file to storage.",
         500
       );
     }
 
     // Update quota after successful upload
-    console.log(
-      `UPLOAD: Updating quota for user ${userId} with ${file.size} bytes`
-    );
-    const quotaUpdateResponse = await quotaStub.fetch(
+    await quotaStub.fetch(
       new Request(`http://quota?userId=${userId}`, {
         method: "POST",
         body: JSON.stringify({ bytes: file.size }),
       }) as any
     );
-    console.log(
-      `UPLOAD: Quota update response:`,
-      await quotaUpdateResponse.text()
-    );
 
     // Save to database
-    const r2ObjectKey = fileName;
+    const r2ObjectKey = objectKey;
+    const downloadFilename = `${objectKey.split("/").pop() || objectKey}`;
 
     try {
       await c.env.DB.prepare(
@@ -747,19 +744,15 @@ app.post("/upload", async (c) => {
          VALUES (?, ?, ?, ?, ?, ?, ?)`
       )
         .bind(
-          fileName, // image_id
+          objectKey, // image_id
           userId,
           r2ObjectKey,
-          file.name,
-          new Date().toISOString(), // upload_date
+          downloadFilename,
+          uploadTime, // upload_date
           file.size,
-          file.type
+          `image/${detectedType === "jpg" ? "jpeg" : detectedType}`
         )
         .run();
-
-      console.log(
-        `Saved image to database: ${r2ObjectKey} for user ${userId} (${username})`
-      );
 
       // Save/update user profile
       try {
@@ -780,29 +773,26 @@ app.post("/upload", async (c) => {
             new Date().toISOString()
           )
           .run();
-        console.log(`Updated user profile for ${username}`);
       } catch (profileError) {
         console.error("Failed to save user profile:", profileError);
       }
     } catch (dbError) {
       console.error("Database save error:", dbError);
-      // Continue even if database save fails
+      return createErrorResponse(
+        "Upload failed",
+        "UPLOAD_FAILED",
+        "Failed to save upload metadata.",
+        500
+      );
     }
 
     // Generate public URL using CDN worker
-    const publicUrl = `${
-      c.env.CDN_BASE_URL || "https://image.hiaplha.xyz"
-    }/${fileName}`;
-
-    // Get file type
-    const fileType = file.type || "unknown";
-    const fileExtension = file.name.split(".").pop() || "unknown";
+    const publicUrl = `${c.env.CDN_BASE_URL || "https://image.hiaplha.xyz"}/${objectKey}`;
 
     // Format file size
     const fileSizeMB = (file.size / 1024 / 1024).toFixed(2);
     const fileSizeKB = (file.size / 1024).toFixed(2);
-    const sizeDisplay =
-      file.size > 1024 * 1024 ? `${fileSizeMB} MB` : `${fileSizeKB} KB`;
+    const sizeDisplay = file.size > 1024 * 1024 ? `${fileSizeMB} MB` : `${fileSizeKB} KB`;
 
     // Send Telegram notification (async)
     const telegramMessage = `
@@ -815,9 +805,9 @@ app.post("/upload", async (c) => {
 └─ IP地址: <code>${clientIP}</code>
 
 📷 <b>文件信息</b>
-├─ 文件名: <code>${file.name}</code>
-├─ 类型: <code>${fileType}</code>
-├─ 格式: <code>${fileExtension.toUpperCase()}</code>
+├─ 文件名: <code>${downloadFilename}</code>
+├─ 类型: <code>image/${detectedType === "jpg" ? "jpeg" : detectedType}</code>
+├─ 格式: <code>${detectedType.toUpperCase()}</code>
 └─ 大小: <code>${sizeDisplay}</code>
 
 🔗 查看: <a href="${publicUrl}">点击预览</a>
@@ -826,73 +816,43 @@ app.post("/upload", async (c) => {
 ━━━━━━━━━━━━━━
     `.trim();
 
-    console.log("UPLOAD: About to send Telegram notification");
-    console.log("UPLOAD: Telegram message length:", telegramMessage.length);
-
     // 使用 waitUntil 确保异步任务完成
     if (c.executionCtx) {
       c.executionCtx.waitUntil(
         sendTelegramNotification(c.env, telegramMessage)
-          .then((result) => {
-            console.log(
-              "UPLOAD: Telegram notification sent successfully",
-              result
-            );
-          })
+          .then(() => {})
           .catch((err) => {
-            console.log("UPLOAD: Telegram notification failed:", err);
-            console.log("UPLOAD: Error details:", {
+            console.warn("telegram notification failed", {
               message: err instanceof Error ? err.message : String(err),
-              stack: err instanceof Error ? err.stack : undefined,
             });
           })
       );
     } else {
       // Fallback: 如果无法使用 waitUntil，使用普通异步调用
       sendTelegramNotification(c.env, telegramMessage)
-        .then((result) => {
-          console.log(
-            "UPLOAD: Telegram notification sent successfully",
-            result
-          );
-        })
+        .then(() => {})
         .catch((err) => {
-          console.log("UPLOAD: Telegram notification failed:", err);
-          console.log("UPLOAD: Error details:", {
+          console.warn("telegram notification failed", {
             message: err instanceof Error ? err.message : String(err),
-            stack: err instanceof Error ? err.stack : undefined,
           });
         });
     }
 
-    console.log("UPLOAD: Telegram notification call initiated (async)");
-
-    return c.json({
-      success: true,
-      data: {
-        id: fileName,
-        url: publicUrl,
-        filename: file.name,
-        size: file.size,
-        type: file.type,
-        uploadedAt: new Date().toISOString(),
-        r2ObjectKey: r2ObjectKey,
-      },
+    return createUploadSuccessResponse({
+      id: objectKey,
+      url: publicUrl,
+      filename: downloadFilename,
+      size: file.size,
+      type: `image/${detectedType === "jpg" ? "jpeg" : detectedType}`,
+      uploadedAt: uploadTime,
+      r2ObjectKey: r2ObjectKey,
     });
   } catch (error) {
     console.error("Upload error:", error);
-    console.error("Upload error details:", {
-      message: error instanceof Error ? error.message : String(error),
-      stack: error instanceof Error ? error.stack : undefined,
-      name: error instanceof Error ? error.name : undefined,
-    });
-    return c.json(
-      {
-        success: false,
-        code: "INTERNAL_ERROR",
-        message: "Upload failed due to server error",
-        error: error instanceof Error ? error.message : String(error),
-      },
+    return createErrorResponse(
+      "Internal error",
+      "INTERNAL_ERROR",
+      "Upload failed due to server error.",
       500
     );
   }
@@ -946,9 +906,7 @@ app.get("/api/admin/stats", async (c) => {
     }
 
     // 获取统计数据
-    const totalImages = await c.env.DB.prepare(
-      "SELECT COUNT(*) as count FROM user_images"
-    ).first();
+    const totalImages = await c.env.DB.prepare("SELECT COUNT(*) as count FROM user_images").first();
 
     const totalUsers = await c.env.DB.prepare(
       "SELECT COUNT(DISTINCT user_id) as count FROM user_images"
@@ -1052,21 +1010,13 @@ app.get("/api/admin/settings", async (c) => {
 });
 
 // Telegram通知辅助函数
-async function sendTelegramNotification(
-  env: Env,
-  message: string
-): Promise<void> {
+async function sendTelegramNotification(env: Env, message: string): Promise<void> {
   console.log("TELEGRAM: Starting notification");
 
   const botToken = env.TELEGRAM_BOT_TOKEN;
   const chatId = env.TELEGRAM_CHAT_ID;
 
-  console.log(
-    "TELEGRAM: Token exists:",
-    !!botToken,
-    "Chat ID exists:",
-    !!chatId
-  );
+  console.log("TELEGRAM: Token exists:", !!botToken, "Chat ID exists:", !!chatId);
 
   if (!botToken || !chatId) {
     console.log("TELEGRAM: Missing credentials, skipping");
@@ -1084,8 +1034,7 @@ async function sendTelegramNotification(
     };
 
     // 隐藏敏感信息
-    const maskedUrl =
-      url.substring(0, 30) + "***" + url.substring(url.length - 10);
+    const maskedUrl = url.substring(0, 30) + "***" + url.substring(url.length - 10);
     console.log("TELEGRAM: Sending request to:", maskedUrl);
     console.log("TELEGRAM: Payload chat_id:", chatId);
     console.log("TELEGRAM: About to make fetch call");
@@ -1109,24 +1058,14 @@ async function sendTelegramNotification(
 
       const responseText = await response.text();
       console.log("TELEGRAM: Response status:", response.status);
-      console.log(
-        "TELEGRAM: Response body (first 200 chars):",
-        responseText.substring(0, 200)
-      );
+      console.log("TELEGRAM: Response body (first 200 chars):", responseText.substring(0, 200));
 
       if (response.ok) {
         console.log("TELEGRAM: SUCCESS - Notification sent");
         return;
       } else {
-        console.log(
-          "TELEGRAM: FAILED - Status:",
-          response.status,
-          "Error:",
-          responseText
-        );
-        throw new Error(
-          `Telegram API error: ${response.status} - ${responseText}`
-        );
+        console.log("TELEGRAM: FAILED - Status:", response.status, "Error:", responseText);
+        throw new Error(`Telegram API error: ${response.status} - ${responseText}`);
       }
     } catch (fetchError) {
       clearTimeout(timeoutId);
@@ -1210,13 +1149,7 @@ async function contentModeration(
     }
 
     const result = await response.json();
-    const blockedLabels = [
-      "bikini",
-      "brassiere",
-      "weapon",
-      "rifle",
-      "military uniform",
-    ];
+    const blockedLabels = ["bikini", "brassiere", "weapon", "rifle", "military uniform"];
 
     for (const item of result.result || []) {
       if (item.score > 0.6) {
@@ -1291,10 +1224,7 @@ app.delete("/api/delete", async (c) => {
       .first();
 
     if (!record) {
-      return c.json(
-        { success: false, error: "图片不存在或您没有权限删除" },
-        404
-      );
+      return c.json({ success: false, error: "图片不存在或您没有权限删除" }, 404);
     }
 
     // 使用事务确保 R2 和 D1 操作的原子性
@@ -1318,9 +1248,7 @@ app.delete("/api/delete", async (c) => {
         return c.json({ success: false, error: "数据库删除失败" }, 500);
       }
 
-      console.log(
-        `User ${authResult.user.login} successfully deleted image: ${r2ObjectKey}`
-      );
+      console.log(`User ${authResult.user.login} successfully deleted image: ${r2ObjectKey}`);
 
       // Get client IP for notification
       const clientIP = c.req.header("CF-Connecting-IP") || "unknown";
@@ -1373,10 +1301,7 @@ app.delete("/api/delete", async (c) => {
         {
           success: false,
           error: "删除操作失败，请重试",
-          details:
-            deleteError instanceof Error
-              ? deleteError.message
-              : String(deleteError),
+          details: deleteError instanceof Error ? deleteError.message : String(deleteError),
         },
         500
       );
@@ -1450,16 +1375,11 @@ app.post("/api/clean-invalid", async (c) => {
     // 删除无效的数据库记录
     const deletePromises = invalidRecords.map(async (key) => {
       try {
-        await c.env.DB.prepare(
-          "DELETE FROM user_images WHERE r2_object_key = ? AND user_id = ?"
-        )
+        await c.env.DB.prepare("DELETE FROM user_images WHERE r2_object_key = ? AND user_id = ?")
           .bind(key, authResult.user.id.toString())
           .run();
       } catch (dbError) {
-        console.error(
-          `Failed to delete database record for key ${key}:`,
-          dbError
-        );
+        console.error(`Failed to delete database record for key ${key}:`, dbError);
       }
     });
 
@@ -1536,9 +1456,7 @@ app.post("/api/clear-storage", async (c) => {
     await Promise.all(deletePromises);
 
     // 删除所有数据库记录
-    const dbDeleteResult = await c.env.DB.prepare(
-      "DELETE FROM user_images WHERE user_id = ?"
-    )
+    const dbDeleteResult = await c.env.DB.prepare("DELETE FROM user_images WHERE user_id = ?")
       .bind(userId)
       .run();
 
@@ -1721,19 +1639,16 @@ app.get("/test-telegram", async (c) => {
 ━━━━━━━━━━━━━━
     `.trim();
 
-    const response = await fetch(
-      `https://api.telegram.org/bot${botToken}/sendMessage`,
-      {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          chat_id: chatId,
-          text: testMessage,
-          parse_mode: "HTML",
-        }),
-        signal: AbortSignal.timeout(10000),
-      }
-    );
+    const response = await fetch(`https://api.telegram.org/bot${botToken}/sendMessage`, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({
+        chat_id: chatId,
+        text: testMessage,
+        parse_mode: "HTML",
+      }),
+      signal: AbortSignal.timeout(10000),
+    });
 
     console.log("TEST: Response status:", response.status);
 
@@ -1840,12 +1755,7 @@ app.put("/api/user/settings", async (c) => {
            notification_enabled = excluded.notification_enabled,
            updated_at = excluded.updated_at`
       )
-        .bind(
-          userId,
-          telegramChatId || null,
-          notificationEnabled ? 1 : 0,
-          new Date().toISOString()
-        )
+        .bind(userId, telegramChatId || null, notificationEnabled ? 1 : 0, new Date().toISOString())
         .run();
 
       return c.json({
@@ -2022,9 +1932,7 @@ app.delete("/api/admin/images/:key", async (c) => {
 
     // 2. 从 D1 删除
     try {
-      await c.env.DB.prepare("DELETE FROM user_images WHERE r2_object_key = ?")
-        .bind(key)
-        .run();
+      await c.env.DB.prepare("DELETE FROM user_images WHERE r2_object_key = ?").bind(key).run();
       console.log(`Admin deleted D1 record for: ${key}`);
     } catch (dbError) {
       console.error(`Failed to delete D1 record for ${key}:`, dbError);
@@ -2095,11 +2003,7 @@ app.post("/api/admin/images/batch-delete", async (c) => {
         await c.env.IMAGES.delete(key);
 
         // 2. 从 D1 删除
-        await c.env.DB.prepare(
-          "DELETE FROM user_images WHERE r2_object_key = ?"
-        )
-          .bind(key)
-          .run();
+        await c.env.DB.prepare("DELETE FROM user_images WHERE r2_object_key = ?").bind(key).run();
 
         deleted.push(key);
         console.log(`Successfully deleted: ${key}`);
@@ -2117,8 +2021,7 @@ app.post("/api/admin/images/batch-delete", async (c) => {
       .slice(0, 5)
       .map((k) => `• ${k}`)
       .join("\n");
-    const moreFiles =
-      deleted.length > 5 ? `\n... 还有 ${deleted.length - 5} 个文件` : "";
+    const moreFiles = deleted.length > 5 ? `\n... 还有 ${deleted.length - 5} 个文件` : "";
 
     const telegramMessage = `
 🗑️ <b>批量删除图片</b>
@@ -2203,9 +2106,7 @@ app.get("/api/admin/images", async (c) => {
       fileSize: row.file_size,
       mimeType: row.mime_type,
       username: row.username,
-      url: `${c.env.CDN_BASE_URL || "https://image.hiaplha.xyz"}/${
-        row.r2_object_key
-      }`,
+      url: `${c.env.CDN_BASE_URL || "https://image.hiaplha.xyz"}/${row.r2_object_key}`,
     }));
 
     return c.json({ success: true, data: images });
@@ -2229,18 +2130,14 @@ app.post("/api/admin/cleanup", async (c) => {
 
     if (action === "cleanup-orphans") {
       // 清理 D1 中不存在对应 R2 对象的记录
-      const allRecords = await c.env.DB.prepare(
-        "SELECT r2_object_key FROM user_images"
-      ).all();
+      const allRecords = await c.env.DB.prepare("SELECT r2_object_key FROM user_images").all();
 
       for (const record of allRecords.results || []) {
         const key = record.r2_object_key as string;
         try {
           const r2Object = await c.env.IMAGES.head(key);
           if (!r2Object) {
-            await c.env.DB.prepare(
-              "DELETE FROM user_images WHERE r2_object_key = ?"
-            )
+            await c.env.DB.prepare("DELETE FROM user_images WHERE r2_object_key = ?")
               .bind(key)
               .run();
             deletedCount++;
@@ -2266,11 +2163,7 @@ app.post("/api/admin/cleanup", async (c) => {
           console.error(`Failed to delete R2 object ${key}:`, error);
         }
         // 删除 D1 记录
-        await c.env.DB.prepare(
-          "DELETE FROM user_images WHERE r2_object_key = ?"
-        )
-          .bind(key)
-          .run();
+        await c.env.DB.prepare("DELETE FROM user_images WHERE r2_object_key = ?").bind(key).run();
         deletedCount++;
       }
     }

@@ -75,6 +75,23 @@ describe("extractImageFilesFromClipboardData", () => {
     expect(result.files).toHaveLength(0);
     expect(result.rejected[0]).toContain("size limit");
   });
+
+  test("extracts multiple unique images when present in items and files", () => {
+    const first = new File(["1"], "first.png", { type: "image/png" });
+    const second = new File(["2"], "second.png", { type: "image/png" });
+    const clipboardData = createClipboardData({
+      items: [{ kind: "file", file: first }],
+      files: [first, second],
+    });
+
+    const result = extractImageFilesFromClipboardData(clipboardData, {
+      acceptedTypes: ["image/png"],
+      maxSize: 10 * 1024 * 1024,
+    });
+
+    expect(result.files).toHaveLength(2);
+    expect(result.files.map((file) => file.name)).toEqual(["first.png", "second.png"]);
+  });
 });
 
 describe("useClipboardUpload", () => {
