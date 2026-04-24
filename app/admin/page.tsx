@@ -3,44 +3,30 @@
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import {
   Activity,
-  AlertTriangle,
   ArrowLeft,
   BarChart3,
   CheckCircle,
   CheckSquare,
   Clock,
   Database,
-  Download,
-  Globe,
   HardDrive,
   Image,
   PieChart,
   RefreshCw,
-  Settings,
   Shield,
   Square,
   Trash2,
   TrendingUp,
   Users,
-  Zap,
 } from "lucide-react";
 import Link from "next/link";
 import { useEffect, useState } from "react";
 import { Button } from "@/components/ui/button";
-import {
-  Card,
-  CardContent,
-  CardDescription,
-  CardHeader,
-  CardTitle,
-} from "@/components/ui/card";
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Footer } from "@/components/ui/footer";
 import { IPManagement } from "@/components/ui/ip-management";
 import { LoadingSpinner } from "@/components/ui/loading";
-import {
-  NotificationContainer,
-  useNotifications,
-} from "@/components/ui/notification";
+import { NotificationContainer, useNotifications } from "@/components/ui/notification";
 
 // 强制动态渲染
 export const dynamic = "force-dynamic";
@@ -68,6 +54,17 @@ interface AdminUser {
   lastActive: string;
 }
 
+interface AdminImage {
+  id: string;
+  key: string;
+  url: string;
+  filename: string;
+  username: string;
+  uploadDate: string;
+  fileSize: number;
+  mimeType: string;
+}
+
 function AdminContent() {
   const [isAuthenticated, setIsAuthenticated] = useState(false);
   const [user, setUser] = useState<User | null>(null);
@@ -82,10 +79,9 @@ function AdminContent() {
   const [activeTab, setActiveTab] = useState<
     "overview" | "users" | "analytics" | "ip-management" | "data-management"
   >("overview");
-  const [images, setImages] = useState<any[]>([]);
+  const [images, setImages] = useState<AdminImage[]>([]);
   const [selectedImages, setSelectedImages] = useState<Set<string>>(new Set());
-  const { notifications, addNotification, removeNotification } =
-    useNotifications();
+  const { notifications, addNotification, removeNotification } = useNotifications();
 
   // 认证检查
   useEffect(() => {
@@ -108,14 +104,13 @@ function AdminContent() {
   }, []);
 
   // 检查管理员权限
+  // biome-ignore lint/correctness/useExhaustiveDependencies: avoid recreating effect on callback identity changes
   useEffect(() => {
     if (!isAuthenticated || !accessToken || !adminToken) return;
 
     const checkAdminAccess = async () => {
       try {
-        const adminApi =
-          process.env.NEXT_PUBLIC_UPLOAD_API ||
-          "https://api.hiaplha.xyz";
+        const adminApi = process.env.NEXT_PUBLIC_UPLOAD_API || "https://api.hiaplha.xyz";
 
         const response = await fetch(`${adminApi}/api/admin/stats`, {
           method: "GET",
@@ -148,6 +143,7 @@ function AdminContent() {
   }, [isAuthenticated, accessToken, adminToken]);
 
   // 定期刷新统计数据
+  // biome-ignore lint/correctness/useExhaustiveDependencies: interval depends on auth/admin state only
   useEffect(() => {
     if (!isAdmin || !accessToken || !adminToken) return;
 
@@ -174,9 +170,7 @@ function AdminContent() {
 
     // 立即验证token
     try {
-      const adminApi =
-        process.env.NEXT_PUBLIC_UPLOAD_API ||
-        "https://api.hiaplha.xyz";
+      const adminApi = process.env.NEXT_PUBLIC_UPLOAD_API || "https://api.hiaplha.xyz";
 
       const response = await fetch(`${adminApi}/api/admin/stats`, {
         method: "GET",
@@ -213,9 +207,7 @@ function AdminContent() {
 
     try {
       setLoading(true);
-      const adminApi =
-        process.env.NEXT_PUBLIC_UPLOAD_API ||
-        "https://api.hiaplha.xyz";
+      const adminApi = process.env.NEXT_PUBLIC_UPLOAD_API || "https://api.hiaplha.xyz";
 
       const response = await fetch(`${adminApi}/api/admin/stats`, {
         method: "GET",
@@ -251,9 +243,7 @@ function AdminContent() {
     }
 
     try {
-      const adminApi =
-        process.env.NEXT_PUBLIC_UPLOAD_API ||
-        "https://api.hiaplha.xyz";
+      const adminApi = process.env.NEXT_PUBLIC_UPLOAD_API || "https://api.hiaplha.xyz";
 
       const response = await fetch(`${adminApi}/api/admin/users`, {
         method: "GET",
@@ -285,9 +275,7 @@ function AdminContent() {
     if (!accessToken || !token) return;
 
     try {
-      const adminApi =
-        process.env.NEXT_PUBLIC_UPLOAD_API ||
-        "https://api.hiaplha.xyz";
+      const adminApi = process.env.NEXT_PUBLIC_UPLOAD_API || "https://api.hiaplha.xyz";
 
       const response = await fetch(`${adminApi}/api/admin/images`, {
         method: "GET",
@@ -315,21 +303,16 @@ function AdminContent() {
     if (!accessToken || !token) return;
 
     try {
-      const adminApi =
-        process.env.NEXT_PUBLIC_UPLOAD_API ||
-        "https://api.hiaplha.xyz";
+      const adminApi = process.env.NEXT_PUBLIC_UPLOAD_API || "https://api.hiaplha.xyz";
 
-      const response = await fetch(
-        `${adminApi}/api/admin/images/${encodeURIComponent(key)}`,
-        {
-          method: "DELETE",
-          headers: {
-            Authorization: `Bearer ${accessToken}`,
-            "X-Admin-Token": token,
-            "Content-Type": "application/json",
-          },
-        }
-      );
+      const response = await fetch(`${adminApi}/api/admin/images/${encodeURIComponent(key)}`, {
+        method: "DELETE",
+        headers: {
+          Authorization: `Bearer ${accessToken}`,
+          "X-Admin-Token": token,
+          "Content-Type": "application/json",
+        },
+      });
 
       if (response.ok) {
         addNotification({
@@ -370,33 +353,23 @@ function AdminContent() {
       return;
     }
 
-    if (
-      !confirm(
-        `确定要删除选中的 ${selectedImages.size} 张图片吗？此操作不可恢复。`
-      )
-    )
-      return;
+    if (!confirm(`确定要删除选中的 ${selectedImages.size} 张图片吗？此操作不可恢复。`)) return;
 
     const token = adminToken || "";
     if (!accessToken || !token) return;
 
     try {
-      const adminApi =
-        process.env.NEXT_PUBLIC_UPLOAD_API ||
-        "https://api.hiaplha.xyz";
+      const adminApi = process.env.NEXT_PUBLIC_UPLOAD_API || "https://api.hiaplha.xyz";
 
-      const response = await fetch(
-        `${adminApi}/api/admin/images/batch-delete`,
-        {
-          method: "POST",
-          headers: {
-            Authorization: `Bearer ${accessToken}`,
-            "X-Admin-Token": token,
-            "Content-Type": "application/json",
-          },
-          body: JSON.stringify({ keys: Array.from(selectedImages) }),
-        }
-      );
+      const response = await fetch(`${adminApi}/api/admin/images/batch-delete`, {
+        method: "POST",
+        headers: {
+          Authorization: `Bearer ${accessToken}`,
+          "X-Admin-Token": token,
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({ keys: Array.from(selectedImages) }),
+      });
 
       const result = await response.json();
 
@@ -495,19 +468,18 @@ function AdminContent() {
               <div className="flex justify-center mb-4">
                 <Shield className="h-12 w-12 text-blue-400" />
               </div>
-              <CardTitle className="text-2xl text-foreground">
-                Admin Authentication
-              </CardTitle>
+              <CardTitle className="text-2xl text-foreground">Admin Authentication</CardTitle>
               <CardDescription className="text-muted-foreground">
                 Please enter admin token to access admin panel
               </CardDescription>
             </CardHeader>
             <CardContent className="space-y-4">
               <div className="space-y-2">
-                <label className="text-sm font-medium text-foreground">
+                <label className="text-sm font-medium text-foreground" htmlFor="admin-token">
                   Admin Token
                 </label>
                 <input
+                  id="admin-token"
                   type="password"
                   value={tokenInput}
                   onChange={(e) => setTokenInput(e.target.value)}
@@ -521,9 +493,7 @@ function AdminContent() {
                   }}
                 />
               </div>
-              {error && (
-                <div className="text-red-400 text-sm text-center">{error}</div>
-              )}
+              {error && <div className="text-red-400 text-sm text-center">{error}</div>}
               <div className="flex flex-col sm:flex-row gap-3">
                 <Button
                   onClick={handleTokenSubmit}
@@ -543,10 +513,7 @@ function AdminContent() {
                   )}
                 </Button>
                 <Link href="/" className="flex-1">
-                  <Button
-                    variant="outline"
-                    className="w-full h-12 text-base font-medium"
-                  >
+                  <Button variant="outline" className="w-full h-12 text-base font-medium">
                     <ArrowLeft className="h-4 w-4 mr-2" />
                     Back to Home
                   </Button>
@@ -565,7 +532,10 @@ function AdminContent() {
         {/* 头部导航 - 单行布局 */}
         <header className="flex items-center justify-between px-4 py-3 bg-card/80 backdrop-blur-md border border-border rounded-xl mb-8">
           <Link href="/">
-            <button className="text-foreground/80 hover:text-foreground transition-colors">
+            <button
+              className="text-foreground/80 hover:text-foreground transition-colors"
+              type="button"
+            >
               <ArrowLeft className="h-5 w-5" />
             </button>
           </Link>
@@ -577,6 +547,7 @@ function AdminContent() {
             onClick={handleRefresh}
             disabled={loading}
             className="bg-blue-600 hover:bg-blue-700 text-white text-xs px-3 py-1.5 rounded transition-colors disabled:opacity-50 flex items-center space-x-1"
+            type="button"
           >
             <RefreshCw className={`h-3 w-3 ${loading ? "animate-spin" : ""}`} />
             <span className="hidden sm:inline">Refresh</span>
@@ -594,49 +565,50 @@ function AdminContent() {
           </CardContent>
         </Card>
 
-        {/* 标签页导航 */
-        <div className="mb-8">
-          <Card className="card-modern">
-            <CardContent className="p-4">
-              <div className="flex overflow-x-auto space-x-1 scrollbar-hide">
-                {[
-                  { id: "overview", label: "概览", icon: BarChart3 },
-                  { id: "users", label: "用户管理", icon: Users },
-                  { id: "data-management", label: "数据管理", icon: Database },
-                  { id: "analytics", label: "数据分析", icon: PieChart },
-                  { id: "ip-management", label: "IP管理", icon: Shield },
-                ].map((tab) => (
-                  <Button
-                    key={tab.id}
-                    variant={activeTab === tab.id ? "default" : "ghost"}
-                    onClick={() => {
-                      setActiveTab(
-                        tab.id as
-                          | "overview"
-                          | "users"
-                          | "analytics"
-                          | "ip-management"
-                          | "data-management"
-                      );
-                      if (tab.id === "data-management") {
-                        fetchImages();
-                      }
-                    }}
-                    className={`flex items-center space-x-1 sm:space-x-2 whitespace-nowrap ${
-                      activeTab === tab.id
-                        ? "bg-blue-600 text-foreground"
-                        : "text-foreground/80 hover:text-foreground hover:bg-muted"
-                    }`}
-                  >
-                    <tab.icon className="h-4 w-4" />
-                    <span className="text-xs sm:text-sm">{tab.label}</span>
-                  </Button>
-                ))}
-              </div>
-            </CardContent>
-          </Card>
-        </div>
-      }
+        {
+          /* 标签页导航 */
+          <div className="mb-8">
+            <Card className="card-modern">
+              <CardContent className="p-4">
+                <div className="flex overflow-x-auto space-x-1 scrollbar-hide">
+                  {[
+                    { id: "overview", label: "概览", icon: BarChart3 },
+                    { id: "users", label: "用户管理", icon: Users },
+                    { id: "data-management", label: "数据管理", icon: Database },
+                    { id: "analytics", label: "数据分析", icon: PieChart },
+                    { id: "ip-management", label: "IP管理", icon: Shield },
+                  ].map((tab) => (
+                    <Button
+                      key={tab.id}
+                      variant={activeTab === tab.id ? "default" : "ghost"}
+                      onClick={() => {
+                        setActiveTab(
+                          tab.id as
+                            | "overview"
+                            | "users"
+                            | "analytics"
+                            | "ip-management"
+                            | "data-management"
+                        );
+                        if (tab.id === "data-management") {
+                          fetchImages();
+                        }
+                      }}
+                      className={`flex items-center space-x-1 sm:space-x-2 whitespace-nowrap ${
+                        activeTab === tab.id
+                          ? "bg-blue-600 text-foreground"
+                          : "text-foreground/80 hover:text-foreground hover:bg-muted"
+                      }`}
+                    >
+                      <tab.icon className="h-4 w-4" />
+                      <span className="text-xs sm:text-sm">{tab.label}</span>
+                    </Button>
+                  ))}
+                </div>
+              </CardContent>
+            </Card>
+          </div>
+        }
         {/* 内容区域 */}
         <div>
           {activeTab === "overview" && (
@@ -681,16 +653,10 @@ function AdminContent() {
                               <p className="text-sm font-medium text-muted-foreground">
                                 {stat.title}
                               </p>
-                              <p className="text-2xl font-bold text-foreground">
-                                {stat.value}
-                              </p>
-                              <p className="text-xs text-green-400">
-                                {stat.change}
-                              </p>
+                              <p className="text-2xl font-bold text-foreground">{stat.value}</p>
+                              <p className="text-xs text-green-400">{stat.change}</p>
                             </div>
-                            <div
-                              className={`p-3 rounded-lg bg-gradient-to-r ${stat.color}`}
-                            >
+                            <div className={`p-3 rounded-lg bg-gradient-to-r ${stat.color}`}>
                               <stat.icon className="h-6 w-6 text-foreground" />
                             </div>
                           </div>
@@ -721,14 +687,10 @@ function AdminContent() {
                           key={index}
                           className="flex items-center justify-between p-3 bg-muted/50 rounded-lg border border-border"
                         >
-                          <span className="font-medium text-foreground">
-                            {service.name}
-                          </span>
+                          <span className="font-medium text-foreground">{service.name}</span>
                           <div className="flex items-center space-x-2">
                             <CheckCircle className="h-4 w-4 text-green-400" />
-                            <span className="text-sm text-green-400">
-                              {service.status}
-                            </span>
+                            <span className="text-sm text-green-400">{service.status}</span>
                           </div>
                         </div>
                       ))}
@@ -760,15 +722,12 @@ function AdminContent() {
                     ) : users.length === 0 ? (
                       <div className="flex flex-col items-center justify-center py-16 text-center">
                         <Users className="h-12 w-12 text-muted-foreground mb-4" />
-                        <h3 className="text-lg font-medium text-foreground mb-2">
-                          暂无用户数据
-                        </h3>
-                        <p className="text-sm text-muted-foreground">
-                          当前数据库中没有用户记录
-                        </p>
+                        <h3 className="text-lg font-medium text-foreground mb-2">暂无用户数据</h3>
+                        <p className="text-sm text-muted-foreground">当前数据库中没有用户记录</p>
                         <button
                           onClick={() => fetchUsers()}
                           className="mt-4 px-4 py-2 bg-primary hover:bg-primary/90 text-primary-foreground rounded-md transition-colors"
+                          type="button"
                         >
                           刷新数据
                         </button>
@@ -778,48 +737,32 @@ function AdminContent() {
                         <table className="w-full">
                           <thead>
                             <tr className="border-b border-border">
-                              <th className="text-left py-3 px-4 text-muted-foreground">
-                                用户ID
-                              </th>
-                              <th className="text-left py-3 px-4 text-muted-foreground">
-                                用户名
-                              </th>
-                              <th className="text-left py-3 px-4 text-muted-foreground">
-                                邮箱
-                              </th>
-                              <th className="text-left py-3 px-4 text-muted-foreground">
-                                上传数
-                              </th>
+                              <th className="text-left py-3 px-4 text-muted-foreground">用户ID</th>
+                              <th className="text-left py-3 px-4 text-muted-foreground">用户名</th>
+                              <th className="text-left py-3 px-4 text-muted-foreground">邮箱</th>
+                              <th className="text-left py-3 px-4 text-muted-foreground">上传数</th>
                               <th className="text-left py-3 px-4 text-muted-foreground">
                                 最后活跃
                               </th>
                             </tr>
                           </thead>
                           <tbody>
-                            {users.map((user, index) => (
+                            {users.map((user, _index) => (
                               <tr
                                 key={user.id}
                                 className="border-b border-border hover:bg-muted/50 transition-colors"
                               >
-                                <td className="py-3 px-4 text-foreground">
-                                  {user.id}
-                                </td>
+                                <td className="py-3 px-4 text-foreground">{user.id}</td>
                                 <td className="py-3 px-4 font-medium text-foreground">
                                   {user.username}
                                 </td>
-                                <td className="py-3 px-4 text-muted-foreground">
-                                  {user.email}
-                                </td>
-                                <td className="py-3 px-4 text-muted-foreground">
-                                  {user.uploads}
-                                </td>
+                                <td className="py-3 px-4 text-muted-foreground">{user.email}</td>
+                                <td className="py-3 px-4 text-muted-foreground">{user.uploads}</td>
                                 <td className="py-3 px-4">
                                   <div className="flex items-center space-x-2">
                                     <Clock className="h-4 w-4 text-muted-foreground" />
                                     <span className="text-sm text-muted-foreground">
-                                      {new Date(
-                                        user.lastActive
-                                      ).toLocaleDateString()}
+                                      {new Date(user.lastActive).toLocaleDateString()}
                                     </span>
                                   </div>
                                 </td>
@@ -851,9 +794,7 @@ function AdminContent() {
                   <CardContent>
                     <div className="text-center py-12">
                       <PieChart className="h-16 w-16 text-muted-foreground mx-auto mb-4" />
-                      <h3 className="text-lg font-medium text-foreground mb-2">
-                        数据分析功能
-                      </h3>
+                      <h3 className="text-lg font-medium text-foreground mb-2">数据分析功能</h3>
                       <p className="text-muted-foreground">
                         详细的数据分析功能正在开发中，敬请期待！
                       </p>
@@ -866,10 +807,7 @@ function AdminContent() {
 
           {activeTab === "ip-management" && (
             <div key="ip-management">
-              <IPManagement
-                accessToken={accessToken || ""}
-                adminToken={adminToken || ""}
-              />
+              <IPManagement accessToken={accessToken || ""} adminToken={adminToken || ""} />
             </div>
           )}
 
@@ -894,15 +832,14 @@ function AdminContent() {
                     ) : images.length === 0 ? (
                       <div className="flex flex-col items-center justify-center py-16 text-center">
                         <Database className="h-12 w-12 text-muted-foreground mb-4" />
-                        <h3 className="text-lg font-medium text-foreground mb-2">
-                          暂无图片数据
-                        </h3>
+                        <h3 className="text-lg font-medium text-foreground mb-2">暂无图片数据</h3>
                         <p className="text-sm text-muted-foreground mb-4">
                           当前数据库中没有图片记录
                         </p>
                         <button
                           onClick={() => fetchImages()}
                           className="px-4 py-2 bg-primary hover:bg-primary/90 text-primary-foreground rounded-md transition-colors"
+                          type="button"
                         >
                           刷新数据
                         </button>
@@ -915,11 +852,7 @@ function AdminContent() {
                             <span className="text-foreground font-medium">
                               已选择 {selectedImages.size} 张图片
                             </span>
-                            <Button
-                              variant="destructive"
-                              size="sm"
-                              onClick={handleBatchDelete}
-                            >
+                            <Button variant="destructive" size="sm" onClick={handleBatchDelete}>
                               <Trash2 className="h-4 w-4 mr-2" />
                               批量删除
                             </Button>
@@ -928,11 +861,7 @@ function AdminContent() {
 
                         {/* 全选按钮 */}
                         <div className="flex items-center space-x-2 mb-4">
-                          <Button
-                            variant="outline"
-                            size="sm"
-                            onClick={handleSelectAll}
-                          >
+                          <Button variant="outline" size="sm" onClick={handleSelectAll}>
                             {selectedImages.size === images.length ? (
                               <>
                                 <CheckSquare className="h-4 w-4 mr-2" />
@@ -957,7 +886,7 @@ function AdminContent() {
                         </div>
 
                         {/* 图片列表 */}
-                        {images.map((image, index) => (
+                        {images.map((image, _index) => (
                           <div
                             key={image.id}
                             className="bg-card rounded-lg p-4 border border-border hover:border-border/80 transition-all"
@@ -968,6 +897,7 @@ function AdminContent() {
                                 <button
                                   onClick={() => handleToggleSelect(image.key)}
                                   className="p-1"
+                                  type="button"
                                 >
                                   {selectedImages.has(image.key) ? (
                                     <CheckSquare className="h-5 w-5 text-blue-500" />
@@ -992,6 +922,7 @@ function AdminContent() {
                                 <button
                                   onClick={() => handleToggleSelect(image.key)}
                                   className="hidden sm:block mt-2"
+                                  type="button"
                                 >
                                   {selectedImages.has(image.key) ? (
                                     <CheckSquare className="h-5 w-5 text-blue-500" />
@@ -1016,9 +947,7 @@ function AdminContent() {
                                     用户: {image.username}
                                   </p>
                                   <p className="text-xs sm:text-sm text-muted-foreground">
-                                    {new Date(image.uploadDate).toLocaleString(
-                                      "zh-CN"
-                                    )}
+                                    {new Date(image.uploadDate).toLocaleString("zh-CN")}
                                   </p>
                                   <p className="text-xs text-muted-foreground">
                                     {image.fileSize} bytes · {image.mimeType}

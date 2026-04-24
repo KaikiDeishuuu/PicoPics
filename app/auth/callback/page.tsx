@@ -5,16 +5,13 @@ import { useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { LoadingSpinner } from "@/components/ui/loading";
 
 // 强制动态渲染，避免静态化
 export const dynamic = "force-dynamic";
 
 export default function AuthCallback() {
   const router = useRouter();
-  const [status, setStatus] = useState<"loading" | "success" | "error">(
-    "loading"
-  );
+  const [status, setStatus] = useState<"loading" | "success" | "error">("loading");
   const [error, setError] = useState<string | null>(null);
 
   useEffect(() => {
@@ -38,19 +35,16 @@ export default function AuthCallback() {
         }
 
         // 调用后端 API 交换访问令牌
-        const response = await fetch(
-          "https://api.hiaplha.xyz/auth/callback",
-          {
-            method: "POST",
-            headers: {
-              "Content-Type": "application/json",
-            },
-            body: JSON.stringify({
-              code,
-              state,
-            }),
-          }
-        );
+        const response = await fetch("https://api.hiaplha.xyz/auth/callback", {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify({
+            code,
+            state,
+          }),
+        });
 
         if (!response.ok) {
           throw new Error(`HTTP ${response.status}: ${response.statusText}`);
@@ -99,14 +93,10 @@ export default function AuthCallback() {
               <div className="flex justify-center mb-4">
                 <Loader2 className="h-12 w-12 text-primary animate-spin" />
               </div>
-              <CardTitle className="text-2xl text-foreground">
-                Processing Authentication
-              </CardTitle>
+              <CardTitle className="text-2xl text-foreground">Processing Authentication</CardTitle>
             </CardHeader>
             <CardContent className="text-center">
-              <p className="text-muted-foreground">
-                Please wait while we verify your identity...
-              </p>
+              <p className="text-muted-foreground">Please wait while we verify your identity...</p>
             </CardContent>
           </Card>
         </div>
@@ -123,17 +113,11 @@ export default function AuthCallback() {
               <div className="flex justify-center mb-4">
                 <XCircle className="h-12 w-12 text-red-400" />
               </div>
-              <CardTitle className="text-2xl text-red-400">
-                Authentication Failed
-              </CardTitle>
+              <CardTitle className="text-2xl text-red-400">Authentication Failed</CardTitle>
             </CardHeader>
             <CardContent className="text-center space-y-4">
               <p className="text-muted-foreground">{error}</p>
-              <Button
-                onClick={() => router.push("/")}
-                variant="outline"
-                className="w-full"
-              >
+              <Button onClick={() => router.push("/")} variant="outline" className="w-full">
                 Back to Home
               </Button>
             </CardContent>
@@ -151,9 +135,7 @@ export default function AuthCallback() {
             <div className="flex justify-center mb-4">
               <CheckCircle className="h-12 w-12 text-green-400" />
             </div>
-            <CardTitle className="text-2xl text-green-400">
-              Authentication Successful
-            </CardTitle>
+            <CardTitle className="text-2xl text-green-400">Authentication Successful</CardTitle>
           </CardHeader>
           <CardContent className="text-center">
             <p className="text-muted-foreground">

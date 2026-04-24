@@ -31,7 +31,10 @@ describe("useUploadQueue", () => {
     const { result } = renderHook(() =>
       useUploadQueue({
         concurrency: 2,
-        uploadFile,
+        createUploadTask: () => ({
+          promise: uploadFile(),
+          cancel: vi.fn(),
+        }),
       })
     );
 
@@ -76,7 +79,10 @@ describe("useUploadQueue", () => {
 
     const { result } = renderHook(() =>
       useUploadQueue({
-        uploadFile,
+        createUploadTask: () => ({
+          promise: uploadFile(),
+          cancel: vi.fn(),
+        }),
       })
     );
 
@@ -95,5 +101,33 @@ describe("useUploadQueue", () => {
     await waitFor(() => {
       expect(result.current.items[0]?.status).toBe("success");
     });
+  });
+
+  test("can cancel queued uploads", async () => {
+    const pending = deferred<void>();
+    const cancelSpy = vi.fn();
+    const { result } = renderHook(() =>
+      useUploadQueue({
+        createUploadTask: () => ({
+          promise: pending.promise,
+          cancel: cancelSpy,
+        }),
+      })
+    );
+
+    act(() => {
+      result.current.enqueueFiles([new File(["a"], "a.png", { type: "image/png" })]);
+    });
+
+    await waitFor(() => {
+      expect(result.current.items[0]?.status).toBe("uploading");
+    });
+
+    act(() => {
+      result.current.cancelItem(result.current.items[0].id);
+    });
+
+    expect(cancelSpy).toHaveBeenCalledTimes(1);
+    expect(result.current.items[0]?.status).toBe("cancelled");
   });
 });

@@ -64,6 +64,11 @@ export const UserSchema = z.object({
 
 export type User = z.infer<typeof UserSchema>;
 
+export type UploadTask<T> = {
+  promise: Promise<ApiResponse<T>>;
+  cancel: () => void;
+};
+
 const DEFAULT_UPLOAD_API_BASE = "https://api.hiaplha.xyz";
 const DEFAULT_HISTORY_API_BASE = "https://history.hiaplha.xyz";
 
@@ -178,8 +183,13 @@ export class ApiClient {
     file: File,
     onProgress?: (progress: number) => void
   ): Promise<ApiResponse<UploadResult>> {
-    return new Promise((resolve) => {
-      const xhr = new XMLHttpRequest();
+    return this.uploadFileTask(file, onProgress).promise;
+  }
+
+  uploadFileTask(file: File, onProgress?: (progress: number) => void): UploadTask<UploadResult> {
+    let aborted = false;
+    const xhr = new XMLHttpRequest();
+    const promise = new Promise<ApiResponse<UploadResult>>((resolve) => {
       const formData = new FormData();
       formData.append("image", file);
 
@@ -220,6 +230,14 @@ export class ApiClient {
       });
 
       xhr.addEventListener("error", () => {
+        if (aborted) {
+          resolve({
+            success: false,
+            error: "Upload cancelled",
+            code: "UPLOAD_CANCELLED",
+          });
+          return;
+        }
         resolve({
           success: false,
           error: "Network error",
@@ -239,6 +257,14 @@ export class ApiClient {
       }
       xhr.send(formData);
     });
+
+    return {
+      promise,
+      cancel: () => {
+        aborted = true;
+        xhr.abort();
+      },
+    };
   }
 
   // History methods

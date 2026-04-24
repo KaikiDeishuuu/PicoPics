@@ -1,8 +1,8 @@
 import type { Metadata } from "next";
 import { Inter } from "next/font/google";
 import "./globals.css";
-import { ThemeProvider } from "@/components/ThemeProvider";
 import { Analytics } from "@vercel/analytics/react";
+import { ThemeProvider } from "@/components/ThemeProvider";
 
 // 强制动态渲染，避免静态化
 export const dynamic = "force-dynamic";
@@ -11,8 +11,7 @@ const inter = Inter({ subsets: ["latin"] });
 
 export const metadata: Metadata = {
   title: "PicoPicsV2-KAIKI'S IMAGE HOSTING",
-  description:
-    "Modern image hosting platform based on Next.js 15 + Cloudflare Workers",
+  description: "Modern image hosting platform based on Next.js 15 + Cloudflare Workers",
   manifest: "/manifest.json",
   icons: {
     icon: "/favicon.svg",
@@ -30,11 +29,7 @@ export const viewport = {
   maximumScale: 1,
 };
 
-export default function RootLayout({
-  children,
-}: {
-  children: React.ReactNode;
-}) {
+export default function RootLayout({ children }: { children: React.ReactNode }) {
   return (
     <html lang="zh-CN" suppressHydrationWarning>
       <body className={inter.className}>

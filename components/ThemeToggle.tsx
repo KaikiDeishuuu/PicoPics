@@ -24,10 +24,10 @@ export function ThemeToggle() {
   };
 
   return (
-    <Button 
-      variant="outline" 
-      size="sm" 
-      onClick={cycleTheme} 
+    <Button
+      variant="outline"
+      size="sm"
+      onClick={cycleTheme}
       className="relative overflow-hidden h-9"
     >
       <motion.div

@@ -1,6 +1,6 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 
-export type UploadQueueItemStatus = "queued" | "uploading" | "success" | "error";
+export type UploadQueueItemStatus = "queued" | "uploading" | "success" | "error" | "cancelled";
 
 export type UploadQueueItem = {
   id: string;
@@ -9,11 +9,15 @@ export type UploadQueueItem = {
   progress: number;
   error?: string;
   result?: unknown;
+  cancel?: () => void;
 };
 
 type UseUploadQueueOptions = {
   concurrency?: number;
-  uploadFile: (file: File, onProgress: (progress: number) => void) => Promise<unknown>;
+  createUploadTask: (
+    file: File,
+    onProgress: (progress: number) => void
+  ) => { promise: Promise<unknown>; cancel: () => void };
 };
 
 function createQueueId() {
@@ -23,13 +27,13 @@ function createQueueId() {
   return `upload-${Date.now()}-${Math.random().toString(36).slice(2)}`;
 }
 
-export function useUploadQueue({ concurrency = 2, uploadFile }: UseUploadQueueOptions) {
+export function useUploadQueue({ concurrency = 2, createUploadTask }: UseUploadQueueOptions) {
   const [items, setItems] = useState<UploadQueueItem[]>([]);
-  const uploadFileRef = useRef(uploadFile);
+  const createUploadTaskRef = useRef(createUploadTask);
 
   useEffect(() => {
-    uploadFileRef.current = uploadFile;
-  }, [uploadFile]);
+    createUploadTaskRef.current = createUploadTask;
+  }, [createUploadTask]);
 
   const enqueueFiles = useCallback((files: File[]) => {
     if (!files.length) {
@@ -71,6 +75,40 @@ export function useUploadQueue({ concurrency = 2, uploadFile }: UseUploadQueueOp
     [updateItem]
   );
 
+  const cancelItem = useCallback((id: string) => {
+    setItems((prev) =>
+      prev.map((item) => {
+        if (item.id !== id) {
+          return item;
+        }
+
+        if (item.status === "uploading") {
+          item.cancel?.();
+        }
+
+        if (item.status === "queued" || item.status === "uploading") {
+          return {
+            ...item,
+            status: "cancelled",
+            error: "Upload cancelled",
+            progress: 0,
+            cancel: undefined,
+          };
+        }
+
+        return item;
+      })
+    );
+  }, []);
+
+  const clearCompleted = useCallback(() => {
+    setItems((prev) => prev.filter((item) => item.status !== "success"));
+  }, []);
+
+  const clearNonUploading = useCallback(() => {
+    setItems((prev) => prev.filter((item) => item.status === "uploading"));
+  }, []);
+
   const activeUploads = useMemo(
     () => items.filter((item) => item.status === "uploading").length,
     [items]
@@ -97,12 +135,18 @@ export function useUploadQueue({ concurrency = 2, uploadFile }: UseUploadQueueOp
         error: undefined,
       }));
 
-      void uploadFileRef
-        .current(item.file, (progress) => {
-          updateItem(item.id, (currentItem) =>
-            currentItem.status === "uploading" ? { ...currentItem, progress } : currentItem
-          );
-        })
+      const task = createUploadTaskRef.current(item.file, (progress) => {
+        updateItem(item.id, (currentItem) =>
+          currentItem.status === "uploading" ? { ...currentItem, progress } : currentItem
+        );
+      });
+
+      updateItem(item.id, (currentItem) => ({
+        ...currentItem,
+        cancel: task.cancel,
+      }));
+
+      void task.promise
         .then((result) => {
           updateItem(item.id, (currentItem) => ({
             ...currentItem,
@@ -110,6 +154,7 @@ export function useUploadQueue({ concurrency = 2, uploadFile }: UseUploadQueueOp
             progress: 100,
             result,
             error: undefined,
+            cancel: undefined,
           }));
         })
         .catch((error: unknown) => {
@@ -117,6 +162,7 @@ export function useUploadQueue({ concurrency = 2, uploadFile }: UseUploadQueueOp
             ...currentItem,
             status: "error",
             error: error instanceof Error ? error.message : "Upload failed",
+            cancel: undefined,
           }));
         });
     }
@@ -129,6 +175,9 @@ export function useUploadQueue({ concurrency = 2, uploadFile }: UseUploadQueueOp
     enqueueFiles,
     retryItem,
     removeItem,
+    cancelItem,
+    clearCompleted,
+    clearNonUploading,
     isUploading,
   };
 }

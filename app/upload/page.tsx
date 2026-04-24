@@ -16,7 +16,7 @@ import {
 } from "lucide-react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
-import { useEffect, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { QuotaBadge } from "@/components/QuotaBadge";
 import { ThemeToggle } from "@/components/ThemeToggle";
 import { ToastManager, useToast } from "@/components/Toast";
@@ -25,9 +25,10 @@ import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Footer } from "@/components/ui/footer";
 import { LoadingSpinner } from "@/components/ui/loading";
+import { createApiClient } from "@/lib/api";
 import { useClipboardUpload } from "@/lib/hooks/use-clipboard-upload";
 import { useNotifications } from "@/lib/hooks/use-notifications";
-import { useUploadImage, useQuota } from "@/lib/hooks/use-queries";
+import { useQuota } from "@/lib/hooks/use-queries";
 import { useUploadQueue } from "@/lib/hooks/use-upload-queue";
 
 // 强制动态渲染，避免静态化
@@ -67,7 +68,7 @@ function UploadPageContent() {
   const { toast } = useToast();
   useNotifications(); // 初始化通知服务
 
-  const uploadMutation = useUploadImage(accessToken || undefined);
+  const apiClient = useMemo(() => createApiClient(accessToken || undefined), [accessToken]);
   const { data: quotaData } = useQuota(accessToken || undefined);
 
   const handleUploadFile = async (
@@ -84,12 +85,9 @@ function UploadPageContent() {
     });
 
     try {
-      const result = await uploadMutation.mutateAsync({
-        file,
-        onProgress: (progress) => {
-          setUploadProgress(progress);
-          onProgress?.(progress);
-        },
+      const result = await apiClient.uploadFile(file, (progress) => {
+        setUploadProgress(progress);
+        onProgress?.(progress);
       });
 
       if (!result.success) {
@@ -122,7 +120,18 @@ function UploadPageContent() {
 
   const uploadQueue = useUploadQueue({
     concurrency: 2,
-    uploadFile: handleUploadFile,
+    createUploadTask: (file, onProgress) => {
+      const task = apiClient.uploadFileTask(file, onProgress);
+      return {
+        cancel: task.cancel,
+        promise: task.promise.then((response) => {
+          if (!response.success) {
+            throw new Error(response.error || response.message || "Upload failed");
+          }
+          return response;
+        }),
+      };
+    },
   });
 
   const queueStats = {
@@ -130,6 +139,7 @@ function UploadPageContent() {
     uploading: uploadQueue.items.filter((item) => item.status === "uploading").length,
     success: uploadQueue.items.filter((item) => item.status === "success").length,
     error: uploadQueue.items.filter((item) => item.status === "error").length,
+    cancelled: uploadQueue.items.filter((item) => item.status === "cancelled").length,
   };
 
   useClipboardUpload({
@@ -410,6 +420,14 @@ function UploadPageContent() {
                   <CardDescription>并发 2 个上传任务，支持失败重试与移除</CardDescription>
                 </CardHeader>
                 <CardContent className="space-y-3">
+                  <div className="flex flex-wrap gap-2">
+                    <Button size="sm" variant="outline" onClick={uploadQueue.clearCompleted}>
+                      清除已完成
+                    </Button>
+                    <Button size="sm" variant="outline" onClick={uploadQueue.clearNonUploading}>
+                      清除非上传项
+                    </Button>
+                  </div>
                   {uploadQueue.items.length === 0 && (
                     <p className="text-sm text-muted-foreground">当前队列为空。</p>
                   )}
@@ -427,7 +445,7 @@ function UploadPageContent() {
                         {item.error && <p className="text-xs text-red-500 mt-1">{item.error}</p>}
                       </div>
                       <div className="flex gap-2">
-                        {item.status === "error" && (
+                        {(item.status === "error" || item.status === "cancelled") && (
                           <Button
                             size="sm"
                             variant="outline"
@@ -436,7 +454,18 @@ function UploadPageContent() {
                             重试
                           </Button>
                         )}
-                        {(item.status === "queued" || item.status === "error") && (
+                        {(item.status === "queued" || item.status === "uploading") && (
+                          <Button
+                            size="sm"
+                            variant="outline"
+                            onClick={() => uploadQueue.cancelItem(item.id)}
+                          >
+                            取消
+                          </Button>
+                        )}
+                        {(item.status === "success" ||
+                          item.status === "error" ||
+                          item.status === "cancelled") && (
                           <Button
                             size="sm"
                             variant="ghost"
@@ -563,6 +592,10 @@ function UploadPageContent() {
                           : "0"}{" "}
                         MB
                       </span>
+                    </div>
+                    <div className="flex items-center justify-between text-sm text-muted-foreground">
+                      <span>已取消</span>
+                      <span className="font-medium text-foreground">{queueStats.cancelled}</span>
                     </div>
                   </div>
                 </CardContent>

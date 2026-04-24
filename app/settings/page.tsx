@@ -1,18 +1,12 @@
 "use client";
 
-import { ArrowLeft, Bell, BellOff, Check, Save, Settings } from "lucide-react";
+import { ArrowLeft, Bell, BellOff, Save, Settings } from "lucide-react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
-import { useEffect, useState } from "react";
+import { useCallback, useEffect, useState } from "react";
 import { ThemeToggle } from "@/components/ThemeToggle";
 import { Button } from "@/components/ui/button";
-import {
-  Card,
-  CardContent,
-  CardDescription,
-  CardHeader,
-  CardTitle,
-} from "@/components/ui/card";
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Footer } from "@/components/ui/footer";
 import { LoadingSpinner } from "@/components/ui/loading";
 
@@ -23,7 +17,7 @@ interface UserSettings {
 
 export default function SettingsPage() {
   const router = useRouter();
-  const [user, setUser] = useState<any>(null);
+  const [_user, setUser] = useState<any>(null);
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
   const [settings, setSettings] = useState<UserSettings>({
@@ -31,6 +25,31 @@ export default function SettingsPage() {
     notificationEnabled: false,
   });
   const [telegramIdInput, setTelegramIdInput] = useState("");
+
+  const fetchUserSettings = useCallback(async (accessToken: string) => {
+    try {
+      const response = await fetch(
+        `${process.env.NEXT_PUBLIC_UPLOAD_API || "https://api.hiaplha.xyz"}/api/user/settings`,
+        {
+          headers: {
+            Authorization: `Bearer ${accessToken}`,
+          },
+        }
+      );
+
+      if (response.ok) {
+        const data = await response.json();
+        if (data.success && data.data) {
+          setSettings(data.data);
+          setTelegramIdInput(data.data.telegramChatId || "");
+        }
+      }
+    } catch (error) {
+      console.error("Failed to fetch settings:", error);
+    } finally {
+      setLoading(false);
+    }
+  }, []);
 
   useEffect(() => {
     if (typeof window === "undefined") return;
@@ -53,35 +72,7 @@ export default function SettingsPage() {
     } else {
       router.push("/");
     }
-  }, [router]);
-
-  const fetchUserSettings = async (accessToken: string) => {
-    try {
-      const response = await fetch(
-        `${
-          process.env.NEXT_PUBLIC_UPLOAD_API ||
-          "https://api.hiaplha.xyz"
-        }/api/user/settings`,
-        {
-          headers: {
-            Authorization: `Bearer ${accessToken}`,
-          },
-        }
-      );
-
-      if (response.ok) {
-        const data = await response.json();
-        if (data.success && data.data) {
-          setSettings(data.data);
-          setTelegramIdInput(data.data.telegramChatId || "");
-        }
-      }
-    } catch (error) {
-      console.error("Failed to fetch settings:", error);
-    } finally {
-      setLoading(false);
-    }
-  };
+  }, [fetchUserSettings, router]);
 
   const handleSave = async () => {
     setSaving(true);
@@ -93,10 +84,7 @@ export default function SettingsPage() {
       const accessToken = auth.accessToken;
 
       const response = await fetch(
-        `${
-          process.env.NEXT_PUBLIC_UPLOAD_API ||
-          "https://api.hiaplha.xyz"
-        }/api/user/settings`,
+        `${process.env.NEXT_PUBLIC_UPLOAD_API || "https://api.hiaplha.xyz"}/api/user/settings`,
         {
           method: "PUT",
           headers: {
@@ -145,10 +133,7 @@ export default function SettingsPage() {
       {/* Header */}
       <header className="relative z-10 container mx-auto px-4 py-6">
         <div className="flex items-center justify-between">
-          <Link
-            href="/"
-            className="flex items-center space-x-2 text-gray-800 dark:text-gray-200"
-          >
+          <Link href="/" className="flex items-center space-x-2 text-gray-800 dark:text-gray-200">
             <ArrowLeft className="h-5 w-5" />
             <span>返回首页</span>
           </Link>
@@ -165,9 +150,7 @@ export default function SettingsPage() {
                 <Settings className="h-6 w-6 text-primary" />
                 <span>Settings</span>
               </CardTitle>
-              <CardDescription className="text-muted-foreground">
-                管理您的通知偏好
-              </CardDescription>
+              <CardDescription className="text-muted-foreground">管理您的通知偏好</CardDescription>
             </CardHeader>
 
             <CardContent className="space-y-6">
@@ -176,9 +159,7 @@ export default function SettingsPage() {
                 <div className="flex items-center justify-between">
                   <div className="flex items-center space-x-2">
                     <Bell className="h-5 w-5" />
-                    <span className="font-medium text-foreground">
-                      Telegram 通知
-                    </span>
+                    <span className="font-medium text-foreground">Telegram 通知</span>
                   </div>
                   <Button
                     variant="ghost"
@@ -205,9 +186,7 @@ export default function SettingsPage() {
                 </div>
 
                 <div className="space-y-2">
-                  <label className="text-sm font-medium text-foreground">
-                    Telegram Chat ID
-                  </label>
+                  <label className="text-sm font-medium text-foreground">Telegram Chat ID</label>
                   <input
                     type="text"
                     value={telegramIdInput}
@@ -218,21 +197,13 @@ export default function SettingsPage() {
                   />
                   <p className="text-xs text-muted-foreground">
                     如何获取 Chat ID: 在 Telegram 搜索{" "}
-                    <span className="font-mono text-foreground">
-                      @userinfobot
-                    </span>{" "}
-                    并发送 /start
+                    <span className="font-mono text-foreground">@userinfobot</span> 并发送 /start
                   </p>
                 </div>
               </div>
 
               {/* Save Button */}
-              <Button
-                onClick={handleSave}
-                disabled={saving}
-                className="w-full"
-                size="lg"
-              >
+              <Button onClick={handleSave} disabled={saving} className="w-full" size="lg">
                 {saving ? (
                   <>
                     <LoadingSpinner className="mr-2" />

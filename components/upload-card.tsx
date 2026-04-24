@@ -2,7 +2,6 @@
 
 import { motion } from "framer-motion";
 import { CheckCircle, FileImage, Upload, X, XCircle } from "lucide-react";
-import * as React from "react";
 import { cn } from "../lib/utils";
 import { Button } from "./ui/button";
 import { Progress } from "./ui/progress";
@@ -21,7 +20,7 @@ export function UploadCard({ file, progress, status, error, onRemove }: UploadCa
     const k = 1024;
     const sizes = ["Bytes", "KB", "MB", "GB"];
     const i = Math.floor(Math.log(bytes) / Math.log(k));
-    return parseFloat((bytes / k ** i).toFixed(2)) + " " + sizes[i];
+    return `${parseFloat((bytes / k ** i).toFixed(2))} ${sizes[i]}`;
   };
 
   const getStatusIcon = () => {

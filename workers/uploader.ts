@@ -291,7 +291,7 @@ function formatBytes(bytes: number): string {
   const k = 1024;
   const sizes = ["B", "KB", "MB", "GB", "TB"];
   const i = Math.floor(Math.log(bytes) / Math.log(k));
-  return parseFloat((bytes / k ** i).toFixed(2)) + " " + sizes[i];
+  return `${parseFloat((bytes / k ** i).toFixed(2))} ${sizes[i]}`;
 }
 
 // Middleware
@@ -365,25 +365,16 @@ app.get("/health", (c) => {
 // GitHub OAuth 回调处理
 app.post("/auth/callback", async (c) => {
   try {
-    const { code, state } = await c.req.json();
-
-    console.log("OAuth callback received:", {
-      code: code?.substring(0, 10) + "...",
-      state,
-    });
+    const { code } = await c.req.json();
 
     if (!code) {
-      console.log("Missing authorization code");
+      console.warn("oauth callback rejected: missing authorization code");
       return c.json({ success: false, error: "Missing authorization code" }, 400);
     }
 
     // 交换访问令牌
-    console.log("Exchanging code for token...");
-    console.log("GitHub Client ID exists:", !!c.env.GITHUB_CLIENT_ID);
-    console.log("GitHub Client Secret exists:", !!c.env.GITHUB_CLIENT_SECRET);
-
     if (!c.env.GITHUB_CLIENT_ID || !c.env.GITHUB_CLIENT_SECRET) {
-      console.log("Missing GitHub OAuth credentials");
+      console.error("oauth callback misconfigured: missing github oauth credentials");
       return c.json({ success: false, error: "GitHub OAuth credentials not configured" }, 500);
     }
 
@@ -400,22 +391,20 @@ app.post("/auth/callback", async (c) => {
       }),
     });
 
-    console.log("Token response status:", tokenResponse.status);
-
     if (!tokenResponse.ok) {
-      const errorText = await tokenResponse.text();
-      console.log("Token exchange failed:", errorText);
+      await tokenResponse.text();
+      console.warn("oauth callback token exchange failed", {
+        status: tokenResponse.status,
+      });
       return c.json({ success: false, error: "Failed to exchange code for token" }, 400);
     }
 
     const tokenData = await tokenResponse.json();
-    console.log("Token data:", {
-      error: tokenData.error,
-      hasAccessToken: !!tokenData.access_token,
-    });
 
     if (tokenData.error) {
-      console.log("Token data error:", tokenData.error);
+      console.warn("oauth callback rejected by github", {
+        code: tokenData.error,
+      });
       return c.json(
         {
           success: false,
@@ -426,7 +415,6 @@ app.post("/auth/callback", async (c) => {
     }
 
     // 获取用户信息
-    console.log("Fetching user info...");
     const userResponse = await fetch("https://api.github.com/user", {
       headers: {
         Authorization: `Bearer ${tokenData.access_token}`,
@@ -435,16 +423,16 @@ app.post("/auth/callback", async (c) => {
       },
     });
 
-    console.log("User response status:", userResponse.status);
-
     if (!userResponse.ok) {
-      const errorText = await userResponse.text();
-      console.log("User fetch failed:", errorText);
+      await userResponse.text();
+      console.warn("oauth callback user fetch failed", {
+        status: userResponse.status,
+      });
       return c.json({ success: false, error: "Failed to fetch user info" }, 400);
     }
 
     const user = await userResponse.json();
-    console.log("User data received:", { id: user.id, login: user.login });
+    console.info("oauth callback success", { userId: user.id });
 
     return c.json({
       success: true,
@@ -488,7 +476,7 @@ app.get("/api/quota", async (c) => {
     const quota = (await quotaResponse.json()) as UploadQuotaState;
 
     // Calculate dynamic quota
-    const baseQuota = parseInt(c.env.DAILY_QUOTA_BYTES || "104857600"); // 100MB base
+    const baseQuota = parseInt(c.env.DAILY_QUOTA_BYTES || "104857600", 10); // 100MB base
     const activityBonus = Math.min(quota.dailyUploads * 1048576, 52428800); // Max 50MB bonus
     const dynamicQuota = baseQuota + activityBonus;
 
@@ -603,7 +591,7 @@ app.post("/upload", async (c) => {
     }
 
     // Dynamic quota calculation based on user activity
-    const baseQuota = parseInt(c.env.DAILY_QUOTA_BYTES || "104857600"); // 100MB base
+    const baseQuota = parseInt(c.env.DAILY_QUOTA_BYTES || "104857600", 10); // 100MB base
 
     // Increase quota for active users (bonus system)
     const activityBonus = Math.min(quota.dailyUploads * 1048576, 52428800); // Max 50MB bonus
@@ -645,7 +633,7 @@ app.post("/upload", async (c) => {
       );
     }
 
-    const maxFileSize = parseInt(c.env.MAX_FILE_SIZE || "10485760"); // 10MB default
+    const maxFileSize = parseInt(c.env.MAX_FILE_SIZE || "10485760", 10); // 10MB default
     if (file.size > maxFileSize) {
       return createErrorResponse(
         "File too large",
@@ -923,7 +911,7 @@ app.get("/api/admin/stats", async (c) => {
         "SELECT COUNT(*) as count FROM user_images WHERE DATE(created_at) = DATE('now')"
       ).first();
       todayUploads = (todayResult?.count as number) || 0;
-    } catch (dateError) {
+    } catch (_dateError) {
       // 如果 created_at 不存在，尝试其他可能的列名
       try {
         const todayResult = await c.env.DB.prepare(
@@ -1011,19 +999,12 @@ app.get("/api/admin/settings", async (c) => {
 
 // Telegram通知辅助函数
 async function sendTelegramNotification(env: Env, message: string): Promise<void> {
-  console.log("TELEGRAM: Starting notification");
-
   const botToken = env.TELEGRAM_BOT_TOKEN;
   const chatId = env.TELEGRAM_CHAT_ID;
 
-  console.log("TELEGRAM: Token exists:", !!botToken, "Chat ID exists:", !!chatId);
-
   if (!botToken || !chatId) {
-    console.log("TELEGRAM: Missing credentials, skipping");
     throw new Error("Missing Telegram credentials");
   }
-
-  console.log("TELEGRAM: Making API call");
 
   try {
     const url = `https://api.telegram.org/bot${botToken}/sendMessage`;
@@ -1033,15 +1014,8 @@ async function sendTelegramNotification(env: Env, message: string): Promise<void
       parse_mode: "HTML",
     };
 
-    // 隐藏敏感信息
-    const maskedUrl = url.substring(0, 30) + "***" + url.substring(url.length - 10);
-    console.log("TELEGRAM: Sending request to:", maskedUrl);
-    console.log("TELEGRAM: Payload chat_id:", chatId);
-    console.log("TELEGRAM: About to make fetch call");
-
     const controller = new AbortController();
     const timeoutId = setTimeout(() => {
-      console.log("TELEGRAM: Request timeout after 3s");
       controller.abort();
     }, 3000);
 
@@ -1054,37 +1028,30 @@ async function sendTelegramNotification(env: Env, message: string): Promise<void
       });
 
       clearTimeout(timeoutId);
-      console.log("TELEGRAM: Got response, status:", response.status);
 
       const responseText = await response.text();
-      console.log("TELEGRAM: Response status:", response.status);
-      console.log("TELEGRAM: Response body (first 200 chars):", responseText.substring(0, 200));
 
       if (response.ok) {
-        console.log("TELEGRAM: SUCCESS - Notification sent");
+        console.info("telegram notification sent");
         return;
       } else {
-        console.log("TELEGRAM: FAILED - Status:", response.status, "Error:", responseText);
+        console.warn("telegram notification failed", { status: response.status });
         throw new Error(`Telegram API error: ${response.status} - ${responseText}`);
       }
     } catch (fetchError) {
       clearTimeout(timeoutId);
-      console.log("TELEGRAM: Fetch failed:", fetchError);
       throw fetchError;
     }
   } catch (error) {
-    console.log("TELEGRAM: EXCEPTION:", error);
-    console.log("TELEGRAM: Exception type:", error?.constructor?.name);
-    console.log(
-      "TELEGRAM: Exception message:",
-      error instanceof Error ? error.message : String(error)
-    );
+    console.warn("telegram notification exception", {
+      message: error instanceof Error ? error.message : String(error),
+    });
     throw error;
   }
 }
 
 // AI内容筛查函数 - 使用Cloudflare Workers AI
-async function checkContentSafety(
+async function _checkContentSafety(
   file: File,
   env: Env
 ): Promise<{ blocked: boolean; label?: string; confidence?: number }> {
@@ -1172,7 +1139,7 @@ async function contentModeration(
 // 验证 GitHub Token
 async function verifyGitHubToken(
   token: string,
-  env: Env
+  _env: Env
 ): Promise<{
   valid: boolean;
   user?: any;
@@ -1192,7 +1159,7 @@ async function verifyGitHubToken(
 
     const user = await response.json();
     return { valid: true, user };
-  } catch (error) {
+  } catch (_error) {
     return { valid: false, error: "Token verification failed" };
   }
 }
@@ -1358,7 +1325,7 @@ app.post("/api/clean-invalid", async (c) => {
         if (!r2Object) {
           invalidRecords.push(key);
         }
-      } catch (error) {
+      } catch (_error) {
         // R2 对象不存在或访问失败
         invalidRecords.push(key);
       }
@@ -1613,12 +1580,8 @@ app.delete("/api/admin/ip-blacklist/:ip", async (c) => {
 
 // Test endpoint for Telegram notifications
 app.get("/test-telegram", async (c) => {
-  console.log("TEST: Telegram test endpoint called");
-
   const botToken = c.env.TELEGRAM_BOT_TOKEN;
   const chatId = c.env.TELEGRAM_CHAT_ID;
-
-  console.log("TEST: Token exists:", !!botToken, "Chat ID exists:", !!chatId);
 
   if (!botToken || !chatId) {
     return c.json({
@@ -1630,8 +1593,6 @@ app.get("/test-telegram", async (c) => {
   }
 
   try {
-    console.log("TEST: Making test API call");
-
     const testMessage = `🧪 <b>测试通知</b>
 
 ━━━━━━━━━━━━━━
@@ -1650,8 +1611,6 @@ app.get("/test-telegram", async (c) => {
       signal: AbortSignal.timeout(10000),
     });
 
-    console.log("TEST: Response status:", response.status);
-
     if (response.ok) {
       const result = await response.json();
       return c.json({
@@ -1669,7 +1628,9 @@ app.get("/test-telegram", async (c) => {
       });
     }
   } catch (error) {
-    console.log("TEST: Exception:", error);
+    console.warn("telegram test endpoint exception", {
+      message: error instanceof Error ? error.message : String(error),
+    });
     return c.json({
       success: false,
       error: "Exception during test",
@@ -1859,7 +1820,7 @@ app.get("/api/admin/users", async (c) => {
     // 如果数据库中没有用户数据，返回当前用户
     if (!usersQuery.results || usersQuery.results.length === 0) {
       const authHeader = c.req.header("Authorization");
-      if (authHeader && authHeader.startsWith("Bearer ")) {
+      if (authHeader?.startsWith("Bearer ")) {
         const token = authHeader.substring(7);
         try {
           const githubResponse = await fetch("https://api.github.com/user", {

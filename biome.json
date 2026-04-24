@@ -1,5 +1,5 @@
 {
-  "$schema": "https://biomejs.dev/schemas/2.2.7/schema.json",
+  "$schema": "https://biomejs.dev/schemas/2.3.1/schema.json",
   "vcs": {
     "enabled": true,
     "clientKind": "git",
@@ -34,7 +34,9 @@
     "rules": {
       "recommended": true,
       "correctness": {
-        "noUnusedVariables": "error"
+        "noUnusedVariables": "error",
+        "useExhaustiveDependencies": "warn",
+        "noInvalidUseBeforeDeclaration": "warn"
       },
       "style": {
         "noNonNullAssertion": "warn",
@@ -44,7 +46,8 @@
       "suspicious": {
         "noExplicitAny": "warn",
         "noArrayIndexKey": "warn",
-        "noUnknownAtRules": "off"
+        "noUnknownAtRules": "off",
+        "noImplicitAnyLet": "warn"
       },
       "complexity": {
         "noForEach": "warn",
@@ -55,7 +58,10 @@
       },
       "a11y": {
         "noSvgWithoutTitle": "warn",
-        "useButtonType": "warn"
+        "useButtonType": "warn",
+        "noLabelWithoutControl": "warn",
+        "noStaticElementInteractions": "warn",
+        "useKeyWithClickEvents": "warn"
       }
     }
   },
@@ -75,6 +81,11 @@
   "json": {
     "formatter": {
       "enabled": true
+    }
+  },
+  "css": {
+    "parser": {
+      "tailwindDirectives": true
     }
   }
 }

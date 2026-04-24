@@ -9,14 +9,11 @@ import {
   Heart,
   Home,
   Image as ImageIcon,
-  LayoutDashboard,
   MessageCircle,
   Shield,
-  Star,
   Upload as UploadIcon,
   Zap,
 } from "lucide-react";
-import { Card, CardContent } from "@/components/ui/card";
 import { ThemeToggle } from "@/components/ThemeToggle";
 
 interface FooterProps {
@@ -75,14 +72,8 @@ export function Footer({ className = "" }: FooterProps) {
             <div className="space-y-2">
               <p className="text-muted-foreground text-sm leading-relaxed">
                 Modern image hosting platform built with{" "}
-                <span className="font-semibold text-foreground">
-                  Next.js 15
-                </span>{" "}
-                +{" "}
-                <span className="font-semibold text-foreground">
-                  Cloudflare Workers
-                </span>
-                .
+                <span className="font-semibold text-foreground">Next.js 15</span> +{" "}
+                <span className="font-semibold text-foreground">Cloudflare Workers</span>.
               </p>
               <motion.div
                 whileHover={{ scale: 1.02 }}
@@ -111,9 +102,7 @@ export function Footer({ className = "" }: FooterProps) {
 
           {/* 快速链接 */}
           <div className="bg-card/50 rounded-lg border border-border p-4 space-y-3">
-            <h4 className="text-base font-semibold text-foreground">
-              Quick Links
-            </h4>
+            <h4 className="text-base font-semibold text-foreground">Quick Links</h4>
             <div className="grid grid-cols-2 gap-2">
               {[
                 {
@@ -196,9 +185,7 @@ export function Footer({ className = "" }: FooterProps) {
                   <Heart className="h-4 w-4 text-red-500 fill-red-500" />
                 </motion.span>
                 <span className="text-sm text-muted-foreground">by</span>
-                <span className="text-sm font-semibold text-foreground">
-                  Kaiki
-                </span>
+                <span className="text-sm font-semibold text-foreground">Kaiki</span>
               </div>
               <div className="text-xs text-center text-muted-foreground">
                 AI-Assisted Development
