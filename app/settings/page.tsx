@@ -5,6 +5,7 @@ import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useCallback, useEffect, useState } from "react";
 import { ThemeToggle } from "@/components/ThemeToggle";
+import { ToastManager, useToast } from "@/components/Toast";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Footer } from "@/components/ui/footer";
@@ -17,6 +18,7 @@ interface UserSettings {
 
 export default function SettingsPage() {
   const router = useRouter();
+  const { toasts, toast, removeToast } = useToast();
   const [_user, setUser] = useState<any>(null);
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
@@ -62,7 +64,6 @@ export default function SettingsPage() {
           setUser(auth.user);
           fetchUserSettings(auth.accessToken);
         } else {
-          alert("Please login to access settings");
           router.push("/");
         }
       } catch (error) {
@@ -101,18 +102,18 @@ export default function SettingsPage() {
       if (response.ok) {
         const result = await response.json();
         if (result.success) {
-          alert("设置已保存！");
+          toast.success("设置已保存");
           setSettings({
             telegramChatId: telegramIdInput || null,
             notificationEnabled: settings.notificationEnabled,
           });
         }
       } else {
-        alert("保存失败，请重试");
+        toast.error("保存失败，请重试");
       }
     } catch (error) {
       console.error("Failed to save settings:", error);
-      alert("保存失败，请重试");
+      toast.error("保存失败，请重试");
     } finally {
       setSaving(false);
     }
@@ -222,6 +223,7 @@ export default function SettingsPage() {
       </main>
 
       <Footer />
+      <ToastManager toasts={toasts} onClose={removeToast} />
     </div>
   );
 }

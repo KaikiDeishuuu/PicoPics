@@ -159,25 +159,23 @@ function UploadPageContent() {
     if (typeof window === "undefined") return;
 
     const authData = localStorage.getItem("auth");
-    if (authData) {
-      try {
-        const auth = JSON.parse(authData);
-        if (auth.user && auth.accessToken) {
-          setUser(auth.user);
-          setAccessToken(auth.accessToken);
-          setLoading(false);
-        } else {
-          alert("Please login to use upload feature");
-          router.push("/");
-        }
-      } catch (error) {
-        console.error("Failed to parse auth data:", error);
-        localStorage.removeItem("auth");
-        alert("请先登录以使用上传功能");
+    if (!authData) {
+      router.push("/");
+      return;
+    }
+
+    try {
+      const auth = JSON.parse(authData);
+      if (auth.user && auth.accessToken) {
+        setUser(auth.user);
+        setAccessToken(auth.accessToken);
+        setLoading(false);
+      } else {
         router.push("/");
       }
-    } else {
-      alert("请先登录以使用上传功能");
+    } catch (error) {
+      console.error("Failed to parse auth data:", error);
+      localStorage.removeItem("auth");
       router.push("/");
     }
   }, [router]);

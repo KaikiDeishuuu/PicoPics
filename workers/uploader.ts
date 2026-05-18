@@ -308,6 +308,16 @@ app.use(
 app.use("*", logger());
 app.use("*", prettyJSON());
 
+function hostnameOf(value: string): string | null {
+  const trimmed = value.trim();
+  if (!trimmed) return null;
+  try {
+    return new URL(trimmed).hostname.toLowerCase();
+  } catch {
+    return /^[a-z0-9.-]+$/i.test(trimmed) ? trimmed.toLowerCase() : null;
+  }
+}
+
 // Origin 验证中间件 - 防止未授权访问
 app.use("*", async (c, next) => {
   const path = c.req.path;
@@ -318,20 +328,27 @@ app.use("*", async (c, next) => {
     return;
   }
 
+  const rawAllowed = c.env.ALLOWED_ORIGINS?.split(",").map((s) => s.trim()) ?? [];
+
+  // "*" 或未配置：放行（保留原有行为）
+  if (rawAllowed.length === 0 || rawAllowed.includes("*")) {
+    await next();
+    return;
+  }
+
+  const allowedHosts = rawAllowed.map(hostnameOf).filter((h): h is string => h !== null);
+
   const origin = c.req.header("Origin");
   const referer = c.req.header("Referer");
-  const allowedOrigins = c.env.ALLOWED_ORIGINS?.split(",") || [];
-
-  // 检查 Origin 或 Referer
   const source = origin || referer;
 
   if (source) {
-    const isAllowed = allowedOrigins.some(
-      (allowed) =>
-        source.includes(allowed) || source.includes("localhost") || source.includes("127.0.0.1")
-    );
+    const sourceHost = hostnameOf(source);
+    const isAllowed =
+      sourceHost !== null &&
+      allowedHosts.some((allowed) => sourceHost === allowed || sourceHost.endsWith(`.${allowed}`));
 
-    if (!isAllowed && allowedOrigins.length > 0 && !allowedOrigins.includes("*")) {
+    if (!isAllowed) {
       console.warn("Blocked request from unauthorized origin:", {
         origin,
         referer,
@@ -953,14 +970,17 @@ app.get("/api/admin/users", async (c) => {
     }
 
     const users = await c.env.DB.prepare(
-      `SELECT 
-        user_id as id,
-        user_id as username,
-        user_id as email,
+      `SELECT
+        ui.user_id as id,
+        COALESCE(up.username, 'User ' || ui.user_id) as username,
+        COALESCE(up.email, '') as email,
+        COALESCE(up.avatar_url, '') as avatar_url,
         COUNT(*) as uploads,
-        MAX(upload_date) as lastActive
-       FROM user_images 
-       GROUP BY user_id 
+        SUM(ui.file_size) as totalSize,
+        MAX(ui.upload_date) as lastActive
+       FROM user_images ui
+       LEFT JOIN user_profiles up ON ui.user_id = up.user_id
+       GROUP BY ui.user_id
        ORDER BY lastActive DESC`
     ).all();
 
@@ -1804,14 +1824,16 @@ app.get("/api/admin/users", async (c) => {
     // 获取所有用户及统计信息
     const usersQuery = await c.env.DB.prepare(
       `
-      SELECT 
+      SELECT
         ui.user_id as id,
-        ui.user_id as username,
-        ui.user_id as email,
+        COALESCE(up.username, 'User ' || ui.user_id) as username,
+        COALESCE(up.email, '') as email,
+        COALESCE(up.avatar_url, '') as avatar_url,
         COUNT(*) as uploads,
         MAX(ui.upload_date) as lastActive,
         SUM(ui.file_size) as totalSize
       FROM user_images ui
+      LEFT JOIN user_profiles up ON ui.user_id = up.user_id
       GROUP BY ui.user_id
       ORDER BY lastActive DESC
     `

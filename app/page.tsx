@@ -55,8 +55,9 @@ export default function Home() {
   }, [authChecked]);
 
   const handleLogin = () => {
-    const clientId = process.env.NEXT_PUBLIC_GITHUB_CLIENT_ID || "Ov23lijBobxzGOfTVu9U";
+    const clientId = process.env.NEXT_PUBLIC_GITHUB_CLIENT_ID;
     if (!clientId) {
+      console.error("NEXT_PUBLIC_GITHUB_CLIENT_ID is not configured");
       alert("GitHub OAuth not configured");
       return;
     }

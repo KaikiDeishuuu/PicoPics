@@ -15,6 +15,21 @@ const app = new Hono<{ Bindings: Env }>();
 // 中间件
 app.use("*", logger());
 
+function hostnameOf(value: string): string | null {
+  const trimmed = value.trim();
+  if (!trimmed) return null;
+  try {
+    return new URL(trimmed).hostname.toLowerCase();
+  } catch {
+    // Bare hostname (e.g. "localhost"): accept as-is
+    return /^[a-z0-9.-]+$/i.test(trimmed) ? trimmed.toLowerCase() : null;
+  }
+}
+
+function isHostAllowed(host: string, allowedHosts: string[]): boolean {
+  return allowedHosts.some((allowed) => host === allowed || host.endsWith(`.${allowed}`));
+}
+
 // Referer 防盗链检查
 app.use("*", async (c, next) => {
   const path = c.req.path;
@@ -25,17 +40,15 @@ app.use("*", async (c, next) => {
     return;
   }
 
+  const allowedHosts = (c.env.ALLOWED_REFERERS?.split(",") ?? ["localhost"])
+    .map(hostnameOf)
+    .filter((h): h is string => h !== null);
+
   const referer = c.req.header("Referer");
-  const allowedReferers = c.env.ALLOWED_REFERERS?.split(",") || [
-    "https://image.hiaplha.xyz", // CDN 自身
-    "localhost", // 本地开发
-  ];
 
-  // 检查 Referer
   if (referer) {
-    const isAllowed = allowedReferers.some((allowed) => referer.includes(allowed));
-
-    if (!isAllowed) {
+    const refererHost = hostnameOf(referer);
+    if (!refererHost || !isHostAllowed(refererHost, allowedHosts)) {
       console.warn("Blocked request from unauthorized referer:", {
         referer,
         path,
@@ -44,8 +57,7 @@ app.use("*", async (c, next) => {
       return c.text("403 Forbidden: Unauthorized referer", 403);
     }
   } else {
-    // 无 Referer 的请求（直接访问、API调用、部分浏览器）
-    // 可以选择允许或拒绝
+    // 无 Referer：可能是直接访问/API/部分浏览器，仅记录，不拒绝以保留可用性
     console.log("Request without referer:", {
       path,
       userAgent: c.req.header("User-Agent"),
