@@ -492,20 +492,17 @@ app.get("/api/quota", async (c) => {
     );
     const quota = (await quotaResponse.json()) as UploadQuotaState;
 
-    // Calculate dynamic quota
-    const baseQuota = parseInt(c.env.DAILY_QUOTA_BYTES || "104857600", 10); // 100MB base
-    const activityBonus = Math.min(quota.dailyUploads * 1048576, 52428800); // Max 50MB bonus
-    const dynamicQuota = baseQuota + activityBonus;
+    const limit = parseInt(c.env.DAILY_QUOTA_BYTES || "104857600", 10); // 100MB default
 
     console.log(
-      `API/QUOTA: User ${userId} - used: ${quota.dailyBytes}, limit: ${dynamicQuota}, uploads: ${quota.dailyUploads}`
+      `API/QUOTA: User ${userId} - used: ${quota.dailyBytes}, limit: ${limit}, uploads: ${quota.dailyUploads}`
     );
 
     return c.json({
       success: true,
       data: {
         used: quota.dailyBytes,
-        limit: dynamicQuota,
+        limit,
         dailyUploads: quota.dailyUploads,
         lastReset: quota.lastReset,
       },
@@ -534,35 +531,18 @@ app.post("/upload", async (c) => {
 
     const token = authHeader.substring(7);
 
-    // 验证 GitHub token 并获取用户信息
+    // 验证 GitHub token 并获取用户信息（带缓存）
     let githubUser: any;
     let userId: string;
     let username: string;
 
-    try {
-      const githubResponse = await fetch("https://api.github.com/user", {
-        headers: {
-          Authorization: `Bearer ${token}`,
-          "User-Agent": "PicoPics-v2/1.0.0",
-        },
-      });
-
-      if (!githubResponse.ok) {
-        return createErrorResponse("Forbidden", "FORBIDDEN", "Invalid GitHub access token.", 403);
-      }
-
-      githubUser = await githubResponse.json();
-      userId = githubUser.id.toString();
-      username = githubUser.login;
-    } catch (error) {
-      console.error("GitHub authentication error:", error);
-      return createErrorResponse(
-        "Authentication failed",
-        "INTERNAL_ERROR",
-        "GitHub authentication failed. Please sign in again.",
-        500
-      );
+    const authResult = await verifyGitHubToken(token, c.env);
+    if (!authResult.valid || !authResult.user) {
+      return createErrorResponse("Forbidden", "FORBIDDEN", "Invalid GitHub access token.", 403);
     }
+    githubUser = authResult.user;
+    userId = githubUser.id.toString();
+    username = githubUser.login;
 
     // Check IP blacklist
     if (c.env.ABUSE_DETECTION_ENABLED === "true") {
@@ -588,41 +568,10 @@ app.post("/upload", async (c) => {
       }
     }
 
-    // Dynamic rate limiting based on user behavior and system load
+    // Quota stub is created early but the actual check happens after file
+    // validation so we know file.size for an exact pre-check.
     const quotaId = c.env.UPLOAD_QUOTA.idFromName(userId);
     const quotaStub = c.env.UPLOAD_QUOTA.get(quotaId);
-    const quotaResponse = await quotaStub.fetch(
-      new Request(`http://quota?userId=${userId}`, { method: "GET" }) as any
-    );
-    const quotaText = await quotaResponse.text();
-
-    let quota: UploadQuotaState;
-    try {
-      quota = JSON.parse(quotaText) as UploadQuotaState;
-    } catch (jsonError) {
-      throw new Error(
-        `Quota JSON parse failed: ${
-          jsonError instanceof Error ? jsonError.message : String(jsonError)
-        }`
-      );
-    }
-
-    // Dynamic quota calculation based on user activity
-    const baseQuota = parseInt(c.env.DAILY_QUOTA_BYTES || "104857600", 10); // 100MB base
-
-    // Increase quota for active users (bonus system)
-    const activityBonus = Math.min(quota.dailyUploads * 1048576, 52428800); // Max 50MB bonus
-    const dynamicQuota = baseQuota + activityBonus;
-
-    // Only enforce quota for very high usage (prevent abuse)
-    if (quota.dailyBytes > dynamicQuota * 2) {
-      return createErrorResponse(
-        "Quota exceeded",
-        "QUOTA_EXCEEDED",
-        "Upload limit exceeded. Please try again later.",
-        429
-      );
-    }
 
     const contentType = c.req.header("Content-Type") || "";
     if (!contentType.includes("multipart/form-data")) {
@@ -680,6 +629,33 @@ app.post("/upload", async (c) => {
       );
     }
 
+    // 配额硬上限：DAILY_QUOTA_BYTES（默认 100MB/天）。预检 used + size > limit。
+    const dailyLimit = parseInt(c.env.DAILY_QUOTA_BYTES || "104857600", 10);
+    const quotaResponse = await quotaStub.fetch(
+      new Request(`http://quota?userId=${userId}`, { method: "GET" }) as any
+    );
+    const quotaText = await quotaResponse.text();
+
+    let quota: UploadQuotaState;
+    try {
+      quota = JSON.parse(quotaText) as UploadQuotaState;
+    } catch (jsonError) {
+      throw new Error(
+        `Quota JSON parse failed: ${
+          jsonError instanceof Error ? jsonError.message : String(jsonError)
+        }`
+      );
+    }
+
+    if (quota.dailyBytes + file.size > dailyLimit) {
+      return createErrorResponse(
+        "Quota exceeded",
+        "QUOTA_EXCEEDED",
+        `Daily upload limit (${Math.round(dailyLimit / (1024 * 1024))}MB) would be exceeded.`,
+        429
+      );
+    }
+
     const objectKey = createSecureObjectKey(detectedType);
     const uploadTime = new Date().toISOString();
 
@@ -731,15 +707,9 @@ app.post("/upload", async (c) => {
       );
     }
 
-    // Update quota after successful upload
-    await quotaStub.fetch(
-      new Request(`http://quota?userId=${userId}`, {
-        method: "POST",
-        body: JSON.stringify({ bytes: file.size }),
-      }) as any
-    );
-
-    // Save to database
+    // Save to database. If this fails after R2 succeeded, roll back the R2
+    // object so we don't leak orphans. Quota is incremented only after both
+    // R2 and D1 succeed.
     const r2ObjectKey = objectKey;
     const downloadFilename = `${objectKey.split("/").pop() || objectKey}`;
 
@@ -783,6 +753,15 @@ app.post("/upload", async (c) => {
       }
     } catch (dbError) {
       console.error("Database save error:", dbError);
+      try {
+        await c.env.IMAGES.delete(objectKey);
+        console.warn("rolled back R2 object after D1 insert failure", { key: objectKey });
+      } catch (rollbackError) {
+        console.error("failed to rollback R2 object after D1 insert failure", {
+          key: objectKey,
+          message: rollbackError instanceof Error ? rollbackError.message : String(rollbackError),
+        });
+      }
       return createErrorResponse(
         "Upload failed",
         "UPLOAD_FAILED",
@@ -790,6 +769,14 @@ app.post("/upload", async (c) => {
         500
       );
     }
+
+    // Increment quota only after both R2 and D1 succeeded.
+    await quotaStub.fetch(
+      new Request(`http://quota?userId=${userId}`, {
+        method: "POST",
+        body: JSON.stringify({ bytes: file.size }),
+      }) as any
+    );
 
     // Generate public URL using CDN worker
     const publicUrl = `${c.env.CDN_BASE_URL || "https://image.hiaplha.xyz"}/${objectKey}`;
@@ -1156,7 +1143,17 @@ async function contentModeration(
   }
 }
 
-// 验证 GitHub Token
+// 验证 GitHub Token（带 60 秒 Cache API 缓存以降低 GitHub API 调用频率）
+const GITHUB_TOKEN_CACHE_TTL_SECONDS = 60;
+
+async function sha256Hex(input: string): Promise<string> {
+  const data = new TextEncoder().encode(input);
+  const hash = await crypto.subtle.digest("SHA-256", data);
+  return Array.from(new Uint8Array(hash))
+    .map((b) => b.toString(16).padStart(2, "0"))
+    .join("");
+}
+
 async function verifyGitHubToken(
   token: string,
   _env: Env
@@ -1165,6 +1162,20 @@ async function verifyGitHubToken(
   user?: any;
   error?: string;
 }> {
+  const tokenHash = await sha256Hex(token);
+  const cacheKey = new Request(`https://picopics.internal/gh-user/${tokenHash}`);
+  const cache = caches.default;
+
+  const cached = await cache.match(cacheKey);
+  if (cached) {
+    try {
+      const user = await cached.json();
+      return { valid: true, user };
+    } catch {
+      // fall through to fresh fetch on parse error
+    }
+  }
+
   try {
     const response = await fetch("https://api.github.com/user", {
       headers: {
@@ -1178,6 +1189,18 @@ async function verifyGitHubToken(
     }
 
     const user = await response.json();
+
+    // 仅缓存成功响应；失败不缓存以便用户重新登录后立即生效
+    await cache.put(
+      cacheKey,
+      new Response(JSON.stringify(user), {
+        headers: {
+          "Content-Type": "application/json",
+          "Cache-Control": `public, max-age=${GITHUB_TOKEN_CACHE_TTL_SECONDS}`,
+        },
+      })
+    );
+
     return { valid: true, user };
   } catch (_error) {
     return { valid: false, error: "Token verification failed" };
