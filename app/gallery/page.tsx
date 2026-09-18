@@ -1,6 +1,5 @@
 "use client";
 
-import { QueryClientProvider } from "@tanstack/react-query";
 import {
   ArrowLeft,
   Grid,
@@ -14,6 +13,7 @@ import {
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
+import { QueryProvider } from "@/components/query-provider";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Footer } from "@/components/ui/footer";
@@ -22,7 +22,6 @@ import { LoadingSpinner } from "@/components/ui/loading";
 import { NotificationContainer, useNotifications } from "@/components/ui/notification";
 import type { ImageHistoryRecord } from "@/lib/api";
 import { useDeleteImage, useUserImages } from "@/lib/hooks/use-queries";
-import { queryClient } from "@/lib/query-client";
 
 // 强制动态渲染
 export const dynamic = "force-dynamic";
@@ -452,8 +451,8 @@ function GalleryContent() {
 
 export default function GalleryPage() {
   return (
-    <QueryClientProvider client={queryClient}>
+    <QueryProvider>
       <GalleryContent />
-    </QueryClientProvider>
+    </QueryProvider>
   );
 }

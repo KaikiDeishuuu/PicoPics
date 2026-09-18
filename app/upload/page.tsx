@@ -1,6 +1,5 @@
 "use client";
 
-import { QueryClientProvider } from "@tanstack/react-query";
 import {
   AlertCircle,
   ArrowLeft,
@@ -18,6 +17,7 @@ import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useEffect, useMemo, useState } from "react";
 import { QuotaBadge } from "@/components/QuotaBadge";
+import { QueryProvider } from "@/components/query-provider";
 import { ThemeToggle } from "@/components/ThemeToggle";
 import { ToastManager, useToast } from "@/components/Toast";
 import { UploadCard } from "@/components/UploadCard";
@@ -30,7 +30,6 @@ import { useClipboardUpload } from "@/lib/hooks/use-clipboard-upload";
 import { useNotifications } from "@/lib/hooks/use-notifications";
 import { useQuota } from "@/lib/hooks/use-queries";
 import { useUploadQueue } from "@/lib/hooks/use-upload-queue";
-import { queryClient } from "@/lib/query-client";
 
 // 强制动态渲染，避免静态化
 export const dynamic = "force-dynamic";
@@ -700,9 +699,9 @@ function UploadPageContent() {
 
 export default function UploadPage() {
   return (
-    <QueryClientProvider client={queryClient}>
+    <QueryProvider>
       <ToastManager toasts={[]} onClose={() => {}} />
       <UploadPageContent />
-    </QueryClientProvider>
+    </QueryProvider>
   );
 }

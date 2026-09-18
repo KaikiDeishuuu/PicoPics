@@ -1,6 +1,5 @@
 "use client";
 
-import { QueryClientProvider } from "@tanstack/react-query";
 import {
   Activity,
   ArrowLeft,
@@ -21,13 +20,13 @@ import {
 } from "lucide-react";
 import Link from "next/link";
 import { useEffect, useState } from "react";
+import { QueryProvider } from "@/components/query-provider";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Footer } from "@/components/ui/footer";
 import { IPManagement } from "@/components/ui/ip-management";
 import { LoadingSpinner } from "@/components/ui/loading";
 import { NotificationContainer, useNotifications } from "@/components/ui/notification";
-import { queryClient } from "@/lib/query-client";
 
 // 强制动态渲染
 export const dynamic = "force-dynamic";
@@ -994,8 +993,8 @@ function AdminContent() {
 
 export default function AdminPage() {
   return (
-    <QueryClientProvider client={queryClient}>
+    <QueryProvider>
       <AdminContent />
-    </QueryClientProvider>
+    </QueryProvider>
   );
 }
