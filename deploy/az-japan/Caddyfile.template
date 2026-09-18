@@ -1,0 +1,39 @@
+# PicoPics single-origin Caddyfile. __DOMAIN__ is replaced by
+# scripts/deploy-vps.sh on first setup (or by hand: sed -i 's/__DOMAIN__/.../').
+#
+# Routing mirrors server/gateway.ts:
+#   POST /auth/callback + /upload + /api/*  -> gateway :8080 (uploader worker)
+#   GET  /api/history                       -> gateway :8080 (history worker)
+#   GET  /images/*                          -> gateway :8080 (cdn worker)
+#   GET  /auth/callback (the page) + the rest -> Next.js :3000
+__DOMAIN__ {
+	encode zstd gzip
+
+	@oauth_exchange {
+		method POST
+		path /auth/callback
+	}
+	handle @oauth_exchange {
+		reverse_proxy 127.0.0.1:8080
+	}
+
+	handle /upload {
+		reverse_proxy 127.0.0.1:8080
+	}
+
+	handle /api/* {
+		reverse_proxy 127.0.0.1:8080
+	}
+
+	handle /images/* {
+		reverse_proxy 127.0.0.1:8080
+	}
+
+	handle /health {
+		reverse_proxy 127.0.0.1:8080
+	}
+
+	handle {
+		reverse_proxy 127.0.0.1:3000
+	}
+}

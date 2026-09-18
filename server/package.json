@@ -1,0 +1,12 @@
+{
+  "name": "picopics-gateway",
+  "version": "2.0.0",
+  "private": true,
+  "description": "PicoPics VPS gateway — runs the Cloudflare Worker apps under Node with a compatibility layer (R2→disk, D1→SQLite, DO→in-process). hono/@hono/node-server are bundled into dist/server.js by esbuild; only the native better-sqlite3 module is installed on the host.",
+  "scripts": {
+    "start": "node dist/gateway.js"
+  },
+  "dependencies": {
+    "better-sqlite3": "^12.4.1"
+  }
+}

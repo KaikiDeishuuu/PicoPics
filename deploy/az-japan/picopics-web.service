@@ -1,0 +1,21 @@
+[Unit]
+Description=PicoPics frontend (Next.js standalone)
+After=network.target picopics-api.service
+
+[Service]
+Type=simple
+User=picopics
+Group=picopics
+WorkingDirectory=/opt/picopics/web
+Environment=NODE_ENV=production
+Environment=PORT=3000
+Environment=HOSTNAME=127.0.0.1
+ExecStart=/usr/bin/node /opt/picopics/web/server.js
+Restart=always
+RestartSec=3
+MemoryMax=400M
+NoNewPrivileges=true
+PrivateTmp=true
+
+[Install]
+WantedBy=multi-user.target

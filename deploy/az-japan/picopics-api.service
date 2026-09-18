@@ -1,0 +1,21 @@
+[Unit]
+Description=PicoPics API gateway (Cloudflare Worker apps on Node)
+After=network.target
+
+[Service]
+Type=simple
+User=picopics
+Group=picopics
+WorkingDirectory=/opt/picopics/server
+EnvironmentFile=/opt/picopics/server/.env
+ExecStart=/usr/bin/node /opt/picopics/server/dist/gateway.js
+Restart=always
+RestartSec=3
+MemoryMax=350M
+NoNewPrivileges=true
+PrivateTmp=true
+ProtectSystem=strict
+ReadWritePaths=/var/lib/picopics
+
+[Install]
+WantedBy=multi-user.target

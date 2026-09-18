@@ -43,8 +43,9 @@ export default function AuthCallback() {
           return;
         }
 
-        // 调用后端 API 交换访问令牌
-        const response = await fetch("https://api.hiaplha.xyz/auth/callback", {
+        // 调用后端 API 交换访问令牌（跟随前端部署的 API 地址，默认沿用 Cloudflare 生产）
+        const uploadApi = process.env.NEXT_PUBLIC_UPLOAD_API || "https://api.hiaplha.xyz";
+        const response = await fetch(`${uploadApi}/auth/callback`, {
           method: "POST",
           headers: {
             "Content-Type": "application/json",

@@ -160,7 +160,11 @@ class IPBlacklist {
     const blacklist: any[] = [];
     const keys = await this.state.storage.list({ prefix: "blocked:" });
 
-    for (const [key, blockedUntil] of keys) {
+    // Indexed loop (not for..of) so this file also type-checks under the
+    // repo's es5 tsconfig target.
+    const entries = Array.from(keys.entries());
+    for (let i = 0; i < entries.length; i++) {
+      const [key, blockedUntil] = entries[i];
       const ip = key.replace("blocked:", "");
       const reason = (await this.state.storage.get(`reason:${ip}`)) || "No reason provided";
       const addedBy = (await this.state.storage.get(`addedBy:${ip}`)) || "system";
@@ -1116,7 +1120,9 @@ async function verifyGitHubToken(
 }> {
   const tokenHash = await sha256Hex(token);
   const cacheKey = new Request(`https://picopics.internal/gh-user/${tokenHash}`);
-  const cache = caches.default;
+  // Cast: `caches.default` exists on Cloudflare Workers (and the VPS gateway
+  // shim) but not in the DOM lib this file is type-checked against.
+  const cache = (caches as unknown as { default: Cache }).default;
 
   const cached = await cache.match(cacheKey);
   if (cached) {

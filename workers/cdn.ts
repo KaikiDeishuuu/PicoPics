@@ -105,7 +105,8 @@ app.get("/", (c) => {
 });
 
 // 图片服务路由 - 支持动态缩略图生成
-app.get("/:key", async (c) => {
+// {.+} 使 :key 匹配多段对象键（如 images/2026-09-18/uuid.png），单段键不受影响
+app.get("/:key{.+}", async (c) => {
   const key = c.req.param("key");
   const env = c.env;
 
