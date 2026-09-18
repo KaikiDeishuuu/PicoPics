@@ -140,3 +140,4 @@ certs/
 api-keys.txt
 tokens.txt
 secrets.txt
+.zcode/
