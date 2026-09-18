@@ -1,11 +1,11 @@
 "use client";
 
-import { Github, Globe, Image, Menu, Shield, Upload, Users, X, Zap } from "lucide-react";
+import { Github, Image, Menu, Shield, Upload, X, Zap } from "lucide-react";
 import Link from "next/link";
 import { useEffect, useState } from "react";
 import { ThemeToggle } from "@/components/ThemeToggle";
 import { Button } from "@/components/ui/button";
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
+import { Card, CardContent, CardDescription, CardTitle } from "@/components/ui/card";
 import { Footer } from "@/components/ui/footer";
 
 export const dynamic = "force-dynamic";
@@ -105,7 +105,7 @@ export default function Home() {
 
   return (
     <div className="min-h-screen bg-background">
-      <div className="container mx-auto px-4 py-16">
+      <div className="container mx-auto px-4 py-12">
         <header className="fixed top-4 left-1/2 -translate-x-1/2 z-50 w-[95%] md:w-[90%] bg-card/90 backdrop-blur-sm border border-border rounded-2xl px-4 sm:px-6 py-2 flex items-center justify-between">
           <div className="flex items-center gap-2">
             <div className="h-9 w-9 rounded-xl bg-gradient-to-tr from-blue-500 to-purple-500 grid place-items-center">
@@ -147,7 +147,7 @@ export default function Home() {
             <ThemeToggle />
             <button
               onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)}
-              className="p-2rounded-lghover:bg-mutedtransition"
+              className="p-2 rounded-lg hover:bg-muted transition"
             >
               {isMobileMenuOpen ? <X className="h-5 w-5" /> : <Menu className="h-5 w-5" />}
             </button>
@@ -195,9 +195,9 @@ export default function Home() {
           </div>
         )}
 
-        <div className="text-center mb-16 px-4 mt-24">
-          <h1 className="text-6xl md:text-8xl font-bold text-foreground mb-4">PicoPics V2</h1>
-          <p className="text-xl md:text-2xl text-muted-foreground mb-8">
+        <div className="text-center mb-10 px-4 mt-20">
+          <h1 className="text-5xl md:text-6xl font-bold text-foreground mb-3">PicoPics V2</h1>
+          <p className="text-lg md:text-xl text-muted-foreground mb-6">
             Modern Image Hosting Platform
           </p>
           {isAuthenticated ? (
@@ -228,74 +228,39 @@ export default function Home() {
           )}
         </div>
 
-        <div className="mb-16 px-4">
-          <div className="text-center mb-8">
-            <h2 className="text-3xl font-bold text-foreground mb-4">Why Choose PicoPics?</h2>
+        <div className="mb-10 px-4">
+          <div className="text-center mb-4">
+            <h2 className="text-2xl font-bold text-foreground">Why PicoPics?</h2>
           </div>
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+          <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
             {[
               {
                 icon: Zap,
-                title: "Ultimate Performance",
-                description: "Cloudflare Workers edge computing, global millisecond response",
+                title: "极速上传",
+                description: "边缘部署、并发队列、粘贴即传",
               },
               {
                 icon: Shield,
-                title: "Enterprise Security",
-                description: "GitHub OAuth authentication, JWT Token verification",
-              },
-              {
-                icon: Globe,
-                title: "Global Deployment",
-                description: "Vercel global CDN, Cloudflare edge network, zero costs",
-              },
-              {
-                icon: Users,
-                title: "User Friendly",
-                description: "Intuitive interface, drag-and-drop upload, real-time preview",
+                title: "隐私安全",
+                description: "GitHub 登录，自动剥离 EXIF 位置信息",
               },
               {
                 icon: Image,
-                title: "Easy Sharing",
-                description: "One-click sharing links, multiple format support",
+                title: "即取即用",
+                description: "一键复制 URL / Markdown / HTML / BBCode",
               },
-              {
-                icon: Upload,
-                title: "Batch Upload",
-                description: "Upload multiple images at once, automatic compression",
-              },
-            ].map((feature, index) => (
-              <Card key={index} className="border border-border">
-                <CardHeader>
-                  <div className="flex items-center space-x-3">
-                    <div className="p-3 rounded-lg bg-primary/10">
-                      <feature.icon className="h-6 w-6 text-primary" />
+            ].map((feature) => (
+              <Card key={feature.title} className="border border-border">
+                <CardContent className="pt-4">
+                  <div className="flex items-center space-x-3 mb-2">
+                    <div className="p-2 rounded-lg bg-primary/10">
+                      <feature.icon className="h-5 w-5 text-primary" />
                     </div>
-                    <CardTitle className="text-xl">{feature.title}</CardTitle>
+                    <CardTitle className="text-base">{feature.title}</CardTitle>
                   </div>
-                </CardHeader>
-                <CardContent>
-                  <CardDescription className="text-base">{feature.description}</CardDescription>
+                  <CardDescription className="text-sm">{feature.description}</CardDescription>
                 </CardContent>
               </Card>
-            ))}
-          </div>
-        </div>
-
-        <div className="text-center mb-16">
-          <h2 className="text-3xl font-bold text-foreground mb-8">Tech Stack</h2>
-          <div className="flex flex-wrap justify-center gap-3">
-            {[
-              "Next.js 15",
-              "React 18",
-              "TypeScript",
-              "Tailwind CSS",
-              "Cloudflare Workers",
-              "Vercel",
-            ].map((tech, index) => (
-              <span key={index} className="px-4 py-2 bg-muted rounded-full text-sm font-medium">
-                {tech}
-              </span>
             ))}
           </div>
         </div>

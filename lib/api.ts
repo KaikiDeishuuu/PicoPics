@@ -43,6 +43,17 @@ export const ImageHistorySchema = z.object({
 
 export type ImageHistoryRecord = z.infer<typeof ImageHistorySchema>;
 
+export type HistoryPagination = {
+  total: number;
+  limit: number;
+  offset: number;
+  hasMore: boolean;
+};
+
+export type PaginatedHistoryResponse = ApiResponse<ImageHistoryRecord[]> & {
+  pagination?: HistoryPagination;
+};
+
 // Admin Stats Schema
 export const AdminStatsSchema = z.object({
   totalImages: z.number(),
@@ -268,8 +279,37 @@ export class ApiClient {
   }
 
   // History methods
-  async getUserHistory(): Promise<ApiResponse<ImageHistoryRecord[]>> {
-    return this.request<ImageHistoryRecord[]>("/api/history");
+  // 不走 this.request()：它只保留 data 字段，会丢掉分页元信息
+  async getUserHistory(params?: {
+    limit?: number;
+    offset?: number;
+  }): Promise<PaginatedHistoryResponse> {
+    const query = new URLSearchParams();
+    if (params?.limit) query.set("limit", String(params.limit));
+    if (params?.offset) query.set("offset", String(params.offset));
+    const qs = query.toString();
+    const url = `${this.baseUrl}/api/history${qs ? `?${qs}` : ""}`;
+
+    const headers: Record<string, string> = {};
+    if (this.accessToken) {
+      headers.Authorization = `Bearer ${this.accessToken}`;
+    }
+
+    try {
+      const response = await fetch(url, { headers });
+      const body = await response.json();
+      return {
+        success: response.ok && body.success !== false,
+        data: body.data,
+        error: body.error,
+        pagination: body.pagination,
+      };
+    } catch (error) {
+      return {
+        success: false,
+        error: error instanceof Error ? error.message : "Network error",
+      };
+    }
   }
 
   async deleteImage(r2ObjectKey: string): Promise<ApiResponse> {

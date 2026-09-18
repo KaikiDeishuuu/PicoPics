@@ -3,19 +3,17 @@
 import {
   AlertCircle,
   ArrowLeft,
+  Check,
   CheckCircle,
   Clock,
-  FileText,
-  Globe,
+  Copy,
   Image,
-  Info,
+  Link2,
   Shield,
   Upload,
-  Zap,
 } from "lucide-react";
-import Link from "next/link";
 import { useRouter } from "next/navigation";
-import { useEffect, useMemo, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import { QuotaBadge } from "@/components/QuotaBadge";
 import { QueryProvider } from "@/components/query-provider";
 import { ThemeToggle } from "@/components/ThemeToggle";
@@ -142,6 +140,20 @@ function UploadPageContent() {
     cancelled: uploadQueue.items.filter((item) => item.status === "cancelled").length,
   };
 
+  // 上传成功的结果列表：提供 URL / Markdown / HTML / BBCode 一键复制
+  const successItems = uploadQueue.items.filter((item) => item.status === "success");
+  const [copiedKey, setCopiedKey] = useState<string | null>(null);
+
+  const copyText = async (key: string, text: string) => {
+    try {
+      await navigator.clipboard.writeText(text);
+      setCopiedKey(key);
+      window.setTimeout(() => setCopiedKey(null), 1500);
+    } catch (_error) {
+      toast.error("复制失败", "浏览器拒绝了剪贴板访问");
+    }
+  };
+
   useClipboardUpload({
     enabled: !loading && !!accessToken,
     acceptedTypes: ["image/jpeg", "image/png", "image/gif", "image/webp"],
@@ -204,23 +216,19 @@ function UploadPageContent() {
     setUploadProgress(0);
   }, [queueStats.error, queueStats.success, uploadQueue.items]);
 
-  // 处理上传成功
+  // 处理上传成功（不自动跳转：留时间复制外链，画廊入口在上传结果卡片里）
+  const successToastCount = useRef(0);
   useEffect(() => {
     if (
       queueStats.success > 0 &&
       queueStats.uploading === 0 &&
       queueStats.queued === 0 &&
-      !isNavigating
+      queueStats.success !== successToastCount.current
     ) {
+      successToastCount.current = queueStats.success;
       toast.success("上传成功", `成功上传 ${queueStats.success} 张图片`);
-      const timer = setTimeout(() => {
-        setIsNavigating(true);
-        router.push(`/gallery?refresh=${Date.now()}`);
-      }, 2000);
-
-      return () => clearTimeout(timer);
     }
-  }, [queueStats.queued, queueStats.uploading, queueStats.success, isNavigating, toast, router]);
+  }, [queueStats.queued, queueStats.uploading, queueStats.success, toast]);
 
   // 处理上传错误
   useEffect(() => {
@@ -275,7 +283,7 @@ function UploadPageContent() {
                       <span>Image Upload</span>
                     </CardTitle>
                     <CardDescription className="text-sm md:text-base text-muted-foreground">
-                      Welcome back, {user?.login || "User"}! Start uploading your images
+                      欢迎 {user?.login || "User"}！支持 JPG / PNG / GIF / WebP，单文件最大 10MB
                     </CardDescription>
                   </div>
                 </div>
@@ -348,37 +356,6 @@ function UploadPageContent() {
                           />
                         </div>
                       )}
-                      {uploadStatus === "success" && (
-                        <div className="mt-4 flex gap-3">
-                          <Button
-                            size="sm"
-                            className="text-foreground"
-                            onClick={() => {
-                              if (!isNavigating) {
-                                setIsNavigating(true);
-                                router.push(`/gallery?refresh=${Date.now()}`);
-                              }
-                            }}
-                            disabled={isNavigating}
-                          >
-                            前往画廊
-                          </Button>
-                          <Button
-                            size="sm"
-                            variant="outline"
-                            className="border-gray-300 text-gray-700 hover:bg-gray-100"
-                            onClick={() => {
-                              if (!isNavigating) {
-                                setIsNavigating(true);
-                                router.push("/");
-                              }
-                            }}
-                            disabled={isNavigating}
-                          >
-                            返回首页
-                          </Button>
-                        </div>
-                      )}
                     </div>
                   </div>
                 </CardContent>
@@ -387,11 +364,83 @@ function UploadPageContent() {
           )}
         </div>
 
+        {/* 上传结果：外链与格式片段一键复制 */}
+        {successItems.length > 0 && (
+          <Card className="card-modern border-0 shadow-lg mb-4">
+            <CardHeader className="pb-2">
+              <CardTitle className="flex items-center space-x-2 text-base">
+                <Link2 className="h-4 w-4 text-blue-600" />
+                <span>上传结果（{successItems.length} 张）</span>
+              </CardTitle>
+              <CardDescription>点击按钮复制对应格式的外链</CardDescription>
+            </CardHeader>
+            <CardContent className="space-y-2">
+              {successItems.map((item) => {
+                const result = (
+                  item.result as { data?: { url?: string; filename?: string } } | undefined
+                )?.data;
+                const url = result?.url || "";
+                const name = result?.filename || item.file.name;
+                if (!url) {
+                  return null;
+                }
+                const snippets = [
+                  { key: "url", label: "URL", text: url },
+                  { key: "md", label: "Markdown", text: `![${name}](${url})` },
+                  { key: "html", label: "HTML", text: `<img src="${url}" alt="${name}" />` },
+                  { key: "bb", label: "BBCode", text: `[img]${url}[/img]` },
+                ];
+                return (
+                  <div key={item.id} className="rounded-md border border-border p-3 space-y-2">
+                    <p className="text-sm font-medium truncate">{name}</p>
+                    <div className="flex flex-wrap gap-2">
+                      {snippets.map((snippet) => (
+                        <Button
+                          key={snippet.key}
+                          size="sm"
+                          variant="outline"
+                          onClick={() => copyText(`${item.id}:${snippet.key}`, snippet.text)}
+                        >
+                          {copiedKey === `${item.id}:${snippet.key}` ? (
+                            <Check className="h-3.5 w-3.5 mr-1 text-green-600" />
+                          ) : (
+                            <Copy className="h-3.5 w-3.5 mr-1" />
+                          )}
+                          {snippet.label}
+                        </Button>
+                      ))}
+                      <a href={url} target="_blank" rel="noreferrer">
+                        <Button size="sm" variant="ghost">
+                          预览
+                        </Button>
+                      </a>
+                    </div>
+                  </div>
+                );
+              })}
+              <div className="pt-1">
+                <Button
+                  size="sm"
+                  onClick={() => {
+                    if (!isNavigating) {
+                      setIsNavigating(true);
+                      router.push(`/gallery?refresh=${Date.now()}`);
+                    }
+                  }}
+                  disabled={isNavigating}
+                >
+                  <Image className="h-4 w-4 mr-1" />
+                  前往画廊
+                </Button>
+              </div>
+            </CardContent>
+          </Card>
+        )}
         {/* 主要内容区域 */}
-        <div className="grid lg:grid-cols-3 gap-8">
+        <div className="grid lg:grid-cols-3 gap-6">
           {/* 上传区域 */}
           <div className="lg:col-span-2">
-            <div className="mb-8">
+            <div className="mb-4">
               <Card className="card-modern border-0 shadow-xl">
                 <CardHeader>
                   <CardTitle className="flex items-center space-x-2">
@@ -411,7 +460,7 @@ function UploadPageContent() {
               </Card>
             </div>
 
-            <div className="mb-8">
+            <div className="mb-4">
               <Card className="card-modern border-0 shadow-lg">
                 <CardHeader>
                   <CardTitle>上传队列</CardTitle>
@@ -478,89 +527,41 @@ function UploadPageContent() {
                 </CardContent>
               </Card>
             </div>
-
-            {/* 上传提示 */}
-            <div className="mb-8">
-              <Card className="card-modern border-0 shadow-lg">
-                <CardHeader>
-                  <CardTitle className="flex items-center space-x-2">
-                    <Info className="h-5 w-5 text-blue-600" />
-                    <span>上传提示</span>
-                  </CardTitle>
-                </CardHeader>
-                <CardContent>
-                  <div className="space-y-4">
-                    <div className="flex items-start space-x-3">
-                      <CheckCircle className="h-5 w-5 text-green-600 mt-0.5 flex-shrink-0" />
-                      <div>
-                        <h4 className="font-medium">支持的格式</h4>
-                        <p className="text-sm text-gray-600">
-                          JPG, PNG, GIF, WebP（默认不支持 SVG）
-                        </p>
-                      </div>
-                    </div>
-                    <div className="flex items-start space-x-3">
-                      <CheckCircle className="h-5 w-5 text-green-600 mt-0.5 flex-shrink-0" />
-                      <div>
-                        <h4 className="font-medium">文件大小</h4>
-                        <p className="text-sm text-gray-600">单个文件最大 10MB</p>
-                      </div>
-                    </div>
-                    <div className="flex items-start space-x-3">
-                      <CheckCircle className="h-5 w-5 text-green-600 mt-0.5 flex-shrink-0" />
-                      <div>
-                        <h4 className="font-medium">上传方式</h4>
-                        <p className="text-sm text-gray-600">
-                          单图上传（拖拽 / 点击 / Ctrl+V / Cmd+V）
-                        </p>
-                      </div>
-                    </div>
-                    <div className="text-xs text-muted-foreground pt-2 border-t border-border">
-                      已实现基础上传队列；后续可继续增强暂停/恢复能力。
-                    </div>
-                  </div>
-                </CardContent>
-              </Card>
-            </div>
           </div>
 
-          {/* 侧边栏 */}
-          <div className="space-y-6">
+          {/* 侧边栏：本次上传 + 配额，紧凑排布 */}
+          <div className="space-y-4">
             {/* 上传效率 */}
             <div>
               <Card className="card-modern border-0 shadow-lg overflow-hidden">
-                <CardHeader className="bg-card/50 border-b border-border">
-                  <CardTitle className="flex items-center space-x-2 text-foreground">
-                    <div className="p-2 bg-purple-500/20 rounded-lg">
-                      <Clock className="h-5 w-5 text-purple-400" />
-                    </div>
-                    <span>上传效率</span>
+                <CardHeader className="bg-card/50 border-b border-border py-3">
+                  <CardTitle className="flex items-center space-x-2 text-base text-foreground">
+                    <Clock className="h-4 w-4 text-purple-400" />
+                    <span>本次上传</span>
                   </CardTitle>
                 </CardHeader>
-                <CardContent className="p-6">
-                  <div className="space-y-4">
+                <CardContent className="p-4">
+                  <div className="space-y-3">
                     <div className="grid grid-cols-2 gap-3">
-                      <div className="p-3 rounded-lg bg-muted/30 border border-border">
-                        <div className="text-xs text-muted-foreground mb-1">上传速度</div>
-                        <div className="text-lg font-semibold text-foreground">
+                      <div className="p-2.5 rounded-lg bg-muted/30 border border-border">
+                        <div className="text-xs text-muted-foreground mb-0.5">上传速度</div>
+                        <div className="text-base font-semibold text-foreground">
                           {uploadMetrics.speed}
                         </div>
                       </div>
-                      <div className="p-3 rounded-lg bg-muted/30 border border-border">
-                        <div className="text-xs text-muted-foreground mb-1">上传时长</div>
-                        <div className="text-lg font-semibold text-foreground">
+                      <div className="p-2.5 rounded-lg bg-muted/30 border border-border">
+                        <div className="text-xs text-muted-foreground mb-0.5">上传时长</div>
+                        <div className="text-base font-semibold text-foreground">
                           {uploadMetrics.duration}
                         </div>
                       </div>
                     </div>
-                    {uploadMetrics.fileSize && (
-                      <div className="pt-2 border-t border-border">
-                        <div className="flex items-center justify-between text-sm">
-                          <span className="text-muted-foreground">文件大小</span>
-                          <span className="font-medium text-foreground">
-                            {(uploadMetrics.fileSize / (1024 * 1024)).toFixed(2)} MB
-                          </span>
-                        </div>
+                    {uploadMetrics.fileSize != null && (
+                      <div className="flex items-center justify-between text-sm">
+                        <span className="text-muted-foreground">文件大小</span>
+                        <span className="font-medium text-foreground">
+                          {(uploadMetrics.fileSize / (1024 * 1024)).toFixed(2)} MB
+                        </span>
                       </div>
                     )}
                   </div>
@@ -571,119 +572,22 @@ function UploadPageContent() {
             {/* 用户配额 */}
             <div>
               <Card className="card-modern border-0 shadow-lg overflow-hidden">
-                <CardHeader className="bg-card/50 border-b border-border">
-                  <CardTitle className="flex items-center space-x-2 text-foreground">
-                    <div className="p-2 bg-blue-500/20 rounded-lg">
-                      <Shield className="h-5 w-5 text-blue-400" />
-                    </div>
-                    <span>使用配额</span>
+                <CardHeader className="bg-card/50 border-b border-border py-3">
+                  <CardTitle className="flex items-center space-x-2 text-base text-foreground">
+                    <Shield className="h-4 w-4 text-blue-400" />
+                    <span>今日配额</span>
                   </CardTitle>
                 </CardHeader>
-                <CardContent className="p-6">
-                  <div className="space-y-4">
+                <CardContent className="p-4">
+                  <div className="space-y-3">
                     <QuotaBadge used={quotaData?.used || 0} limit={quotaData?.limit || 100000000} />
-                    <div className="flex items-center justify-between text-sm text-muted-foreground pt-2 border-t border-border">
+                    <div className="flex items-center justify-between text-sm text-muted-foreground">
                       <span>已使用</span>
                       <span className="font-medium text-foreground">
-                        {(quotaData?.used || 0) / (1024 * 1024) > 0
-                          ? ((quotaData?.used || 0) / (1024 * 1024)).toFixed(2)
-                          : "0"}{" "}
-                        MB
+                        {((quotaData?.used || 0) / (1024 * 1024)).toFixed(2)} MB
                       </span>
                     </div>
-                    <div className="flex items-center justify-between text-sm text-muted-foreground">
-                      <span>已取消</span>
-                      <span className="font-medium text-foreground">{queueStats.cancelled}</span>
-                    </div>
                   </div>
-                </CardContent>
-              </Card>
-            </div>
-
-            {/* 功能特性 */}
-            <div>
-              <Card className="card-modern border-0 shadow-lg overflow-hidden">
-                <CardHeader className="bg-card/50 border-b border-border">
-                  <CardTitle className="flex items-center space-x-2 text-foreground">
-                    <div className="p-2 bg-yellow-500/20 rounded-lg">
-                      <Zap className="h-5 w-5 text-yellow-400" />
-                    </div>
-                    <span>平台特性</span>
-                  </CardTitle>
-                </CardHeader>
-                <CardContent className="p-6">
-                  <div className="space-y-4">
-                    {[
-                      {
-                        icon: Zap,
-                        title: "极速上传",
-                        description: "Cloudflare Workers 边缘计算",
-                        color: "text-yellow-400",
-                        bgColor: "bg-yellow-400/10",
-                      },
-                      {
-                        icon: Shield,
-                        title: "安全可靠",
-                        description: "企业级安全防护",
-                        color: "text-green-400",
-                        bgColor: "bg-green-400/10",
-                      },
-                      {
-                        icon: Globe,
-                        title: "全球加速",
-                        description: "Vercel 全球 CDN 网络",
-                        color: "text-blue-400",
-                        bgColor: "bg-blue-400/10",
-                      },
-                    ].map((feature) => (
-                      <div
-                        key={feature.title}
-                        className="flex items-start space-x-3 p-3 rounded-lg hover:bg-muted/30 transition-colors"
-                      >
-                        <div className={`p-2 ${feature.bgColor} rounded-lg flex-shrink-0`}>
-                          <feature.icon className={`h-4 w-4 ${feature.color}`} />
-                        </div>
-                        <div className="flex-1">
-                          <h4 className="font-medium text-foreground mb-0.5">{feature.title}</h4>
-                          <p className="text-sm text-muted-foreground">{feature.description}</p>
-                        </div>
-                      </div>
-                    ))}
-                  </div>
-                </CardContent>
-              </Card>
-            </div>
-
-            {/* 快速操作 */}
-            <div>
-              <Card className="card-modern border-0 shadow-lg overflow-hidden">
-                <CardHeader className="bg-card/50 border-b border-border">
-                  <CardTitle className="flex items-center space-x-2 text-foreground">
-                    <div className="p-2 bg-purple-500/20 rounded-lg">
-                      <FileText className="h-5 w-5 text-purple-400" />
-                    </div>
-                    <span>快速操作</span>
-                  </CardTitle>
-                </CardHeader>
-                <CardContent className="p-4 space-y-2">
-                  <Link href="/gallery">
-                    <Button
-                      variant="outline"
-                      className="w-full justify-start border-border hover:bg-accent hover:text-accent-foreground transition-colors"
-                    >
-                      <Image className="h-4 w-4 mr-2 text-blue-400" />
-                      <span>查看我的图片</span>
-                    </Button>
-                  </Link>
-                  <Link href="/admin">
-                    <Button
-                      variant="outline"
-                      className="w-full justify-start border-border hover:bg-accent hover:text-accent-foreground transition-colors"
-                    >
-                      <Shield className="h-4 w-4 mr-2 text-purple-400" />
-                      <span>管理面板</span>
-                    </Button>
-                  </Link>
                 </CardContent>
               </Card>
             </div>

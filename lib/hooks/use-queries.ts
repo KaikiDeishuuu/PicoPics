@@ -1,4 +1,4 @@
-import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
+import { useInfiniteQuery, useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { createApiClient, createHistoryApiClient } from "../api";
 import { handleApiError } from "../api-error-handler";
 import { NotificationService, Notifications } from "../notifications";
@@ -18,6 +18,29 @@ export function useUserImages(accessToken?: string) {
     queryFn: () => apiClient.getUserHistory(),
     enabled: !!accessToken,
     staleTime: 2 * 60 * 1000, // 2 minutes
+  });
+}
+
+// 分页加载用户图片（画廊无限滚动用）
+const GALLERY_PAGE_SIZE = 60;
+
+export function useUserImagesInfinite(accessToken?: string) {
+  const apiClient = createHistoryApiClient(accessToken);
+
+  return useInfiniteQuery({
+    queryKey: [...queryKeys.userImages, "infinite", accessToken],
+    initialPageParam: 0,
+    queryFn: ({ pageParam }) =>
+      apiClient.getUserHistory({ limit: GALLERY_PAGE_SIZE, offset: pageParam }),
+    getNextPageParam: (lastPage) => {
+      const pagination = lastPage.pagination;
+      if (!pagination || !pagination.hasMore) {
+        return undefined;
+      }
+      return pagination.offset + pagination.limit;
+    },
+    enabled: !!accessToken,
+    staleTime: 2 * 60 * 1000,
   });
 }
 
