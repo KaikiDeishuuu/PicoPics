@@ -8,10 +8,12 @@
 # Front-door routing (same-origin, no CORS):
 #   POST /auth/callback      -> gateway :8080 (uploader OAuth exchange)
 #   GET  /auth/callback      -> Next.js :3000 (the callback PAGE)
-#   /upload /api/* /images/* /health -> gateway :8080
+#   POST /upload             -> gateway :8080 (uploader API)
+#   GET  /upload             -> Next.js :3000 (the upload PAGE)
+#   /api/* /images/* /health -> gateway :8080
 #   everything else          -> Next.js :3000
 
-map $request_method $picopics_auth_cb_upstream {
+map $request_method $picopics_method_upstream {
     POST    127.0.0.1:8080;
     default 127.0.0.1:3000;
 }
@@ -37,12 +39,12 @@ server {
     proxy_set_header CF-Connecting-IP $http_cf_connecting_ip;
 
     location = /auth/callback {
-        proxy_pass http://$picopics_auth_cb_upstream;
+        proxy_pass http://$picopics_method_upstream;
     }
 
     location = /upload {
         proxy_read_timeout 300s;
-        proxy_pass http://127.0.0.1:8080;
+        proxy_pass http://$picopics_method_upstream;
     }
 
     location /api/ {

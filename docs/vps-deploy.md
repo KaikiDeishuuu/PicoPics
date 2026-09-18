@@ -9,7 +9,11 @@
   ├─ POST /auth/callback、/upload、/api/* ──> picopics-api (Node :8080, gateway)
   ├─ GET  /api/history                     ──> 同上（history worker）
   ├─ GET  /images/*                        ──> 同上（cdn worker）
-  └─ 其余（含 GET /auth/callback 页面）    ──> picopics-web (Next standalone :3000)
+  └─ 其余（含 GET /auth/callback、GET /upload 页面）──> picopics-web (Next standalone :3000)
+
+> 注意：`/auth/callback` 和 `/upload` 都是「同一路径既是 Next 页面又是 API 端点」，
+> nginx 按 `$request_method` 切分（POST→8080，GET→3000），新增同类路径时要照做，
+> 否则浏览器打开页面会 404。
 
 数据：/var/lib/picopics/db.sqlite（SQLite，WAL）
       /var/lib/picopics/images/<对象键>（图片文件 + .__meta__.json 边车）
