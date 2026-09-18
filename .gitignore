@@ -113,7 +113,7 @@ agent/*.tar.gz
 # VPS deployment packages
 vps-deploy/
 *.tar.gz
-deploy-*.sh
+/deploy-*.sh
 
 # Cloudflare Workers secrets
 .dev.vars
