@@ -1,0 +1,7 @@
+[Unit]
+Description=PicoPics daily backup (SQLite + images)
+After=picopics-api.service
+
+[Service]
+Type=oneshot
+ExecStart=/opt/picopics/bin/backup.sh

@@ -18,10 +18,23 @@ map $request_method $picopics_method_upstream {
     default 127.0.0.1:3000;
 }
 
+# Origin-side cache for /images/* — popular images stop hitting the Node
+# gateway. This file is included inside nginx's http{} context, so declaring
+# the zone here is valid.
+proxy_cache_path /var/cache/nginx/picopics levels=1:2
+    keys_zone=picopics_images:10m max_size=500m inactive=30d use_temp_path=off;
+
 server {
     listen 80;
     listen [::]:80;
     server_name __DOMAIN__;
+
+    # Baseline security headers for every response (incl. proxied APIs).
+    # NOTE: nginx add_header does not inherit into locations that declare
+    # their own add_header — /images/ repeats them for that reason.
+    add_header X-Content-Type-Options nosniff always;
+    add_header X-Frame-Options DENY always;
+    add_header Referrer-Policy strict-origin-when-cross-origin always;
 
     # ACME HTTP-01 challenge (Cloudflare proxies /.well-known to origin)
     location /.well-known/acme-challenge/ {
@@ -53,7 +66,15 @@ server {
     }
 
     location /images/ {
+        proxy_cache picopics_images;
+        proxy_cache_key $scheme$request_method$host$request_uri;
         proxy_cache_valid 200 30d;
+        proxy_cache_valid 404 1m;
+        proxy_cache_use_stale error timeout updating http_500 http_502 http_503 http_504;
+        add_header X-Cache-Status $upstream_cache_status;
+        add_header X-Content-Type-Options nosniff always;
+        add_header X-Frame-Options DENY always;
+        add_header Referrer-Policy strict-origin-when-cross-origin always;
         proxy_pass http://127.0.0.1:8080;
     }
 

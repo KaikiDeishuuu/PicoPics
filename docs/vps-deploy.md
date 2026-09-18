@@ -54,18 +54,22 @@ curl -s http://127.0.0.1:8080/health       # 网关健康（不经 nginx）
 curl -s https://<域名>/health              # 经 CF + nginx
 ```
 
-备份（建议 cron 每日）：
+备份（已由 `picopics-backup.timer` 每日 04:30 自动执行，保留 7 份）：
 
 ```bash
-sudo tar czf /backup/picopics-$(date +%F).tgz /var/lib/picopics
+systemctl list-timers picopics-backup.timer            # 下次执行时间
+systemctl start picopics-backup.service                # 手动跑一次
+ls /var/backups/picopics/                              # db.sqlite + images.tar.gz
 ```
+
+恢复：解包 `images.tar.gz` 到 `/var/lib/picopics/images/`，用备份的 `db.sqlite` 覆盖前先停 `picopics-api`。
 
 ## 已知差异（与 Cloudflare 生产相比）
 
 - CDN 的 `?w/&h=` 缩略图参数会重定向到 Cloudflare Image Resizing，VPS 上不可用（客户端不使用该参数）。
-- IP 黑名单管理端点与 Durable Object 交互的既有缺陷（admin 写 `global` 实例、检查用 per-IP 实例）按原样保留，与 CF 行为一致。
 - 上传/删除的 Telegram 通知在 Node 侧为 fire-and-forget（等价于 Workers 的 waitUntil 弱化版）。
-- GitHub token 验证缓存在进程内存（60s），重启即清空。
+- GitHub token 验证缓存：uploader 在 caches shim（5 分钟），history 在进程内存（5 分钟），重启即清空。
+- nginx 对 `/images/*` 有 30 天源站缓存（`X-Cache-Status` 响应头可见 HIT/MISS），Cloudflare 侧由橙云边缘缓存承担。
 
 ## 故障排查
 

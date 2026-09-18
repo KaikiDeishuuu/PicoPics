@@ -13,7 +13,7 @@ set -euo pipefail
 DOMAIN="${1:?usage: setup-server.sh <domain>}"
 SRC="$(cd "$(dirname "$0")" && pwd)"
 
-echo "==> [1/7] 2G swap (skip if present)"
+echo "==> [1/8] 2G swap (skip if present)"
 if ! swapon --show | grep -q .; then
     fallocate -l 2G /swapfile
     chmod 600 /swapfile
@@ -27,7 +27,7 @@ else
     echo "    swap already present"
 fi
 
-echo "==> [2/7] Node 22 (skip if installed)"
+echo "==> [2/8] Node 22 (skip if installed)"
 if [ "$(node -v 2>/dev/null || true)" != "v22."* ]; then
     apt-get update -y
     apt-get install -y curl ca-certificates build-essential
@@ -36,34 +36,45 @@ if [ "$(node -v 2>/dev/null || true)" != "v22."* ]; then
 fi
 node -v
 
-echo "==> [3/7] picopics user and directories"
+echo "==> [3/8] picopics user and directories"
 id picopics >/dev/null 2>&1 || useradd --system --home /opt/picopics --shell /usr/sbin/nologin picopics
 mkdir -p /opt/picopics/web /opt/picopics/server/dist /var/lib/picopics
 chown -R picopics:picopics /opt/picopics /var/lib/picopics
 
-echo "==> [4/7] systemd units"
+echo "==> [4/8] systemd units + daily backup"
 install -m 644 "$SRC/picopics-api.service" /etc/systemd/system/picopics-api.service
 install -m 644 "$SRC/picopics-web.service" /etc/systemd/system/picopics-web.service
+install -m 644 "$SRC/picopics-backup.service" /etc/systemd/system/picopics-backup.service
+install -m 644 "$SRC/picopics-backup.timer" /etc/systemd/system/picopics-backup.timer
+mkdir -p /opt/picopics/bin
+install -m 755 "$SRC/picopics-backup.sh" /opt/picopics/bin/backup.sh
+command -v sqlite3 >/dev/null || apt-get install -y sqlite3
 systemctl daemon-reload
-systemctl enable picopics-api picopics-web >/dev/null
+systemctl enable picopics-api picopics-web picopics-backup.timer >/dev/null
 
-echo "==> [5/7] nginx site for $DOMAIN (HTTP first; certbot upgrades to TLS)"
+echo "==> [5/8] nginx site for $DOMAIN (HTTP first; certbot upgrades to TLS)"
 sed "s/__DOMAIN__/$DOMAIN/g" "$SRC/nginx-picopics.conf.template" > /etc/nginx/sites-available/picopics
 ln -sf /etc/nginx/sites-available/picopics /etc/nginx/sites-enabled/picopics
+mkdir -p /var/cache/nginx/picopics
+chown -R www-data:www-data /var/cache/nginx/picopics
 nginx -t && systemctl reload nginx
 
-echo "==> [6/7] Let's Encrypt certificate (certbot reuses the existing account)"
+echo "==> [6/8] Let's Encrypt certificate (certbot reuses the existing account)"
 if [ ! -d "/etc/letsencrypt/live/$DOMAIN" ]; then
     certbot --nginx -d "$DOMAIN" --non-interactive --agree-tos -m "kaiki@hiaplha.xyz" || \
         echo "!! certbot failed — if Cloudflare blocks HTTP-01, flip the DNS record to grey cloud and re-run"
 fi
 nginx -t && systemctl reload nginx
 
-echo "==> [7/7] gateway .env placeholder (secrets are filled separately)"
+echo "==> [7/8] gateway .env placeholder (secrets are filled separately)"
 if [ ! -f /opt/picopics/server/.env ]; then
     sed "s|https://YOUR.DOMAIN|https://$DOMAIN|g" "$SRC/server.env.example" > /opt/picopics/server/.env
     chown picopics:picopics /opt/picopics/server/.env
     chmod 600 /opt/picopics/server/.env
 fi
+
+echo "==> [8/8] start services"
+systemctl restart picopics-api picopics-web || true
+systemctl start picopics-backup.timer
 
 echo "SETUP-OK — now run scripts/deploy-vps.sh $DOMAIN from your workstation"
