@@ -61,7 +61,7 @@ export class R2BucketDisk {
 
   async put(
     key: string,
-    value: ArrayBuffer | ReadableStream | string | Blob | null,
+    value: ArrayBuffer | ArrayBufferView | ReadableStream | string | Blob | null,
     options: R2PutOptions = {}
   ): Promise<R2ObjectLike | null> {
     if (value === null) {
@@ -72,6 +72,8 @@ export class R2BucketDisk {
     let bytes: Uint8Array;
     if (value instanceof ArrayBuffer) {
       bytes = new Uint8Array(value);
+    } else if (ArrayBuffer.isView(value)) {
+      bytes = new Uint8Array(value.buffer, value.byteOffset, value.byteLength);
     } else if (typeof value === "string") {
       bytes = new TextEncoder().encode(value);
     } else if (value instanceof Blob) {

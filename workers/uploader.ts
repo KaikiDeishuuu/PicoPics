@@ -9,6 +9,8 @@ import { cors } from "hono/cors";
 import { logger } from "hono/logger";
 import { prettyJSON } from "hono/pretty-json";
 
+import { stripJpegMetadata } from "./image-meta";
+
 interface Env {
   IMAGES: R2Bucket;
   UPLOAD_QUOTA: DurableObjectNamespace;
@@ -125,9 +127,24 @@ class IPBlacklist {
     }
 
     if (request.method === "POST") {
-      const { reason } = await request.json();
-      await this.blockIP(clientIP, reason);
-      return new Response("OK");
+      const { action, ip, reason } = await request.json();
+
+      switch (action) {
+        case "check":
+          return Response.json({ blocked: await this.isBlocked(ip) });
+        case "block":
+          await this.addToBlacklist(ip, reason || "Manual ban");
+          return Response.json({ ok: true });
+        case "remove":
+          await this.removeFromBlacklist(ip);
+          return Response.json({ ok: true });
+        case "list":
+          return Response.json({ blacklist: await this.getBlacklist() });
+        default:
+          // Legacy auto-block path: block the header IP (no action field).
+          await this.blockIP(clientIP, reason);
+          return new Response("OK");
+      }
     }
 
     return new Response("Method not allowed", { status: 405 });
@@ -548,14 +565,15 @@ app.post("/upload", async (c) => {
     userId = githubUser.id.toString();
     username = githubUser.login;
 
-    // Check IP blacklist
+    // Check IP blacklist（数据集中在 global 实例，per-IP 实例读不到彼此的存储）
     if (c.env.ABUSE_DETECTION_ENABLED === "true") {
-      const blacklistId = c.env.IP_BLACKLIST.idFromName(clientIP);
+      const blacklistId = c.env.IP_BLACKLIST.idFromName("global");
       const blacklistStub = c.env.IP_BLACKLIST.get(blacklistId);
       const blacklistResponse = await blacklistStub.fetch(
         new Request(`http://blacklist`, {
-          method: "GET",
-          headers: { "CF-Connecting-IP": clientIP },
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ action: "check", ip: clientIP }),
         }) as any
       );
       const { blocked } = (await blacklistResponse.json()) as {
@@ -681,11 +699,17 @@ app.post("/upload", async (c) => {
         });
     }
 
+    // Convert File to bytes; strip EXIF/XMP metadata from JPEGs (GPS、设备信息)
+    // before anything is persisted. Malformed JPEGs pass through unchanged.
+    let storedBytes: Uint8Array = new Uint8Array(await file.arrayBuffer());
+    if (detectedType === "jpg") {
+      storedBytes = stripJpegMetadata(storedBytes);
+    }
+    const storedSize = storedBytes.byteLength;
+
     // Upload to R2
     try {
-      // Convert File to ArrayBuffer for R2
-      const fileBuffer = await file.arrayBuffer();
-      await c.env.IMAGES.put(objectKey, fileBuffer, {
+      await c.env.IMAGES.put(objectKey, storedBytes, {
         httpMetadata: {
           contentType: `image/${detectedType === "jpg" ? "jpeg" : detectedType}`,
           cacheControl: "public, max-age=31536000", // 1 year
@@ -694,7 +718,7 @@ app.post("/upload", async (c) => {
       console.info("upload success", {
         userId,
         key: objectKey,
-        size: file.size,
+        size: storedSize,
         type: detectedType,
       });
     } catch (r2Error) {
@@ -728,7 +752,7 @@ app.post("/upload", async (c) => {
           r2ObjectKey,
           downloadFilename,
           uploadTime, // upload_date
-          file.size,
+          storedSize,
           `image/${detectedType === "jpg" ? "jpeg" : detectedType}`
         )
         .run();
@@ -778,7 +802,7 @@ app.post("/upload", async (c) => {
     await quotaStub.fetch(
       new Request(`http://quota?userId=${userId}`, {
         method: "POST",
-        body: JSON.stringify({ bytes: file.size }),
+        body: JSON.stringify({ bytes: storedSize }),
       }) as any
     );
 
@@ -786,9 +810,9 @@ app.post("/upload", async (c) => {
     const publicUrl = `${c.env.CDN_BASE_URL || "https://image.hiaplha.xyz"}/${objectKey}`;
 
     // Format file size
-    const fileSizeMB = (file.size / 1024 / 1024).toFixed(2);
-    const fileSizeKB = (file.size / 1024).toFixed(2);
-    const sizeDisplay = file.size > 1024 * 1024 ? `${fileSizeMB} MB` : `${fileSizeKB} KB`;
+    const fileSizeMB = (storedSize / 1024 / 1024).toFixed(2);
+    const fileSizeKB = (storedSize / 1024).toFixed(2);
+    const sizeDisplay = storedSize > 1024 * 1024 ? `${fileSizeMB} MB` : `${fileSizeKB} KB`;
 
     // Send Telegram notification (async)
     const telegramMessage = `
@@ -838,7 +862,7 @@ app.post("/upload", async (c) => {
       id: objectKey,
       url: publicUrl,
       filename: downloadFilename,
-      size: file.size,
+      size: storedSize,
       type: `image/${detectedType === "jpg" ? "jpeg" : detectedType}`,
       uploadedAt: uploadTime,
       r2ObjectKey: r2ObjectKey,
@@ -1465,7 +1489,11 @@ app.get("/api/admin/ip-blacklist", async (c) => {
     // 获取所有黑名单IP
     const blacklistId = c.env.IP_BLACKLIST.idFromName("global");
     const blacklistStub = c.env.IP_BLACKLIST.get(blacklistId);
-    const response = await blacklistStub.fetch("http://dummy/list");
+    const response = await blacklistStub.fetch("http://blacklist", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ action: "list" }),
+    });
     const result = (await response.json()) as { blacklist?: string[] };
 
     return c.json({
@@ -1493,9 +1521,10 @@ app.post("/api/admin/ip-blacklist", async (c) => {
     // 添加到黑名单
     const blacklistId = c.env.IP_BLACKLIST.idFromName("global");
     const blacklistStub = c.env.IP_BLACKLIST.get(blacklistId);
-    await blacklistStub.fetch("http://dummy/add", {
+    await blacklistStub.fetch("http://blacklist", {
       method: "POST",
-      body: JSON.stringify({ ip, reason: reason || "Manual ban" }),
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ action: "block", ip, reason: reason || "Manual ban" }),
     });
 
     // Send Telegram notification
@@ -1504,7 +1533,7 @@ app.post("/api/admin/ip-blacklist", async (c) => {
 
 🌐 IP地址: <code>${ip}</code>
 📝 原因: ${reason || "Manual ban"}
-⏰ 时长: 永久
+⏰ 时长: 24小时
 👮 操作者: 管理员
 🕐 时间: ${new Date().toLocaleString("zh-CN")}
     `.trim();
@@ -1547,8 +1576,10 @@ app.delete("/api/admin/ip-blacklist/:ip", async (c) => {
     // 从黑名单移除
     const blacklistId = c.env.IP_BLACKLIST.idFromName("global");
     const blacklistStub = c.env.IP_BLACKLIST.get(blacklistId);
-    await blacklistStub.fetch(`http://dummy/remove/${ip}`, {
-      method: "DELETE",
+    await blacklistStub.fetch("http://blacklist", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ action: "remove", ip }),
     });
 
     // Send Telegram notification
