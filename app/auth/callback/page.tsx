@@ -34,6 +34,15 @@ export default function AuthCallback() {
           return;
         }
 
+        // CSRF check: state must match what handleLogin stored before redirecting.
+        const expectedState = sessionStorage.getItem("oauth_state");
+        sessionStorage.removeItem("oauth_state");
+        if (!expectedState || !state || expectedState !== state) {
+          setError("OAuth state 校验失败，可能是 CSRF 攻击或会话过期");
+          setStatus("error");
+          return;
+        }
+
         // 调用后端 API 交换访问令牌
         const response = await fetch("https://api.hiaplha.xyz/auth/callback", {
           method: "POST",

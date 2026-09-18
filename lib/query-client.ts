@@ -6,8 +6,9 @@ export const queryClient = new QueryClient({
       staleTime: 5 * 60 * 1000, // 5 minutes
       gcTime: 10 * 60 * 1000, // 10 minutes
       retry: (failureCount, error) => {
-        // Don't retry on 4xx errors
-        if (error instanceof Error && error.message.includes("4")) {
+        // Don't retry on 4xx errors. Match an explicit "HTTP 4xx" or "status: 4xx"
+        // signal so we don't false-positive on any digit 4 in the message.
+        if (error instanceof Error && /\b(HTTP|status:?)\s*4\d{2}\b/i.test(error.message)) {
           return false;
         }
         return failureCount < 3;

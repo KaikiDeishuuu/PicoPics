@@ -912,20 +912,11 @@ app.get("/api/admin/stats", async (c) => {
     let todayUploads = 0;
     try {
       const todayResult = await c.env.DB.prepare(
-        "SELECT COUNT(*) as count FROM user_images WHERE DATE(created_at) = DATE('now')"
+        "SELECT COUNT(*) as count FROM user_images WHERE DATE(upload_date) = DATE('now')"
       ).first();
       todayUploads = (todayResult?.count as number) || 0;
-    } catch (_dateError) {
-      // 如果 created_at 不存在，尝试其他可能的列名
-      try {
-        const todayResult = await c.env.DB.prepare(
-          "SELECT COUNT(*) as count FROM user_images WHERE DATE(upload_time) = DATE('now')"
-        ).first();
-        todayUploads = (todayResult?.count as number) || 0;
-      } catch {
-        // 如果都失败，设置为 0
-        todayUploads = 0;
-      }
+    } catch (queryError) {
+      console.error("Today uploads query failed:", queryError);
     }
 
     return c.json({
@@ -1058,45 +1049,6 @@ async function sendTelegramNotification(env: Env, message: string): Promise<void
 }
 
 // AI内容筛查函数 - 使用Cloudflare Workers AI
-async function _checkContentSafety(
-  file: File,
-  env: Env
-): Promise<{ blocked: boolean; label?: string; confidence?: number }> {
-  try {
-    // 检查AI服务是否可用
-    if (!env.AI || env.CONTENT_MODERATION_ENABLED !== "true") {
-      return { blocked: false }; // 如果未启用，直接通过
-    }
-
-    // 读取文件内容
-    const arrayBuffer = await file.arrayBuffer();
-
-    // 使用Cloudflare Workers AI的NSFW检测模型
-    const result = await env.AI.run("@cf/automod/clip-nsfw", {
-      image: arrayBuffer,
-    });
-
-    // 检查结果 - result应该是 { NSFW: 0.0-1.0 } 格式
-    const nsfwScore = (result as any)?.NSFW || 0;
-
-    // 如果NSFW分数超过0.7，认为是不适当内容
-    const threshold = 0.7;
-    if (nsfwScore > threshold) {
-      return {
-        blocked: true,
-        label: "inappropriate_content",
-        confidence: nsfwScore,
-      };
-    }
-
-    return { blocked: false, confidence: nsfwScore };
-  } catch (error) {
-    console.error("Content moderation error:", error);
-    // 如果筛查失败，默认允许通过（避免误判）
-    return { blocked: false };
-  }
-}
-
 // Content moderation function (async)
 async function contentModeration(
   file: File,
@@ -1237,13 +1189,12 @@ app.delete("/api/delete", async (c) => {
       return c.json({ success: false, error: "图片不存在或您没有权限删除" }, 404);
     }
 
-    // 使用事务确保 R2 和 D1 操作的原子性
+    // 删除顺序：先 D1（事实记录），后 R2（实际对象）。如果 R2 删除失败，
+    // 用户视角上图片已经"消失"（DB 没有记录），孤儿对象会被
+    // /api/clean-invalid 后续清理。反过来先删 R2 会留下指向不存在对象的
+    // DB 记录，给用户造成幻觉。
     try {
-      // 1. 先删除 R2 对象
-      const r2DeleteResult = await c.env.IMAGES.delete(r2ObjectKey);
-      console.log(`R2 delete result for ${r2ObjectKey}:`, r2DeleteResult);
-
-      // 2. 删除数据库记录
+      // 1. 先删除数据库记录
       const dbDeleteResult = await c.env.DB.prepare(
         "DELETE FROM user_images WHERE r2_object_key = ? AND user_id = ?"
       )
@@ -1252,10 +1203,17 @@ app.delete("/api/delete", async (c) => {
 
       console.log(`DB delete result for ${r2ObjectKey}:`, dbDeleteResult);
 
-      // 3. 验证删除是否成功
       if (!dbDeleteResult.success) {
         console.error(`Failed to delete database record for ${r2ObjectKey}`);
         return c.json({ success: false, error: "数据库删除失败" }, 500);
+      }
+
+      // 2. 删除 R2 对象（失败不影响用户视角；遗留对象会被 clean-invalid 收回）
+      try {
+        const r2DeleteResult = await c.env.IMAGES.delete(r2ObjectKey);
+        console.log(`R2 delete result for ${r2ObjectKey}:`, r2DeleteResult);
+      } catch (r2Error) {
+        console.error(`R2 delete failed for ${r2ObjectKey} (orphan will be cleaned):`, r2Error);
       }
 
       console.log(`User ${authResult.user.login} successfully deleted image: ${r2ObjectKey}`);
@@ -1305,8 +1263,6 @@ app.delete("/api/delete", async (c) => {
     } catch (deleteError) {
       console.error(`Delete operation failed for ${r2ObjectKey}:`, deleteError);
 
-      // 如果 R2 删除成功但 D1 删除失败，尝试恢复 R2 对象
-      // 注意：R2 删除是不可逆的，这里只能记录错误
       return c.json(
         {
           success: false,
@@ -1621,8 +1577,13 @@ app.delete("/api/admin/ip-blacklist/:ip", async (c) => {
   }
 });
 
-// Test endpoint for Telegram notifications
+// Test endpoint for Telegram notifications (admin-only)
 app.get("/test-telegram", async (c) => {
+  const adminCheck = await verifyAdmin(c.req.raw, c.env);
+  if (!adminCheck.valid) {
+    return c.json({ success: false, error: adminCheck.error }, 403);
+  }
+
   const botToken = c.env.TELEGRAM_BOT_TOKEN;
   const chatId = c.env.TELEGRAM_CHAT_ID;
 
@@ -1808,20 +1769,6 @@ app.get("/api/admin/system-stats", async (c) => {
     return c.json({
       success: true,
       data: {
-        cpu: 45,
-        memory: 62,
-        disk: 78,
-        network: {
-          in: 1250000,
-          out: 980000,
-        },
-        uptime: "15 days, 3 hours",
-        requests: {
-          total: 12500,
-          success: 11800,
-          error: 700,
-        },
-        responseTime: 145,
         dbStats: {
           totalUsers: Number(totalUsers) || 0,
           totalImages: Number(totalImages) || 0,
@@ -1833,88 +1780,6 @@ app.get("/api/admin/system-stats", async (c) => {
   } catch (error) {
     console.error("System stats error:", error);
     return c.json({ success: false, error: "获取系统统计失败" }, 500);
-  }
-});
-
-// 获取用户列表
-app.get("/api/admin/users", async (c) => {
-  try {
-    const adminCheck = await verifyAdmin(c.req.raw, c.env);
-    if (!adminCheck.valid) {
-      return c.json({ success: false, error: adminCheck.error }, 403);
-    }
-
-    // 获取所有用户及统计信息
-    const usersQuery = await c.env.DB.prepare(
-      `
-      SELECT
-        ui.user_id as id,
-        COALESCE(up.username, 'User ' || ui.user_id) as username,
-        COALESCE(up.email, '') as email,
-        COALESCE(up.avatar_url, '') as avatar_url,
-        COUNT(*) as uploads,
-        MAX(ui.upload_date) as lastActive,
-        SUM(ui.file_size) as totalSize
-      FROM user_images ui
-      LEFT JOIN user_profiles up ON ui.user_id = up.user_id
-      GROUP BY ui.user_id
-      ORDER BY lastActive DESC
-    `
-    ).all();
-
-    // 如果数据库中没有用户数据，返回当前用户
-    if (!usersQuery.results || usersQuery.results.length === 0) {
-      const authHeader = c.req.header("Authorization");
-      if (authHeader?.startsWith("Bearer ")) {
-        const token = authHeader.substring(7);
-        try {
-          const githubResponse = await fetch("https://api.github.com/user", {
-            headers: {
-              Authorization: `Bearer ${token}`,
-              "User-Agent": "PicoPics-v2/1.0.0",
-            },
-          });
-
-          if (githubResponse.ok) {
-            const githubUser = await githubResponse.json();
-            return c.json({
-              success: true,
-              data: [
-                {
-                  id: githubUser.id.toString(),
-                  username: githubUser.login,
-                  email: githubUser.email || "N/A",
-                  uploads: 0,
-                  lastActive: new Date().toISOString(),
-                },
-              ],
-            });
-          }
-        } catch (error) {
-          console.error("Failed to fetch current user:", error);
-        }
-      }
-
-      return c.json({ success: true, data: [] });
-    }
-
-    // 格式化用户数据 - 直接从查询结果获取
-    const users = usersQuery.results.map((row: any) => ({
-      id: row.id,
-      username: row.username,
-      email: row.email,
-      uploads: row.uploads,
-      lastActive: row.lastActive,
-      totalSize: row.totalSize || 0,
-    }));
-
-    return c.json({
-      success: true,
-      data: users,
-    });
-  } catch (error) {
-    console.error("Get users error:", error);
-    return c.json({ success: false, error: "获取用户列表失败" }, 500);
   }
 });
 

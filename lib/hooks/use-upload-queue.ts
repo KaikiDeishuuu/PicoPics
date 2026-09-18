@@ -30,10 +30,15 @@ function createQueueId() {
 export function useUploadQueue({ concurrency = 2, createUploadTask }: UseUploadQueueOptions) {
   const [items, setItems] = useState<UploadQueueItem[]>([]);
   const createUploadTaskRef = useRef(createUploadTask);
+  const itemsRef = useRef(items);
 
   useEffect(() => {
     createUploadTaskRef.current = createUploadTask;
   }, [createUploadTask]);
+
+  useEffect(() => {
+    itemsRef.current = items;
+  }, [items]);
 
   const enqueueFiles = useCallback((files: File[]) => {
     if (!files.length) {
@@ -76,14 +81,14 @@ export function useUploadQueue({ concurrency = 2, createUploadTask }: UseUploadQ
   );
 
   const cancelItem = useCallback((id: string) => {
+    const target = itemsRef.current.find((item) => item.id === id);
+    if (target?.status === "uploading") {
+      target.cancel?.();
+    }
     setItems((prev) =>
       prev.map((item) => {
         if (item.id !== id) {
           return item;
-        }
-
-        if (item.status === "uploading") {
-          item.cancel?.();
         }
 
         if (item.status === "queued" || item.status === "uploading") {

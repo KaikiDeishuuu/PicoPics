@@ -1,6 +1,6 @@
 "use client";
 
-import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
+import { QueryClientProvider } from "@tanstack/react-query";
 import {
   AlertCircle,
   ArrowLeft,
@@ -30,6 +30,7 @@ import { useClipboardUpload } from "@/lib/hooks/use-clipboard-upload";
 import { useNotifications } from "@/lib/hooks/use-notifications";
 import { useQuota } from "@/lib/hooks/use-queries";
 import { useUploadQueue } from "@/lib/hooks/use-upload-queue";
+import { queryClient } from "@/lib/query-client";
 
 // 强制动态渲染，避免静态化
 export const dynamic = "force-dynamic";
@@ -696,15 +697,6 @@ function UploadPageContent() {
     </div>
   );
 }
-
-const queryClient = new QueryClient({
-  defaultOptions: {
-    queries: {
-      staleTime: 5 * 60 * 1000, // 5 minutes
-      gcTime: 10 * 60 * 1000, // 10 minutes
-    },
-  },
-});
 
 export default function UploadPage() {
   return (

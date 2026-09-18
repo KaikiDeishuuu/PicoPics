@@ -64,7 +64,11 @@ export default function Home() {
 
     const redirectUri = `${window.location.origin}/auth/callback`;
     const scope = "user:email";
-    const state = Math.random().toString(36).substring(7);
+    // Cryptographic state for CSRF protection; verified by the callback page.
+    const stateBytes = new Uint8Array(16);
+    crypto.getRandomValues(stateBytes);
+    const state = Array.from(stateBytes, (b) => b.toString(16).padStart(2, "0")).join("");
+    sessionStorage.setItem("oauth_state", state);
     const authUrl =
       "https://github.com/login/oauth/authorize?client_id=" +
       clientId +

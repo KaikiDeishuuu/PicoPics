@@ -32,23 +32,6 @@ app.use(
   })
 );
 
-// 获取 CORS 头部
-function _getCorsHeaders(env: Env, request: Request): Record<string, string> {
-  const origin = request.headers.get("Origin");
-  const allowedOrigins = env.ALLOWED_ORIGINS?.split(",") || ["*"];
-
-  if (allowedOrigins.includes("*") || (origin && allowedOrigins.includes(origin))) {
-    return {
-      "Access-Control-Allow-Origin": origin || "*",
-      "Access-Control-Allow-Methods": "GET, POST, OPTIONS",
-      "Access-Control-Allow-Headers": "Content-Type, Authorization",
-      "Access-Control-Max-Age": "86400",
-    };
-  }
-
-  return {};
-}
-
 // 验证 GitHub Token
 async function verifyGitHubToken(
   token: string,
@@ -94,29 +77,11 @@ app.get("/api/history", async (c) => {
   }
 
   try {
-    // 尝试不同的列名
-    let records;
-    try {
-      records = await env.DB.prepare(
-        `SELECT * FROM user_images WHERE user_id = ? ORDER BY upload_date DESC`
-      )
-        .bind(authResult.user.id.toString())
-        .all();
-    } catch (_uploadDateError) {
-      // 如果 upload_date 不存在，尝试 created_at
-      try {
-        records = await env.DB.prepare(
-          `SELECT * FROM user_images WHERE user_id = ? ORDER BY created_at DESC`
-        )
-          .bind(authResult.user.id.toString())
-          .all();
-      } catch (_createdAtError) {
-        // 如果都不存在，使用默认排序
-        records = await env.DB.prepare(`SELECT * FROM user_images WHERE user_id = ?`)
-          .bind(authResult.user.id.toString())
-          .all();
-      }
-    }
+    const records = await env.DB.prepare(
+      `SELECT * FROM user_images WHERE user_id = ? ORDER BY upload_date DESC`
+    )
+      .bind(authResult.user.id.toString())
+      .all();
 
     const historyRecords: ImageHistoryRecord[] =
       records.results?.map((record: any) => ({
@@ -125,7 +90,7 @@ app.get("/api/history", async (c) => {
         url: `${env.CDN_BASE_URL || "https://image.hiaplha.xyz"}/${record.r2_object_key}`,
         size: record.file_size,
         type: record.mime_type,
-        uploadedAt: record.upload_date || record.created_at || new Date().toISOString(),
+        uploadedAt: record.upload_date || new Date().toISOString(),
         r2ObjectKey: record.r2_object_key,
       })) || [];
 

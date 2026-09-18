@@ -1,6 +1,6 @@
 "use client";
 
-import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
+import { QueryClientProvider } from "@tanstack/react-query";
 import {
   ArrowLeft,
   Grid,
@@ -22,6 +22,7 @@ import { LoadingSpinner } from "@/components/ui/loading";
 import { NotificationContainer, useNotifications } from "@/components/ui/notification";
 import type { ImageHistoryRecord } from "@/lib/api";
 import { useDeleteImage, useUserImages } from "@/lib/hooks/use-queries";
+import { queryClient } from "@/lib/query-client";
 
 // 强制动态渲染
 export const dynamic = "force-dynamic";
@@ -59,8 +60,6 @@ function GalleryContent() {
   const images =
     imagesResponse?.success && Array.isArray(imagesResponse.data) ? imagesResponse.data : [];
   const deleteMutation = useDeleteImage(accessToken || undefined);
-
-  // 调试信息
 
   // 认证检查
   useEffect(() => {
@@ -124,29 +123,6 @@ function GalleryContent() {
           return new Date(b.uploadedAt || 0).getTime() - new Date(a.uploadedAt || 0).getTime();
       }
     });
-
-  // 调试filteredImages
-
-  // 测试API调用
-  useEffect(() => {
-    if (accessToken) {
-      const historyApi = process.env.NEXT_PUBLIC_HISTORY_API || "https://history.hiaplha.xyz";
-      fetch(`${historyApi}/api/history`, {
-        method: "GET",
-        headers: {
-          Authorization: `Bearer ${accessToken}`,
-          "Content-Type": "application/json",
-        },
-      })
-        .then((response) => {
-          return response.json();
-        })
-        .then((_data) => {})
-        .catch((error) => {
-          console.error("API Call Error:", error);
-        });
-    }
-  }, [accessToken]);
 
   // 处理图片删除
   const handleDeleteImage = async (imageId: string) => {
@@ -473,15 +449,6 @@ function GalleryContent() {
     </div>
   );
 }
-
-const queryClient = new QueryClient({
-  defaultOptions: {
-    queries: {
-      staleTime: 5 * 60 * 1000, // 5 minutes
-      gcTime: 10 * 60 * 1000, // 10 minutes
-    },
-  },
-});
 
 export default function GalleryPage() {
   return (

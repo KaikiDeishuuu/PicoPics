@@ -19,33 +19,21 @@ class SmartCache {
   private maxSize = 100; // 最大缓存条目数
 
   async get<T>(key: string, fetcher: () => Promise<T>, options: CacheOptions = {}): Promise<T> {
-    const {
-      maxAge = 5 * 60 * 1000, // 5分钟
-      staleWhileRevalidate = 10 * 60 * 1000, // 10分钟
-      tags = [],
-    } = options;
-
-    // 使用解构的变量
-    void maxAge;
-    void staleWhileRevalidate;
-    void tags;
-
     const entry = this.cache.get(key);
     const now = Date.now();
 
-    // 检查缓存是否存在且未过期
+    // Cache hit and fresh
     if (entry && now - entry.timestamp < entry.maxAge) {
       return entry.data as T;
     }
 
-    // 检查是否在 stale-while-revalidate 期间
+    // Stale-while-revalidate window: return stale, refresh in background
     if (entry && now - entry.timestamp < entry.staleWhileRevalidate) {
-      // 返回过期数据，同时在后台更新
       this.updateInBackground(key, fetcher, options);
       return entry.data as T;
     }
 
-    // 缓存未命中或完全过期，重新获取
+    // Miss / expired
     return this.fetchAndCache(key, fetcher, options);
   }
 
@@ -146,13 +134,22 @@ class SmartCache {
 // 全局缓存实例
 export const smartCache = new SmartCache();
 
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 
 // React Hook for cache
 export function useCache<T>(key: string, fetcher: () => Promise<T>, options: CacheOptions = {}) {
   const [data, setData] = useState<T | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<Error | null>(null);
+
+  // Stabilize fetcher and options across renders — callers commonly pass fresh
+  // identities each render, which would otherwise re-run the effect every render.
+  const fetcherRef = useRef(fetcher);
+  const optionsRef = useRef(options);
+  useEffect(() => {
+    fetcherRef.current = fetcher;
+    optionsRef.current = options;
+  });
 
   useEffect(() => {
     let cancelled = false;
@@ -162,7 +159,7 @@ export function useCache<T>(key: string, fetcher: () => Promise<T>, options: Cac
         setLoading(true);
         setError(null);
 
-        const result = await smartCache.get(key, fetcher, options);
+        const result = await smartCache.get(key, fetcherRef.current, optionsRef.current);
 
         if (!cancelled) {
           setData(result);
@@ -183,7 +180,7 @@ export function useCache<T>(key: string, fetcher: () => Promise<T>, options: Cac
     return () => {
       cancelled = true;
     };
-  }, [key, fetcher, options]);
+  }, [key]);
 
   return { data, loading, error };
 }
