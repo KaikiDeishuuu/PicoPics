@@ -1,12 +1,15 @@
 # PicoPics nginx site — installed to /etc/nginx/sites-available/picopics.
 # __DOMAIN__ is replaced by deploy/az-japan/setup-server.sh.
 #
+# Ships HTTP-only; `certbot --nginx` upgrades this same server block with
+# `listen 443 ssl` + certificate lines (keeping the ACME location working
+# for renewals behind the Cloudflare proxy).
+#
 # Front-door routing (same-origin, no CORS):
 #   POST /auth/callback      -> gateway :8080 (uploader OAuth exchange)
 #   GET  /auth/callback      -> Next.js :3000 (the callback PAGE)
 #   /upload /api/* /images/* /health -> gateway :8080
 #   everything else          -> Next.js :3000
-# Certificate lines are appended by `certbot --nginx` after install.
 
 map $request_method $picopics_auth_cb_upstream {
     POST    127.0.0.1:8080;
@@ -22,17 +25,6 @@ server {
     location /.well-known/acme-challenge/ {
         root /var/www/html;
     }
-
-    location / {
-        return 301 https://$host$request_uri;
-    }
-}
-
-server {
-    listen 443 ssl;
-    listen [::]:443 ssl;
-    server_name __DOMAIN__;
-    # certbot injects ssl_certificate / ssl_certificate_key here
 
     # Uploads are capped at MAX_FILE_SIZE (10 MiB) — give nginx headroom.
     client_max_body_size 15m;

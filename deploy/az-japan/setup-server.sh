@@ -47,10 +47,10 @@ install -m 644 "$SRC/picopics-web.service" /etc/systemd/system/picopics-web.serv
 systemctl daemon-reload
 systemctl enable picopics-api picopics-web >/dev/null
 
-echo "==> [5/7] nginx site for $DOMAIN"
+echo "==> [5/7] nginx site for $DOMAIN (HTTP first; certbot upgrades to TLS)"
 sed "s/__DOMAIN__/$DOMAIN/g" "$SRC/nginx-picopics.conf.template" > /etc/nginx/sites-available/picopics
 ln -sf /etc/nginx/sites-available/picopics /etc/nginx/sites-enabled/picopics
-nginx -t
+nginx -t && systemctl reload nginx
 
 echo "==> [6/7] Let's Encrypt certificate (certbot reuses the existing account)"
 if [ ! -d "/etc/letsencrypt/live/$DOMAIN" ]; then
