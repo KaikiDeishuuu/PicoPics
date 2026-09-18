@@ -1,15 +1,15 @@
 # PicoPics VPS 部署（az-japan / Azure Debian 12）
 
-单域名全栈自托管方案：**三个 Cloudflare Worker（uploader/history/cdn）的 Hono 代码原样运行在 Node 网关里**，Cloudflare 绑定由 `server/cf-compat/` 兼容层替换——R2→本地磁盘、D1→SQLite、Durable Objects→进程内实例（SQLite 持久化）、`caches.default`→内存缓存。前端为 Next.js standalone。TLS 由 Caddy 自动签发。
+单域名全栈自托管方案：**三个 Cloudflare Worker（uploader/history/cdn）的 Hono 代码原样运行在 Node 网关里**，Cloudflare 绑定由 `server/cf-compat/` 兼容层替换——R2→本地磁盘、D1→SQLite、Durable Objects→进程内实例（SQLite 持久化）、`caches.default`→内存缓存。前端为 Next.js standalone。这台 VM 与其他站点共享，**前置代理是既有的 nginx（+ certbot）**，PicoPics 以新增 server 块的方式接入；域名经 Cloudflare 橙云代理实现 IPv4/IPv6 双栈。
 
 ## 架构
 
 ```
-浏览器 ── https://<域名> ──> Caddy :443
+浏览器 ── https://<域名>（CF 橙云，双栈）──> nginx :443 (certbot LE 证书)
   ├─ POST /auth/callback、/upload、/api/* ──> picopics-api (Node :8080, gateway)
-  ├─ GET  /api/history                   ──> 同上（history worker）
-  ├─ GET  /images/*                      ──> 同上（cdn worker）
-  └─ 其余（含 GET /auth/callback 页面）  ──> picopics-web (Next standalone :3000)
+  ├─ GET  /api/history                     ──> 同上（history worker）
+  ├─ GET  /images/*                        ──> 同上（cdn worker）
+  └─ 其余（含 GET /auth/callback 页面）    ──> picopics-web (Next standalone :3000)
 
 数据：/var/lib/picopics/db.sqlite（SQLite，WAL）
       /var/lib/picopics/images/<对象键>（图片文件 + .__meta__.json 边车）
@@ -20,21 +20,17 @@
 
 ## 首次准备（已完成一次的部分可跳过）
 
-1. **系统**：swap 2G、Node 22（NodeSource）、Caddy（官方 apt 源）、build-essential。
-2. **目录与用户**：
+1. **一键脚本**（swap、Node 22、picopics 用户/目录、systemd 单元、nginx 站点、certbot 证书、.env 模板）：
    ```bash
-   sudo useradd --system --home /opt/picopics --shell /usr/sbin/nologin picopics || true
-   sudo mkdir -p /opt/picopics/{web,server/dist} /var/lib/picopics
-   sudo chown -R picopics:picopics /opt/picopics /var/lib/picopics
+   rsync -az deploy/az-japan az-japan:/tmp/picopics-setup/
+   ssh az-japan 'sudo bash /tmp/picopics-setup/setup-server.sh <域名>'
    ```
-3. **systemd**：复制 `deploy/az-japan/picopics-api.service`、`picopics-web.service` 到 `/etc/systemd/system/`，`systemctl daemon-reload && systemctl enable picopics-api picopics-web`。
-4. **Caddy**：`sed 's/__DOMAIN__/<你的域名>/' deploy/az-japan/Caddyfile.template | sudo tee /etc/caddy/Caddyfile`，`sudo systemctl reload caddy`。
-5. **配置**：`sudo cp deploy/az-japan/server.env.example /opt/picopics/server/.env` 并填写（属主 picopics，权限 600）：
+2. **配置**：编辑 `/opt/picopics/server/.env`（属主 picopics，600）：
    - `PUBLIC_ORIGIN=https://<域名>`
    - `GITHUB_CLIENT_ID/SECRET`（GitHub OAuth App，回调 `https://<域名>/auth/callback`）
    - `ADMIN_TOKEN`（随机长字符串，`openssl rand -hex 32`）
    - `TELEGRAM_BOT_TOKEN/CHAT_ID`（可选）
-6. **DNS / Azure**：域名 A 记录 → VM 公网 IPv4；NSG 入站放行 80/443。
+3. **DNS / Azure**：AAAA 记录指向 VM 公网 IPv6，橙云代理开启（CF 提供双栈边缘）；NSG 放行 80/443 (IPv6)。
 
 ## 日常部署
 
@@ -47,11 +43,11 @@
 ## 运维速查
 
 ```bash
-systemctl status picopics-api picopics-web caddy
+systemctl status picopics-api picopics-web nginx
 journalctl -u picopics-api -f              # gateway 日志（含 worker 的 console.log）
 sudo -u picopics sqlite3 /var/lib/picopics/db.sqlite   # 查库
-curl -s http://127.0.0.1:8080/health       # 网关健康（不经 Caddy）
-curl -s https://<域名>/health              # 经 Caddy
+curl -s http://127.0.0.1:8080/health       # 网关健康（不经 nginx）
+curl -s https://<域名>/health              # 经 CF + nginx
 ```
 
 备份（建议 cron 每日）：
